@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Guitarra: Escalas y acordes</title>
+    <title>PUMUCHORDS Web Pro</title>
     <style>
         :root {
             --bg-color: #2c3e50;
@@ -22,48 +22,49 @@
         }
 
         .control-group { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
-        label { font-size: 0.8rem; text-transform: uppercase; opacity: 0.8; }
+        label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px; }
 
-        /* Sección de Acordes Mejorada */
-        .chords-container {
-            display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 30px;
-            padding: 10px;
-        }
+        /* Acordes */
+        .chords-container { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 25px; }
         .chord-card {
-            background: #1a1a1a; border-top: 4px solid var(--accent); border-radius: 8px;
-            padding: 12px; min-width: 100px; box-shadow: 0 6px 12px rgba(0,0,0,0.4);
-            display: flex; flex-direction: column; gap: 4px;
+            background: #1a1a1a; border-radius: 8px; padding: 10px; min-width: 90px; 
+            cursor: pointer; transition: all 0.2s; border: 2px solid transparent;
         }
+        .chord-card:hover { transform: translateY(-3px); background: #252525; border-color: var(--accent); }
+        .chord-card.selected { border-color: var(--note-root); background: #2c3e50; box-shadow: 0 0 15px rgba(241, 196, 15, 0.4); }
+        
         .chord-triad { font-size: 1.1rem; font-weight: bold; color: #fff; }
-        .chord-tetrad { font-size: 0.9rem; font-weight: bold; color: var(--note-root); opacity: 0.9; border-top: 1px solid #333; padding-top: 4px; }
-        .chord-degree { font-size: 0.7rem; opacity: 0.5; margin-top: 4px; font-style: italic; }
+        .chord-tetrad { font-size: 0.8rem; color: var(--note-root); opacity: 0.8; }
+        .chord-degree { font-size: 0.6rem; opacity: 0.4; }
 
+        /* Mástil */
         .overflow-container {
-            width: 100%; overflow-x: auto; background: #1a1a1a; padding: 30px 0;
+            width: 100%; overflow-x: auto; background: #1a1a1a; padding: 35px 0;
             border-radius: 8px; box-shadow: inset 0 0 20px #000; margin-bottom: 20px;
         }
-
         .fretboard { display: inline-flex; flex-direction: column; background: var(--fretboard-wood); position: relative; }
-        .string { display: flex; height: 40px; position: relative; background-image: linear-gradient(to bottom, transparent 48%, var(--string-color) 49%, var(--string-color) 51%, transparent 52%); }
-        .fret { width: 65px; height: 100%; border-right: 2px solid var(--fret-color); display: flex; justify-content: center; align-items: center; position: relative; box-sizing: border-box; }
-        .fret:first-child { background: #111; border-right: 6px solid #555; width: 50px; }
-        .fret.dot::after { content: ""; position: absolute; width: 14px; height: 14px; background: rgba(255,255,255,0.1); border-radius: 50%; z-index: 0; }
+        .string { display: flex; height: 38px; position: relative; background-image: linear-gradient(to bottom, transparent 48%, var(--string-color) 49%, var(--string-color) 51%, transparent 52%); }
+        .fret { width: 60px; border-right: 2px solid var(--fret-color); display: flex; justify-content: center; align-items: center; position: relative; }
+        .fret:first-child { background: #111; border-right: 6px solid #555; width: 45px; }
+        .fret.dot::after { content: ""; position: absolute; width: 12px; height: 12px; background: rgba(255,255,255,0.1); border-radius: 50%; }
 
         .note {
-            width: 30px; height: 30px; border-radius: 50%; background: var(--note-default);
-            color: #000; font-size: 11px; font-weight: bold; display: none;
+            width: 28px; height: 28px; border-radius: 50%; background: var(--note-default);
+            color: #000; font-size: 10px; font-weight: bold; display: none;
             justify-content: center; align-items: center; z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         .note.active { display: flex; }
-        .note.root { background: var(--note-root); border: 2px solid #000; transform: scale(1.1); }
+        .note.chord-highlight { transform: scale(1.2); box-shadow: 0 0 10px var(--note-root); border: 2px solid #000; }
+        .note.dimmed { opacity: 0.15; transform: scale(0.8); }
+        .note.root { background: var(--note-root); }
 
-        button { padding: 10px 20px; cursor: pointer; background: var(--accent); border: none; color: white; border-radius: 5px; font-weight: bold; }
-        select { padding: 8px; border-radius: 5px; font-weight: bold; }
+        .info-panel { background: #1a1a1a; padding: 15px; border-radius: 8px; display: inline-block; margin-top: 10px; border: 1px solid #444; }
+        button { padding: 10px 15px; cursor: pointer; background: var(--accent); border: none; color: white; border-radius: 5px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <h2>ESCALAS Y ACORDES <span style="font-weight: 100;">v3.1</span></h2>
+    <h2 style="margin-bottom: 10px;">PUMUCHORDS WEB <span style="font-weight: 100; color: var(--accent);">PRO</span></h2>
 
     <div class="controls">
         <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
@@ -71,78 +72,53 @@
         <div class="control-group">
             <label>Afinación</label>
             <select id="tuningSelect">
-                <option value="standard">Estándar (EADGBE)</option>
+                <option value="standard">Standard E</option>
                 <option value="dropD">Drop D</option>
                 <option value="eb">Eb Standard</option>
             </select>
         </div>
-        <button id="toggleBtn">Ver Intervalos</button>
+        <button id="toggleBtn">Intervalos: OFF</button>
     </div>
 
-    <h3 style="letter-spacing: 1px; font-weight: 300;">ACORDES (TRIADA | SÉPTIMA)</h3>
     <div id="chordsList" class="chords-container"></div>
 
     <div class="overflow-container">
         <div id="fretboard" class="fretboard"></div>
     </div>
 
+    <div id="chordInfo" class="info-panel">
+        Selecciona un acorde para ver sus notas en el mástil
+    </div>
+
     <script>
         const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
         const intervals = ['1', 'b2', '2', 'b3', '3', '4', 'b5', '5', 'b6', '6', 'b7', '7'];
-        const romanDegrees = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
         
-        // Datos de armonización: [pasos, sufijos tríada, sufijos séptima]
         const scales = {
-            "Mayor (Jónico)": { 
-                steps: [0, 2, 4, 5, 7, 9, 11], 
-                triads: ["", "m", "m", "", "", "m", "dim"],
-                tetrads: ["Maj7", "m7", "m7", "Maj7", "7", "m7", "m7b5"] 
-            },
-            "Menor (Eólico)": { 
-                steps: [0, 2, 3, 5, 7, 8, 10], 
-                triads: ["m", "dim", "", "m", "m", "", ""],
-                tetrads: ["m7", "m7b5", "Maj7", "m7", "m7", "Maj7", "7"] 
-            },
-            "Dórico": { 
-                steps: [0, 2, 3, 5, 7, 9, 10], 
-                triads: ["m", "m", "", "", "m", "dim", ""],
-                tetrads: ["m7", "m7", "Maj7", "7", "m7", "m7b5", "Maj7"] 
-            },
-            "Frigio": { 
-                steps: [0, 1, 3, 5, 7, 8, 10], 
-                triads: ["m", "", "", "m", "dim", "", "m"],
-                tetrads: ["m7", "Maj7", "7", "m7", "m7b5", "Maj7", "m7"] 
-            },
-            "Lidio": { 
-                steps: [0, 2, 4, 6, 7, 9, 11], 
-                triads: ["", "", "m", "dim", "", "m", "m"],
-                tetrads: ["Maj7", "7", "m7", "m7b5", "Maj7", "m7", "m7"] 
-            },
-            "Mixolidio": { 
-                steps: [0, 2, 4, 5, 7, 9, 10], 
-                triads: ["", "m", "dim", "", "m", "m", ""],
-                tetrads: ["7", "m7", "m7b5", "Maj7", "m7", "m7", "Maj7"] 
-            }
+            "Mayor (Jónico)": { steps: [0, 2, 4, 5, 7, 9, 11], triads: ["", "m", "m", "", "", "m", "dim"], tetrads: ["Maj7", "m7", "m7", "Maj7", "7", "m7", "m7b5"], chordNotes: [[0,4,7,11], [0,3,7,10], [0,3,7,10], [0,4,7,11], [0,4,7,10], [0,3,7,10], [0,3,6,10]] },
+            "Menor (Eólico)": { steps: [0, 2, 3, 5, 7, 8, 10], triads: ["m", "dim", "", "m", "m", "", ""], tetrads: ["m7", "m7b5", "Maj7", "m7", "m7", "Maj7", "7"], chordNotes: [[0,3,7,10], [0,3,6,10], [0,4,7,11], [0,3,7,10], [0,3,7,10], [0,4,7,11], [0,4,7,10]] }
         };
 
         const tuningPresets = { "standard": [4, 11, 7, 2, 9, 4], "dropD": [4, 11, 7, 2, 9, 2], "eb": [3, 10, 6, 1, 8, 3] };
         let currentTuning = tuningPresets.standard;
         let showIntervals = false;
+        let selectedChordIdx = null;
 
         function init() {
             const rootSel = document.getElementById('rootSelect');
             const scaleSel = document.getElementById('scaleSelect');
-            const tuningSel = document.getElementById('tuningSelect');
             notes.forEach((n, i) => rootSel.innerHTML += `<option value="${i}">${n}</option>`);
             Object.keys(scales).forEach(s => scaleSel.innerHTML += `<option value="${s}">${s}</option>`);
+            
             createFretboard();
             update();
-            rootSel.onchange = update;
-            scaleSel.onchange = update;
-            tuningSel.onchange = (e) => { currentTuning = tuningPresets[e.target.value]; createFretboard(); update(); };
-            document.getElementById('toggleBtn').onclick = () => {
+
+            rootSel.onchange = () => { selectedChordIdx = null; update(); };
+            scaleSel.onchange = () => { selectedChordIdx = null; update(); };
+            document.getElementById('tuningSelect').onchange = (e) => { currentTuning = tuningPresets[e.target.value]; createFretboard(); update(); };
+            document.getElementById('toggleBtn').onclick = (e) => {
                 showIntervals = !showIntervals;
-                document.getElementById('toggleBtn').innerText = showIntervals ? "Ver Notas" : "Ver Intervalos";
+                e.target.innerText = showIntervals ? "Intervalos: ON" : "Intervalos: OFF";
                 update();
             };
         }
@@ -150,51 +126,60 @@
         function createFretboard() {
             const board = document.getElementById('fretboard');
             board.innerHTML = "";
-            currentTuning.forEach((startNote, stringIdx) => {
-                const stringDiv = document.createElement('div');
-                stringDiv.className = 'string';
-                for (let fret = 0; fret <= 15; fret++) {
-                    const fretDiv = document.createElement('div');
-                    fretDiv.className = 'fret';
-                    if ((stringIdx === 2 || stringIdx === 3) && [3, 5, 7, 9, 12, 15].includes(fret)) fretDiv.classList.add('dot');
-                    const noteIdx = (startNote + fret) % 12;
-                    fretDiv.innerHTML = `<div class="note" data-note="${noteIdx}"></div>`;
-                    stringDiv.appendChild(fretDiv);
+            currentTuning.forEach((startNote, sIdx) => {
+                const sDiv = document.createElement('div');
+                sDiv.className = 'string';
+                for (let f = 0; f <= 15; f++) {
+                    const fDiv = document.createElement('div');
+                    fDiv.className = 'fret';
+                    if ((sIdx === 2 || sIdx === 3) && [3, 5, 7, 9, 12, 15].includes(f)) fDiv.classList.add('dot');
+                    const nIdx = (startNote + f) % 12;
+                    fDiv.innerHTML = `<div class="note" data-note="${nIdx}"></div>`;
+                    sDiv.appendChild(fDiv);
                 }
-                board.appendChild(stringDiv);
+                board.appendChild(sDiv);
             });
         }
 
         function update() {
             const root = parseInt(document.getElementById('rootSelect').value);
             const scaleName = document.getElementById('scaleSelect').value;
-            const scaleData = scales[scaleName];
-            const activeNotes = scaleData.steps.map(val => (root + val) % 12);
+            const sData = scales[scaleName];
+            const scaleNotes = sData.steps.map(v => (root + v) % 12);
+            
+            let chordNotes = [];
+            if (selectedChordIdx !== null) {
+                const chordRoot = scaleNotes[selectedChordIdx];
+                chordNotes = sData.chordNotes[selectedChordIdx].map(interval => (chordRoot + interval) % 12);
+                document.getElementById('chordInfo').innerHTML = `Notas de <b>${notes[chordRoot]}${sData.tetrads[selectedChordIdx]}</b>: ${chordNotes.map(n => notes[n]).join(' - ')}`;
+            } else {
+                document.getElementById('chordInfo').innerText = "Pulsa en un acorde para filtrar el mástil";
+            }
 
             document.querySelectorAll('.note').forEach(el => {
-                const noteVal = parseInt(el.dataset.note);
-                el.classList.remove('active', 'root');
-                if (activeNotes.includes(noteVal)) {
+                const nVal = parseInt(el.dataset.note);
+                el.classList.remove('active', 'root', 'chord-highlight', 'dimmed');
+                
+                if (scaleNotes.includes(nVal)) {
                     el.classList.add('active');
-                    const intervalIdx = (noteVal - root + 12) % 12;
-                    el.innerText = showIntervals ? intervals[intervalIdx] : notes[noteVal];
-                    if (noteVal === root) el.classList.add('root');
+                    if (selectedChordIdx !== null) {
+                        chordNotes.includes(nVal) ? el.classList.add('chord-highlight') : el.classList.add('dimmed');
+                    }
+                    if (nVal === root) el.classList.add('root');
+                    const intIdx = (nVal - root + 12) % 12;
+                    el.innerText = showIntervals ? intervals[intIdx] : notes[nVal];
                 }
             });
 
-            const chordsList = document.getElementById('chordsList');
-            chordsList.innerHTML = "";
-            scaleData.steps.forEach((step, index) => {
-                const noteName = notes[(root + step) % 12];
-                const triad = scaleData.triads[index];
-                const tetrad = scaleData.tetrads[index];
-                chordsList.innerHTML += `
-                    <div class="chord-card">
-                        <div class="chord-triad">${noteName}${triad}</div>
-                        <div class="chord-tetrad">${noteName}${tetrad}</div>
-                        <div class="chord-degree">${romanDegrees[index]}</div>
-                    </div>
-                `;
+            const cList = document.getElementById('chordsList');
+            cList.innerHTML = "";
+            sData.steps.forEach((step, i) => {
+                const card = document.createElement('div');
+                card.className = `chord-card ${selectedChordIdx === i ? 'selected' : ''}`;
+                card.innerHTML = `<div class="chord-triad">${notes[(root+step)%12]}${sData.triads[i]}</div>
+                                  <div class="chord-tetrad">${notes[(root+step)%12]}${sData.tetrads[i]}</div>`;
+                card.onclick = () => { selectedChordIdx = (selectedChordIdx === i) ? null : i; update(); };
+                cList.appendChild(card);
             });
         }
         init();
