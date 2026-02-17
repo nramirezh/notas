@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>PUMUCHORDS Pro v3.7 - Triad Focus</title>
+    <style>
+        :root {
+            --bg-color: #2c3e50; --fretboard-wood: #3d2b1f; --string-color: #bdc3c7;
+            --fret-color: #d4af37; --note-root: #f1c40f; --note-default: #ffffff; --accent: #e67e22;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: white; padding: 20px; margin: 0; text-align: center; }
+        
+        .controls { background: #34495e; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .control-group { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
+        label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px; }
+
+        /* Piano Principal */
+        .piano-container { display: inline-flex; background: #111; padding: 10px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+        .piano-key { width: 32px; height: 110px; background: white; border: 1px solid #ccc; border-radius: 0 0 4px 4px; position: relative; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; color: #333; font-size: 9px; font-weight: bold; box-sizing: border-box; }
+        .piano-key.black { width: 22px; height: 70px; background: #222; margin-left: -11px; margin-right: -11px; z-index: 2; border: 1px solid #000; color: white; }
+        .piano-key.active { background: #d1d8e0; box-shadow: inset 0 -4px 0 var(--accent); }
+        .piano-key.highlight { background: var(--note-root) !important; color: black; }
+
+        /* Mini Piano (Solo Tríadas) */
+        .mini-piano { display: flex; justify-content: center; margin-top: 8px; background: #000; padding: 2px; border-radius: 2px; width: fit-content; margin-left: auto; margin-right: auto; }
+        .mini-key { width: 7px; height: 22px; background: #eee; margin: 0.5px; border-radius: 0 0 1px 1px; }
+        .mini-key.black { width: 6px; height: 13px; background: #444; margin-left: -1.75px; margin-right: -1.75px; z-index: 2; }
+        .mini-key.active { background: var(--note-root); box-shadow: 0 0 4px var(--note-root); }
+
+        /* Acordes */
+        .chords-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 25px; }
+        .chord-card { background: #1a1a1a; border-radius: 8px; padding: 10px; min-width: 90px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .chord-card.selected { border-color: var(--note-root); background: #2c3e50; }
+        .chord-triad { font-size: 0.95rem; font-weight: bold; }
+        .chord-tetrad { font-size: 0.75rem; color: var(--note-root); opacity: 0.7; margin-bottom: 2px; }
+
+        /* Mástil */
+        .overflow-container { width: 100%; overflow-x: auto; background: #000; padding: 30px 0 50px 0; border-radius: 8px; margin-bottom: 20px; box-shadow: inset 0 0 20px #000; }
+        .fretboard { display: inline-flex; flex-direction: column; background: var(--fretboard-wood); position: relative; border-left: 10px solid #222; }
+        .string { display: flex; height: 38px; position: relative; background-image: linear-gradient(to bottom, transparent 48%, var(--string-color) 49%, var(--string-color) 51%, transparent 52%); }
+        .fret { width: 55px; border-right: 2px solid var(--fret-color); display: flex; justify-content: center; align-items: center; position: relative; }
+        .fret:first-child { background: #111; border-right: 5px solid #444; width: 45px; }
+        .fret.inlay-dot::after { content: "●"; position: absolute; bottom: -35px; color: #aaa; font-size: 14px; }
+        .fret.inlay-dot-double::after { content: "● ●"; position: absolute; bottom: -35px; color: #aaa; font-size: 14px; letter-spacing: 2px; }
+
+        .note { width: 26px; height: 26px; border-radius: 50%; background: var(--note-default); color: #000; font-size: 10px; font-weight: bold; display: none; justify-content: center; align-items: center; z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .note.active { display: flex; }
+        .note.chord-highlight { transform: scale(1.2); box-shadow: 0 0 10px var(--note-root); border: 2px solid #000; }
+        .note.dimmed { opacity: 0.15; transform: scale(0.85); }
+        .note.root { background: var(--note-root); }
+
+        button, select { padding: 10px 15px; cursor: pointer; background: var(--accent); border: none; color: white; border-radius: 5px; font-weight: bold; }
+        select { background: #34495e; }
+    </style>
+</head>
+<body>
+
+    <h2 style="margin-bottom: 10px;">PUMUCHORDS <span style="font-weight: 100;">v3.7 Triad Focus</span></h2>
+
+    <div class="controls">
+        <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
+        <div class="control-group"><label>Escala</label><select id="scaleSelect"></select></div>
+        <div class="control-group">
+            <label>Afinación</label>
+            <select id="tuningSelect">
+                <option value="standard">Standard (EADGBe)</option>
+                <option value="dropD">Drop D</option>
+                <option value="eb">Eb (Medio tono abajo)</option>
+                <option value="d">D (Tono abajo)</option>
+                <option value="openG">Open G</option>
+            </select>
+        </div>
+        <button id="toggleBtn">Intervalos: OFF</button>
+    </div>
+
+    <div id="piano" class="piano-container"></div>
+    <div id="chordsList" class="chords-container"></div>
+
+    <div class="overflow-container"><div id="fretboard" class="fretboard"></div></div>
+
+    <script>
+        const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const intervals = ['1', 'b2', '2', 'b3', '3', '4', 'b5', '5', 'b6', '6', 'b7', '7'];
+        const pianoLayout = [0,1,0,1,0,0,1,0,1,0,1,0];
+
+        const tuningPresets = {
+            "standard": [4, 11, 7, 2, 9, 4],
+            "dropD": [4, 11, 7, 2, 9, 2],
+            "eb": [3, 10, 6, 1, 8, 3],
+            "d": [2, 9, 5, 0, 7, 2],
+            "openG": [2, 11, 7, 2, 7, 2]
+        };
+
+        const scales = {
+            "Mayor (Jónico)": { steps: [0, 2, 4, 5, 7, 9, 11], triads: ["", "m", "m", "", "", "m", "dim"], tetrads: ["Maj7", "m7", "m7", "Maj7", "7", "m7", "m7b5"], chordNotes: [[0,4,7,11], [0,3,7,10], [0,3,7,10], [0,4,7,11], [0,4,7,10], [0,3,7,10], [0,3,6,10]] },
+            "Dórico": { steps: [0, 2, 3, 5, 7, 9, 10], triads: ["m", "m", "", "", "m", "dim", ""], tetrads: ["m7", "m7", "Maj7", "7", "m7", "m7b5", "Maj7"], chordNotes: [[0,3,7,10], [0,3,7,10], [0,4,7,11], [0,4,7,10], [0,3,7,10], [0,3,6,10], [0,4,7,11]] },
+            "Frigio": { steps: [0, 1, 3, 5, 7, 8, 10], triads: ["m", "", "", "m", "dim", "", "m"], tetrads: ["m7", "Maj7", "7", "m7", "m7b5", "Maj7", "m7"], chordNotes: [[0,3,7,10], [0,4,7,11], [0,4,7,10], [0,3,7,10], [0,3,6,10], [0,4,7,11], [0,3,7,10]] },
+            "Lidio": { steps: [0, 2, 4, 6, 7, 9, 11], triads: ["", "", "m", "dim", "", "m", "m"], tetrads: ["Maj7", "7", "m7", "m7b5", "Maj7", "m7", "m7"], chordNotes: [[0,4,7,11], [0,4,7,10], [0,3,7,10], [0,3,6,10], [0,4,7,11], [0,3,7,10], [0,3,7,10]] },
+            "Mixolidio": { steps: [0, 2, 4, 5, 7, 9, 10], triads: ["", "m", "dim", "", "m", "m", ""], tetrads: ["7", "m7", "m7b5", "Maj7", "m7", "m7", "Maj7"], chordNotes: [[0,4,7,10], [0,3,7,10], [0,3,6,10], [0,4,7,11], [0,3,7,10], [0,3,7,10], [0,4,7,11]] },
+            "Eólico (Menor)": { steps: [0, 2, 3, 5, 7, 8, 10], triads: ["m", "dim", "", "m", "m", "", ""], tetrads: ["m7", "m7b5", "Maj7", "m7", "m7", "Maj7", "7"], chordNotes: [[0,3,7,10], [0,3,6,10], [0,4,7,11], [0,3,7,10], [0,3,7,10], [0,4,7,11], [0,4,7,10]] },
+            "Locrio": { steps: [0, 1, 3, 5, 6, 8, 10], triads: ["dim", "", "m", "m", "", "", "m"], tetrads: ["m7b5", "Maj7", "m7", "m7", "Maj7", "7", "m7"], chordNotes: [[0,3,6,10], [0,4,7,11], [0,3,7,10], [0,3,7,10], [0,4,7,11], [0,4,7,10], [0,3,7,10]] },
+            "Menor Armónica": { steps: [0, 2, 3, 5, 7, 8, 11], triads: ["m", "dim", "aug", "m", "", "", "dim"], tetrads: ["m(Maj7)", "m7b5", "Maj7#5", "m7", "7", "Maj7", "dim7"], chordNotes: [[0,3,7,11], [0,3,6,10], [0,4,8,11], [0,3,7,10], [0,4,7,10], [0,4,7,11], [0,3,6,9]] },
+            "Menor Melódica": { steps: [0, 2, 3, 5, 7, 9, 11], triads: ["m", "m", "aug", "", "", "dim", "dim"], tetrads: ["m(Maj7)", "m7", "Maj7#5", "7", "7", "m7b5", "m7b5"], chordNotes: [[0,3,7,11], [0,3,7,10], [0,4,8,11], [0,4,7,10], [0,4,7,10], [0,3,6,10], [0,3,6,10]] },
+            "Pentatónica Mayor": { steps: [0, 2, 4, 7, 9], triads: ["", "sus2", "m", "", "sus4"], tetrads: ["add9", "7sus2", "m7", "6", "7sus4"], chordNotes: [[0,4,7], [0,2,7], [0,3,7], [0,4,7], [0,5,7]] },
+            "Pentatónica Menor": { steps: [0, 3, 5, 7, 10], triads: ["m", "", "sus4", "m", ""], tetrads: ["m7", "7sus4", "7sus4", "m7", "7"], chordNotes: [[0,3,7], [0,5,7], [0,5,7], [0,3,7], [0,4,7]] }
+        };
+
+        let currentTuning = tuningPresets.standard;
+        let showIntervals = false;
+        let selectedChordIdx = null;
+
+        function init() {
+            const rootSel = document.getElementById('rootSelect');
+            const scaleSel = document.getElementById('scaleSelect');
+            const tuningSel = document.getElementById('tuningSelect');
+            notes.forEach((n, i) => rootSel.innerHTML += `<option value="${i}">${n}</option>`);
+            Object.keys(scales).forEach(s => scaleSel.innerHTML += `<option value="${s}">${s}</option>`);
+            createPiano(); createFretboard(); update();
+            rootSel.onchange = () => { selectedChordIdx = null; update(); };
+            scaleSel.onchange = () => { selectedChordIdx = null; update(); };
+            tuningSel.onchange = (e) => { currentTuning = tuningPresets[e.target.value]; createFretboard(); update(); };
+            document.getElementById('toggleBtn').onclick = (e) => {
+                showIntervals = !showIntervals;
+                e.target.innerText = showIntervals ? "Intervalos: ON" : "Intervalos: OFF";
+                update();
+            };
+        }
+
+        function createMiniPiano(triadNotes) {
+            let html = '<div class="mini-piano">';
+            for(let i=0; i<12; i++) {
+                const isActive = triadNotes.includes(i) ? 'active' : '';
+                html += `<div class="mini-key ${pianoLayout[i] ? 'black' : ''} ${isActive}"></div>`;
+            }
+            html += '</div>';
+            return html;
+        }
+
+        function createPiano() {
+            const p = document.getElementById('piano'); p.innerHTML = "";
+            for (let i = 0; i < 24; i++) {
+                const nIdx = i % 12;
+                const k = document.createElement('div');
+                k.className = `piano-key ${pianoLayout[nIdx] ? 'black' : ''}`;
+                k.dataset.note = nIdx; k.innerText = notes[nIdx];
+                p.appendChild(k);
+            }
+        }
+
+        function createFretboard() {
+            const b = document.getElementById('fretboard'); b.innerHTML = "";
+            currentTuning.forEach((start, sIdx) => {
+                const sDiv = document.createElement('div'); sDiv.className = 'string';
+                for (let f = 0; f <= 17; f++) {
+                    const fDiv = document.createElement('div'); fDiv.className = 'fret';
+                    if (sIdx === 5 && [3,5,7,9,15,17].includes(f)) fDiv.classList.add('inlay-dot');
+                    if (sIdx === 5 && f === 12) fDiv.classList.add('inlay-dot-double');
+                    fDiv.innerHTML = `<div class="note" data-note="${(start + f) % 12}"></div>`;
+                    sDiv.appendChild(fDiv);
+                }
+                b.appendChild(sDiv);
+            });
+        }
+
+        function update() {
+            const root = parseInt(document.getElementById('rootSelect').value);
+            const sData = scales[document.getElementById('scaleSelect').value];
+            const scaleNotes = sData.steps.map(v => (root + v) % 12);
+            let highlightNotes = [];
+
+            if (selectedChordIdx !== null) {
+                const cRoot = scaleNotes[selectedChordIdx];
+                highlightNotes = sData.chordNotes[selectedChordIdx].map(v => (cRoot + v) % 12);
+            }
+
+            document.querySelectorAll('.note').forEach(el => {
+                const n = parseInt(el.dataset.note);
+                el.classList.remove('active', 'root', 'chord-highlight', 'dimmed');
+                if (scaleNotes.includes(n)) {
+                    el.classList.add('active');
+                    if (selectedChordIdx !== null) highlightNotes.includes(n) ? el.classList.add('chord-highlight') : el.classList.add('dimmed');
+                    if (n === root) el.classList.add('root');
+                    el.innerText = showIntervals ? intervals[(n - root + 12) % 12] : notes[n];
+                }
+            });
+
+            document.querySelectorAll('.piano-key').forEach(el => {
+                const n = parseInt(el.dataset.note);
+                el.classList.remove('active', 'highlight');
+                if (scaleNotes.includes(n)) el.classList.add('active');
+                if (selectedChordIdx !== null && highlightNotes.includes(n)) el.classList.add('highlight');
+            });
+
+            const cList = document.getElementById('chordsList'); cList.innerHTML = "";
+            sData.steps.forEach((step, i) => {
+                const cRoot = (root + step) % 12;
+                // Extraemos solo las primeras 3 notas (la tríada) para el mini-piano
+                const triad = sData.chordNotes[i].slice(0, 3).map(v => (cRoot + v) % 12);
+                const card = document.createElement('div');
+                card.className = `chord-card ${selectedChordIdx === i ? 'selected' : ''}`;
+                card.innerHTML = `
+                    <div class="chord-triad">${notes[cRoot]}${sData.triads[i]}</div>
+                    <div class="chord-tetrad">${notes[cRoot]}${sData.tetrads[i]}</div>
+                    ${createMiniPiano(triad)}
+                `;
+                card.onclick = () => { selectedChordIdx = (selectedChordIdx === i) ? null : i; update(); };
+                cList.appendChild(card);
+            });
+        }
+        init();
+    </script>
+</body>
+</html>
