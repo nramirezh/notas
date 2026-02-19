@@ -2,70 +2,62 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Diccionario de Acordes - PUMUCHORDS</title>
+    <title>Diccionario Pro - PUMUCHORDS</title>
     <style>
-        :root {
-            --bg-color: #2c3e50; --accent: #e67e22; --card-bg: #ffffff;
-        }
+        :root { --bg-color: #2c3e50; --accent: #e67e22; --card-bg: #ffffff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: white; padding: 20px; text-align: center; margin: 0; }
         
+        /* Filtros */
         .filters { background: #34495e; padding: 20px; border-radius: 12px; margin-bottom: 30px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; position: sticky; top: 10px; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .filter-group { display: flex; flex-direction: column; align-items: flex-start; }
         label { font-size: 10px; text-transform: uppercase; opacity: 0.7; margin-bottom: 5px; }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 20px; padding: 10px; }
         
-        /* Estilo de la tarjeta */
         .chord-box { 
             background: var(--card-bg); border-radius: 8px; padding: 15px; color: #333; 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: zoom-in;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: pointer;
             position: relative; z-index: 1;
         }
 
         .chord-name { font-weight: 800; font-size: 18px; color: var(--accent); border-bottom: 2px solid #eee; margin-bottom: 10px; padding-bottom: 5px; }
         .chord-fret-str { font-family: monospace; font-size: 10px; color: #7f8c8d; margin-top: 8px; background: #eee; padding: 2px; border-radius: 3px; }
 
-        /* EFECTO ZOOM */
+        /* Zoom */
         .chord-box.expanded {
-            position: fixed;
-            top: 50%; left: 50%;
+            position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%) scale(2.2);
-            z-index: 1000;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            cursor: zoom-out;
+            z-index: 1000; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
         }
 
-        /* Fondo oscuro cuando hay zoom */
         #overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); display: none; z-index: 999;
             backdrop-filter: blur(3px);
         }
 
-        select { padding: 8px 12px; border-radius: 5px; background: #2c3e50; color: white; border: 1px solid var(--accent); font-weight: bold; cursor: pointer; }
-        .btn-back { display: inline-block; margin-bottom: 20px; color: white; text-decoration: none; font-size: 14px; border: 1px solid white; padding: 8px 15px; border-radius: 5px; transition: 0.3s; }
-        .btn-back:hover { background: white; color: var(--bg-color); }
+        select { padding: 8px 12px; border-radius: 5px; background: #2c3e50; color: white; border: 1px solid var(--accent); font-weight: bold; }
+        .btn-back { display: inline-block; margin-bottom: 20px; color: white; text-decoration: none; border: 1px solid white; padding: 8px 15px; border-radius: 5px; }
     </style>
 </head>
 <body>
 
     <div id="overlay"></div>
-
     <a href="index.html" class="btn-back">← Volver al Generador</a>
     <h1>Diccionario de Acordes</h1>
 
     <div class="filters">
         <div class="filter-group">
             <label>Nota Raíz</label>
-            <select id="rootFilter"><option value="ALL">Todas las notas</option></select>
+            <select id="rootFilter"><option value="ALL">Todas</option></select>
         </div>
         <div class="filter-group">
-            <label>Tipo de Acorde</label>
-            <select id="typeFilter"><option value="ALL">Todos los tipos</option></select>
+            <label>Tipo</label>
+            <select id="typeFilter"><option value="ALL">Todos</option></select>
         </div>
         <div style="align-self: flex-end; font-size: 11px; opacity: 0.6; padding-bottom: 10px;">
-            Pulsa un acorde para ampliarlo
+            Haz clic para ampliar y escuchar
         </div>
     </div>
 
@@ -73,8 +65,10 @@
 
     <script>
         const notes = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
+        // Frecuencias base de las cuerdas al aire (E2, A2, D3, G3, B3, E4)
+        const stringBaseFreqs = [82.41, 110.00, 146.83, 196.00, 246.94, 329.63];
         let libreriaManual = null;
-        const overlay = document.getElementById('overlay');
+        let audioCtx = null;
 
         async function cargarLibreria() {
             try {
@@ -82,9 +76,38 @@
                 libreriaManual = await res.json();
                 poblarFiltros();
                 render();
-            } catch (e) {
-                document.getElementById('chordGrid').innerHTML = "Error cargando Acordes2.json";
-            }
+            } catch (e) { console.error("Error al cargar JSON"); }
+        }
+
+        // --- MOTOR DE AUDIO ---
+        function playChord(fretStr) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const frets = fretStr.split('-');
+            const now = audioCtx.currentTime;
+
+            frets.forEach((fret, i) => {
+                if (fret.toLowerCase() === 'x') return;
+                
+                const f = parseInt(fret);
+                // Calcular frecuencia: freq = base * 2^(traste/12)
+                const freq = stringBaseFreqs[i] * Math.pow(2, f / 12);
+                
+                // Sintetizador simple de cuerda
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'triangle'; // Sonido más suave que 'sawtooth'
+                osc.frequency.setValueAtTime(freq, now);
+                
+                gain.gain.setValueAtTime(0.3, now + (i * 0.05)); // Rasgueo progresivo
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start(now + (i * 0.05));
+                osc.stop(now + 1.5);
+            });
         }
 
         function poblarFiltros() {
@@ -119,32 +142,28 @@
                             <div class="chord-fret-str">${pos}</div>
                         `;
                         
-                        // EVENTO CLIC PARA ZOOM
                         card.onclick = (e) => {
                             e.stopPropagation();
                             const isExpanded = card.classList.contains('expanded');
-                            
-                            // Cerrar cualquier otro abierto
                             document.querySelectorAll('.chord-box').forEach(c => c.classList.remove('expanded'));
                             
                             if (!isExpanded) {
                                 card.classList.add('expanded');
-                                overlay.style.display = 'block';
+                                document.getElementById('overlay').style.display = 'block';
+                                playChord(pos); // <-- AQUÍ SUENA EL ACORDE
                             } else {
-                                overlay.style.display = 'none';
+                                document.getElementById('overlay').style.display = 'none';
                             }
                         };
-
                         grid.appendChild(card);
                     });
                 }
             }
         }
 
-        // Cerrar al hacer clic en el fondo
-        overlay.onclick = () => {
+        document.getElementById('overlay').onclick = () => {
             document.querySelectorAll('.chord-box').forEach(c => c.classList.remove('expanded'));
-            overlay.style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
         };
 
         function drawSVG(frets) {
