@@ -51,7 +51,8 @@
 
         .info-panel { background: #1a1a1a; padding: 20px; border-radius: 12px; display: inline-block; border: 1px solid #444; min-width: 80%; margin-top: 20px; }
         .svg-card { background: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-        .svg-label { color: #333; font-size: 10px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; border-bottom: 1px solid #eee; }
+        .svg-label { color: #e67e22; /* Color naranja para el nombre del acorde */font-size: 11px; font-weight: 800;margin-bottom: 5px;text-transform: none; /* Para que respete "Mim" y no lo ponga "MIM" */
+            border-bottom: 1px solid #eee;padding-bottom: 2px; }
         
         button, select { padding: 10px 15px; cursor: pointer; background: var(--accent); border: none; color: white; border-radius: 5px; font-weight: bold; }
         select { background: #34495e; }
@@ -185,38 +186,52 @@
                 const cRoot = scaleNotes[selectedChordIdx];
                 chordNotes = sData.chordNotes[selectedChordIdx].map(interval => (cRoot + interval) % 12);
                 
-                const noteName = notes[cRoot];
-                const tetrad = sData.tetrads[selectedChordIdx];
-                const triad = sData.triads[selectedChordIdx];
+                const noteName = notes[cRoot]; // Ej: "Mi"
+                const tetrad = sData.tetrads[selectedChordIdx]; // Ej: "m7"
+                const triad = sData.triads[selectedChordIdx];   // Ej: "m"
 
-                // MAPEADOR INTELIGENTE (JSON)
-                let jsonTetrad = tetrad;
-                if (tetrad === "Maj7") jsonTetrad = "M7";
-                if (tetrad === "") jsonTetrad = "M";
-                
-                let jsonTriad = triad;
-                if (triad === "") jsonTriad = "M"; // Mayor simple
+                // --- MAPEADOR PARA BUSCAR EN JSON ---
+                let jsonTetrad = tetrad === "Maj7" ? "M7" : (tetrad === "" ? "M" : tetrad);
+                let jsonTriad = triad === "" ? "M" : triad;
 
-                infoPanel.innerHTML = `<div>Notas de <b>${noteName}${tetrad}</b>: ${chordNotes.map(n => notes[n]).join(' - ')}</div>`;
+                // --- NOMBRES NATURALES PARA PANTALLA ---
+                // Si es Mayor (vacío), no ponemos sufijo. Si es m, ponemos "m".
+                let displayTetrad = noteName + (tetrad === "Maj7" ? "Maj7" : tetrad);
+                let displayTriad = noteName + (triad === "" ? "" : triad); 
+
+                infoPanel.innerHTML = `<div style="margin-bottom:10px; font-size:1.2rem;">Escuchando: <b>${displayTetrad}</b></div>
+                                       <div style="font-size:0.9rem; opacity:0.8;">Notas: ${chordNotes.map(n => notes[n]).join(' - ')}</div>`;
                 
                 let htmlSVG = '<div style="display:flex; justify-content:center; gap:15px; margin-top:15px; flex-wrap:wrap;">';
 
-                // Buscar Séptimas
+                // 1. Mostrar Séptimas (Tetrads)
                 if (libreriaManual && libreriaManual[jsonTetrad] && libreriaManual[jsonTetrad][noteName]) {
                     libreriaManual[jsonTetrad][noteName].forEach(pos => {
-                        htmlSVG += `<div class="svg-card"><div class="svg-label">${jsonTetrad}</div>${drawSVG(pos.split('-'))}</div>`;
+                        htmlSVG += `<div class="svg-card">
+                                        <div class="svg-label">${displayTetrad}</div>
+                                        ${drawSVG(pos.split('-'))}
+                                    </div>`;
                     });
                 }
-                // Buscar Tríadas
+
+                // 2. Mostrar Tríadas (Solo si es distinta a la séptima)
                 if (libreriaManual && libreriaManual[jsonTriad] && libreriaManual[jsonTriad][noteName] && jsonTriad !== jsonTetrad) {
                     libreriaManual[jsonTriad][noteName].forEach(pos => {
-                        htmlSVG += `<div class="svg-card"><div class="svg-label">Tríada ${jsonTriad}</div>${drawSVG(pos.split('-'))}</div>`;
+                        htmlSVG += `<div class="svg-card" style="border-color:#ccc;">
+                                        <div class="svg-label">${displayTriad}</div>
+                                        ${drawSVG(pos.split('-'))}
+                                    </div>`;
                     });
                 }
                 infoPanel.innerHTML += htmlSVG + '</div>';
             } else {
                 infoPanel.innerText = "Selecciona un acorde de la lista superior";
             }
+
+            // ... (resto del código de actualización de mástil, piano y tarjetas igual que antes)
+            actualizarVisuales(scaleNotes, chordNotes, root);
+            renderizarTarjetas(sData, root, scaleNotes);
+        }
 
             // Actualizar Mástil y Piano
             document.querySelectorAll('.note').forEach(el => {
