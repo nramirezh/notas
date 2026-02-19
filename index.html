@@ -2,13 +2,14 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>PUMUCHORDS v3.9 Elite</title>
+    <title>PUMUCHORDS v3.9 Elite - Full Library</title>
     <style>
         :root {
             --bg-color: #2c3e50; --fretboard-wood: #3d2b1f; --string-color: #bdc3c7;
             --fret-color: #d4af37; --note-root: #f1c40f; --note-default: #ffffff; --accent: #e67e22;
         }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: white; padding: 20px; margin: 0; text-align: center; }
+        
         .controls { background: #34495e; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .control-group { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
         label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px; }
@@ -24,7 +25,7 @@
         .mini-piano { display: flex; justify-content: center; margin-top: 8px; background: #000; padding: 3px; border-radius: 3px; width: fit-content; margin: 10px auto 0 auto; }
         .mini-key { width: 7px; height: 22px; background: #eee; margin: 0.5px; border-radius: 0 0 1px 1px; }
         .mini-key.black { width: 6px; height: 13px; background: #444; margin-left: -3px; margin-right: -3px; z-index: 2; }
-        .mini-key.active { background: var(--note-root); box-shadow: 0 0 4px var(--note-root); }
+        .mini-key.active { background: var(--note-root); }
 
         /* Acordes */
         .chords-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 25px; }
@@ -34,7 +35,7 @@
         .chord-tetrad { font-size: 0.8rem; color: var(--note-root); opacity: 0.7; margin-bottom: 4px; }
 
         /* Mástil */
-        .overflow-container { width: 100%; overflow-x: auto; background: #000; padding: 30px 0 50px 0; border-radius: 8px; margin-bottom: 20px; box-shadow: inset 0 0 20px #000; }
+        .overflow-container { width: 100%; overflow-x: auto; background: #000; padding: 30px 0 50px 0; border-radius: 8px; margin-bottom: 20px; }
         .fretboard { display: inline-flex; flex-direction: column; background: var(--fretboard-wood); position: relative; border-left: 10px solid #222; }
         .string { display: flex; height: 38px; position: relative; background-image: linear-gradient(to bottom, transparent 48%, var(--string-color) 49%, var(--string-color) 51%, transparent 52%); }
         .fret { width: 55px; border-right: 2px solid var(--fret-color); display: flex; justify-content: center; align-items: center; position: relative; }
@@ -42,19 +43,23 @@
         .fret.inlay-dot::after { content: "●"; position: absolute; bottom: -35px; color: #aaa; font-size: 14px; }
         .fret.inlay-dot-double::after { content: "● ●"; position: absolute; bottom: -35px; color: #aaa; font-size: 14px; letter-spacing: 2px; }
 
-        .note { width: 26px; height: 26px; border-radius: 50%; background: var(--note-default); color: #000; font-size: 10px; font-weight: bold; display: none; justify-content: center; align-items: center; z-index: 2; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .note { width: 26px; height: 26px; border-radius: 50%; background: var(--note-default); color: #000; font-size: 10px; font-weight: bold; display: none; justify-content: center; align-items: center; z-index: 2; }
         .note.active { display: flex; }
         .note.chord-highlight { transform: scale(1.2); box-shadow: 0 0 10px var(--note-root); border: 2px solid #000; }
-        .note.dimmed { opacity: 0.15; transform: scale(0.85); }
+        .note.dimmed { opacity: 0.2; transform: scale(0.85); }
         .note.root { background: var(--note-root); }
 
-        .info-panel { background: #1a1a1a; padding: 20px; border-radius: 12px; display: inline-block; border: 1px solid #444; min-width: 400px; margin-top: 20px; }
+        .info-panel { background: #1a1a1a; padding: 20px; border-radius: 12px; display: inline-block; border: 1px solid #444; min-width: 80%; margin-top: 20px; }
+        .svg-card { background: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .svg-label { color: #333; font-size: 10px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; border-bottom: 1px solid #eee; }
+        
         button, select { padding: 10px 15px; cursor: pointer; background: var(--accent); border: none; color: white; border-radius: 5px; font-weight: bold; }
+        select { background: #34495e; }
     </style>
 </head>
 <body>
 
-    <h2 style="margin-bottom: 10px;">PUMUCHORDS <span style="font-weight: 100;">v3.9 Elite</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.9 Elite</span></h2>
 
     <div class="controls">
         <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
@@ -64,8 +69,8 @@
             <select id="tuningSelect">
                 <option value="standard">Standard (EADGBe)</option>
                 <option value="dropD">Drop D</option>
-                <option value="eb">Eb (Half Step Down)</option>
-                <option value="d">D (Full Step Down)</option>
+                <option value="eb">Eb (Medio tono abajo)</option>
+                <option value="d">D (Tono abajo)</option>
                 <option value="openG">Open G</option>
             </select>
         </div>
@@ -75,7 +80,7 @@
     <div id="piano" class="piano-container"></div>
     <div id="chordsList" class="chords-container"></div>
     <div class="overflow-container"><div id="fretboard" class="fretboard"></div></div>
-    <div id="chordInfo" class="info-panel">Selecciona un acorde</div>
+    <div id="chordInfo" class="info-panel">Selecciona un acorde de la lista superior</div>
 
     <script>
         const notes = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
@@ -114,11 +119,11 @@
                 const res = await fetch('Acordes2.json');
                 if (!res.ok) throw new Error();
                 libreriaManual = await res.json();
-                init();
+                console.log("JSON cargado");
             } catch (e) {
-                console.warn("Acordes2.json no encontrado, funcionando modo teoría.");
-                init();
+                console.warn("No se pudo cargar Acordes2.json");
             }
+            init();
         }
 
         function init() {
@@ -126,10 +131,16 @@
             const scaleSel = document.getElementById('scaleSelect');
             notes.forEach((n, i) => rootSel.innerHTML += `<option value="${i}">${n}</option>`);
             Object.keys(scales).forEach(s => scaleSel.innerHTML += `<option value="${s}">${s}</option>`);
+            
             createPiano(); createFretboard(); update();
+
             rootSel.onchange = () => { selectedChordIdx = null; update(); };
             scaleSel.onchange = () => { selectedChordIdx = null; update(); };
-            document.getElementById('tuningSelect').onchange = (e) => { currentTuning = tuningPresets[e.target.value]; createFretboard(); update(); };
+            document.getElementById('tuningSelect').onchange = (e) => { 
+                currentTuning = tuningPresets[e.target.value]; 
+                createFretboard(); 
+                update(); 
+            };
             document.getElementById('toggleBtn').onclick = (e) => {
                 showIntervals = !showIntervals;
                 e.target.innerText = showIntervals ? "Intervalos: ON" : "Intervalos: OFF";
@@ -173,59 +184,41 @@
             if (selectedChordIdx !== null && sData.chordNotes[selectedChordIdx]) {
                 const cRoot = scaleNotes[selectedChordIdx];
                 chordNotes = sData.chordNotes[selectedChordIdx].map(interval => (cRoot + interval) % 12);
+                
                 const noteName = notes[cRoot];
                 const tetrad = sData.tetrads[selectedChordIdx];
+                const triad = sData.triads[selectedChordIdx];
 
-                // --- NUEVO MAPEADOR DE NOMBRES (Tríadas + Tétradas) ---
-                let noteName = notes[cRoot];
-                let tetradType = sData.tetrads[selectedChordIdx]; // Maj7, m7, etc.
-                let triadType = sData.triads[selectedChordIdx];   // "", "m", "dim", etc.
+                // MAPEADOR INTELIGENTE (JSON)
+                let jsonTetrad = tetrad;
+                if (tetrad === "Maj7") jsonTetrad = "M7";
+                if (tetrad === "") jsonTetrad = "M";
                 
-                // 1. Intentar mapear la Tétrada (Acorde de 4 notas)
-                let jsonType = tetradType;
-                if (tetradType === "Maj7") jsonType = "M7";
-                if (tetradType === "m7") jsonType = "m7";
-                if (tetradType === "7") jsonType = "7";
+                let jsonTriad = triad;
+                if (triad === "") jsonTriad = "M"; // Mayor simple
+
+                infoPanel.innerHTML = `<div>Notas de <b>${noteName}${tetrad}</b>: ${chordNotes.map(n => notes[n]).join(' - ')}</div>`;
                 
-                // 2. Si quieres que TAMBIÉN busque la tríada si la tétrada falla o quieres ambas:
-                // Definimos el nombre para la tríada
-                let jsonTriad = triadType; 
-                if (triadType === "") jsonTriad = "M"; // Mayor
-                if (triadType === "m") jsonTriad = "m"; // Menor
-                if (triadType === "dim") jsonTriad = "dim"; 
-                if (triadType === "aug") jsonTriad = "aug";
-                
-                infoPanel.innerHTML = `Notas de <b>${noteName}${tetradType}</b>: ${chordNotes.map(n => notes[n]).join(' - ')}`;
-                
-                // CONTENEDOR DE DIAGRAMAS
-                let htmlSVG = '<div style="display:flex; justify-content:center; gap:10px; margin-top:15px; flex-wrap:wrap;">';
-                
-                // DIBUJAR TÉTRADAS (Si existen en el JSON)
-                if (libreriaManual && libreriaManual[jsonType] && libreriaManual[jsonType][noteName]) {
-                    libreriaManual[jsonType][noteName].forEach(pos => {
-                        htmlSVG += `<div style="background:#fff; padding:8px; border-radius:4px; border:1px solid #e67e22;">
-                                        <div style="color:#333; font-size:9px; font-weight:bold;">${jsonType}</div>
-                                        ${drawSVG(pos.split('-'))}
-                                    </div>`;
+                let htmlSVG = '<div style="display:flex; justify-content:center; gap:15px; margin-top:15px; flex-wrap:wrap;">';
+
+                // Buscar Séptimas
+                if (libreriaManual && libreriaManual[jsonTetrad] && libreriaManual[jsonTetrad][noteName]) {
+                    libreriaManual[jsonTetrad][noteName].forEach(pos => {
+                        htmlSVG += `<div class="svg-card"><div class="svg-label">${jsonTetrad}</div>${drawSVG(pos.split('-'))}</div>`;
                     });
                 }
-                
-                // DIBUJAR TRÍADAS (Añadimos esto para que aparezcan también las simples)
-                if (libreriaManual && libreriaManual[jsonTriad] && libreriaManual[jsonTriad][noteName]) {
+                // Buscar Tríadas
+                if (libreriaManual && libreriaManual[jsonTriad] && libreriaManual[jsonTriad][noteName] && jsonTriad !== jsonTetrad) {
                     libreriaManual[jsonTriad][noteName].forEach(pos => {
-                        htmlSVG += `<div style="background:#fff; padding:8px; border-radius:4px; border:1px solid #ccc;">
-                                        <div style="color:#333; font-size:9px; font-weight:bold;">Tríada ${jsonTriad}</div>
-                                        ${drawSVG(pos.split('-'))}
-                                    </div>`;
+                        htmlSVG += `<div class="svg-card"><div class="svg-label">Tríada ${jsonTriad}</div>${drawSVG(pos.split('-'))}</div>`;
                     });
                 }
-                
-                infoPanel.innerHTML += htmlSVG + '</div>';           
-                }
+                infoPanel.innerHTML += htmlSVG + '</div>';
             } else {
-                infoPanel.innerText = "Selecciona un acorde";
+                infoPanel.innerText = "Selecciona un acorde de la lista superior";
             }
 
+            // Actualizar Mástil y Piano
             document.querySelectorAll('.note').forEach(el => {
                 const n = parseInt(el.dataset.note);
                 el.classList.remove('active', 'root', 'chord-highlight', 'dimmed');
@@ -244,13 +237,19 @@
                 if (selectedChordIdx !== null && chordNotes.includes(n)) el.classList.add('highlight');
             });
 
+            // Generar tarjetas de acordes
             const cList = document.getElementById('chordsList'); cList.innerHTML = "";
             sData.steps.forEach((step, i) => {
                 const cRoot = (root + step) % 12;
-                const triad = sData.chordNotes[i].slice(0, 3).map(v => (cRoot + v) % 12);
+                const triadNotes = sData.chordNotes[i].slice(0, 3).map(v => (cRoot + v) % 12);
                 const card = document.createElement('div');
                 card.className = `chord-card ${selectedChordIdx === i ? 'selected' : ''}`;
-                card.innerHTML = `<div class="chord-triad">${notes[cRoot]}${sData.triads[i]}</div><div class="chord-tetrad">${notes[cRoot]}${sData.tetrads[i]}</div><div class="mini-piano">${Array.from({length:12}, (_,k)=>`<div class="mini-key ${pianoLayout[k]?'black':''} ${triad.includes(k)?'active':''}"></div>`).join('')}</div>`;
+                card.innerHTML = `
+                    <div class="chord-triad">${notes[cRoot]}${sData.triads[i]}</div>
+                    <div class="chord-tetrad">${notes[cRoot]}${sData.tetrads[i]}</div>
+                    <div class="mini-piano">
+                        ${Array.from({length:12}, (_,k)=>`<div class="mini-key ${pianoLayout[k]?'black':''} ${triadNotes.includes(k)?'active':''}"></div>`).join('')}
+                    </div>`;
                 card.onclick = () => { selectedChordIdx = (selectedChordIdx === i) ? null : i; update(); };
                 cList.appendChild(card);
             });
