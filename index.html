@@ -176,20 +176,51 @@
                 const noteName = notes[cRoot];
                 const tetrad = sData.tetrads[selectedChordIdx];
 
-                // MAPEADOR DE NOMBRES PARA EL JSON
-                let jsonType = tetrad;
-                if (tetrad === "Maj7") jsonType = "M7";
-                if (tetrad === "") jsonType = "M";
-                if (tetrad === "m(Maj7)") jsonType = "mMaj7"; // Ejemplo mapeo adicional
-
-                infoPanel.innerHTML = `Notas de <b>${noteName}${tetrad}</b>: ${chordNotes.map(n => notes[n]).join(' - ')}`;
-
+                // --- NUEVO MAPEADOR DE NOMBRES (Tríadas + Tétradas) ---
+                let noteName = notes[cRoot];
+                let tetradType = sData.tetrads[selectedChordIdx]; // Maj7, m7, etc.
+                let triadType = sData.triads[selectedChordIdx];   // "", "m", "dim", etc.
+                
+                // 1. Intentar mapear la Tétrada (Acorde de 4 notas)
+                let jsonType = tetradType;
+                if (tetradType === "Maj7") jsonType = "M7";
+                if (tetradType === "m7") jsonType = "m7";
+                if (tetradType === "7") jsonType = "7";
+                
+                // 2. Si quieres que TAMBIÉN busque la tríada si la tétrada falla o quieres ambas:
+                // Definimos el nombre para la tríada
+                let jsonTriad = triadType; 
+                if (triadType === "") jsonTriad = "M"; // Mayor
+                if (triadType === "m") jsonTriad = "m"; // Menor
+                if (triadType === "dim") jsonTriad = "dim"; 
+                if (triadType === "aug") jsonTriad = "aug";
+                
+                infoPanel.innerHTML = `Notas de <b>${noteName}${tetradType}</b>: ${chordNotes.map(n => notes[n]).join(' - ')}`;
+                
+                // CONTENEDOR DE DIAGRAMAS
+                let htmlSVG = '<div style="display:flex; justify-content:center; gap:10px; margin-top:15px; flex-wrap:wrap;">';
+                
+                // DIBUJAR TÉTRADAS (Si existen en el JSON)
                 if (libreriaManual && libreriaManual[jsonType] && libreriaManual[jsonType][noteName]) {
-                    let htmlSVG = '<div style="display:flex; justify-content:center; gap:10px; margin-top:15px; flex-wrap:wrap;">';
                     libreriaManual[jsonType][noteName].forEach(pos => {
-                        htmlSVG += `<div style="background:#fff; padding:8px; border-radius:4px;">${drawSVG(pos.split('-'))}</div>`;
+                        htmlSVG += `<div style="background:#fff; padding:8px; border-radius:4px; border:1px solid #e67e22;">
+                                        <div style="color:#333; font-size:9px; font-weight:bold;">${jsonType}</div>
+                                        ${drawSVG(pos.split('-'))}
+                                    </div>`;
                     });
-                    infoPanel.innerHTML += htmlSVG + '</div>';
+                }
+                
+                // DIBUJAR TRÍADAS (Añadimos esto para que aparezcan también las simples)
+                if (libreriaManual && libreriaManual[jsonTriad] && libreriaManual[jsonTriad][noteName]) {
+                    libreriaManual[jsonTriad][noteName].forEach(pos => {
+                        htmlSVG += `<div style="background:#fff; padding:8px; border-radius:4px; border:1px solid #ccc;">
+                                        <div style="color:#333; font-size:9px; font-weight:bold;">Tríada ${jsonTriad}</div>
+                                        ${drawSVG(pos.split('-'))}
+                                    </div>`;
+                    });
+                }
+                
+                infoPanel.innerHTML += htmlSVG + '</div>';           
                 }
             } else {
                 infoPanel.innerText = "Selecciona un acorde";
