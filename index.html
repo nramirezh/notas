@@ -30,11 +30,13 @@
         .chord-tetrad { font-size: 0.8rem; color: var(--note-root); opacity: 0.7; margin-bottom: 4px; }
 
         /* Mástil */
-        .overflow-container { width: 100%; overflow-x: auto; background: #000; padding: 30px 0 50px 0; border-radius: 8px; margin-bottom: 20px; }
+        .overflow-container { width: 100%; overflow-x: auto; background: #000; padding: 30px 0 60px 0; border-radius: 8px; margin-bottom: 20px; }
         .fretboard { display: inline-flex; flex-direction: column; background: var(--fretboard-wood); position: relative; border-left: 10px solid #222; }
         .string { display: flex; height: 38px; position: relative; background-image: linear-gradient(to bottom, transparent 48%, var(--string-color) 49%, var(--string-color) 51%, transparent 52%); }
         .fret { width: 55px; border-right: 2px solid var(--fret-color); display: flex; justify-content: center; align-items: center; position: relative; }
         .fret:first-child { background: #111; border-right: 5px solid #444; width: 45px; }
+        .fret.inlay-dot::after { content: "●"; position: absolute; bottom: -35px; color: #aaa; font-size: 14px; }
+        .fret.inlay-dot-double::after { content: "● ●"; position: absolute; bottom: -35px; color: #aaa; font-size: 14px; letter-spacing: 2px; }
         
         .note { width: 26px; height: 26px; border-radius: 50%; background: var(--note-default); color: #000; font-size: 10px; font-weight: bold; display: none; justify-content: center; align-items: center; z-index: 2; }
         .note.active { display: flex; }
@@ -186,12 +188,31 @@
                 const sDiv = document.createElement('div'); sDiv.className = 'string';
                 for (let f = 0; f <= 17; f++) {
                     const fDiv = document.createElement('div'); fDiv.className = 'fret';
+                    
+                    // Lógica de inlays (solo se añaden en la última cuerda para que no se repitan)
+                    if (sIdx === 5) {
+                        if ([3, 5, 7, 9, 15, 17].includes(f)) fDiv.classList.add('inlay-dot');
+                        if (f === 12) fDiv.classList.add('inlay-dot-double');
+                    }
+
                     fDiv.innerHTML = `<div class="note" data-note="${(start + f) % 12}"></div>`;
                     sDiv.appendChild(fDiv);
                 }
                 b.appendChild(sDiv);
             });
         }
+        /*function createFretboard() {
+            const b = document.getElementById('fretboard'); b.innerHTML = "";
+            currentTuning.forEach((start, sIdx) => {
+                const sDiv = document.createElement('div'); sDiv.className = 'string';
+                for (let f = 0; f <= 17; f++) {
+                    const fDiv = document.createElement('div'); fDiv.className = 'fret';
+                    fDiv.innerHTML = `<div class="note" data-note="${(start + f) % 12}"></div>`;
+                    sDiv.appendChild(fDiv);
+                }
+                b.appendChild(sDiv);
+            });
+        }*/
 
         function update() {
             const root = parseInt(document.getElementById('rootSelect').value);
