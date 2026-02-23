@@ -178,7 +178,7 @@
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.2</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.3</span></h2>
 
     <div class="controls">
         <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
@@ -429,6 +429,7 @@
             document.getElementById('tuningSelect').onchange = (e) => { 
                 currentTuning = tuningPresets[e.target.value]; 
                 createFretboard(); update(); 
+                updateTunerButtons();
             };
             document.getElementById('toggleBtn').onclick = (e) => {
                 showIntervals = !showIntervals;
@@ -439,6 +440,7 @@
                 document.querySelectorAll('.svg-card').forEach(c => c.classList.remove('expanded'));
                 document.getElementById('overlay').style.display = 'none';
             };
+            updateTunerButtons();
         }
 
         function createPiano() {
