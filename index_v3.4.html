@@ -178,6 +178,81 @@
                 width: 2px; height: 20px; background: rgba(0,0,0,0.5);
             }
             .tuner-status { font-size: 0.7rem; margin-top: 15px; opacity: 0.7; }
+
+        /* Contenedor principal para alinear elementos */
+        .main-interface {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap; /* Para que en móviles se ponga uno debajo de otro */
+        }
+        
+        .tuner-pro-container {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            width: 180px;
+            height: 110px; /* Misma altura que las teclas blancas del piano */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+        
+        .tuner-display { text-align: center; }
+        
+        .tuner-note { 
+            font-size: 1.8rem; 
+            font-weight: bold; 
+            color: var(--note-root); 
+            line-height: 1;
+        }
+        
+        .tuner-meter { 
+            position: relative; 
+            width: 100%; 
+            height: 12px; 
+            background: #333; /* Fondo oscuro */
+            border-radius: 6px; 
+            margin: 8px 0;
+            overflow: hidden;
+            border: 1px solid #444;
+        }
+        
+        /* El puntero ahora es una zona de color que se mueve */
+        .tuner-pointer {
+            position: absolute; 
+            top: 0; 
+            left: 50%;
+            width: 6px; 
+            height: 100%; 
+            background: var(--accent);
+            transform: translateX(-50%); 
+            transition: left 0.1s ease-out;
+        }
+        
+        .tuner-center {
+            position: absolute; 
+            left: calc(50% - 1px); 
+            top: 0;
+            width: 2px; 
+            height: 100%; 
+            background: #2ecc71; /* Centro verde */
+            z-index: 1;
+        }
+        
+        .tuner-status { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; }
+        
+        #micBtn {
+            padding: 5px 10px;
+            font-size: 0.7rem;
+            background: #34495e;
+            border: 1px solid #555;
+        }
+        #micBtn:hover { background: var(--accent); }
                 
         /* Panel de Info y Zoom */
         .info-panel { background: #1a1a1a; padding: 20px; border-radius: 12px; display: inline-block; border: 1px solid #444; min-width: 85%; margin-top: 20px; }
@@ -247,6 +322,23 @@
             <div class="tuner-status" id="tunerStatus">Pulsa "Escuchar" para afinar</div>
         </div>
         <button id="micBtn" onclick="toggleLiveTuner()" style="background: #27ae60;">🎤 Escuchar Guitarra</button>
+    </div>
+
+    <div class="main-interface">
+            <div id="piano" class="piano-container"></div>
+    
+        <div class="tuner-pro-container">
+            <div class="tuner-display">
+                <div class="tuner-note" id="liveNote">--</div>
+                <div class="tuner-meter">
+                    <div class="tuner-pointer" id="tunerPointer"></div>
+                    <div class="tuner-center"></div>
+                </div>
+                <div class="tuner-status" id="tunerStatus">AFINADOR READY</div>
+            </div>
+            <button id="micBtn" onclick="toggleLiveTuner()">🎤 ESCUCHAR</button>
+        </div>
+        
     </div>
 
     <div id="piano" class="piano-container"></div>
