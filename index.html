@@ -22,6 +22,36 @@
         .piano-key.active { background: #d1d8e0; box-shadow: inset 0 -4px 0 var(--accent); }
         .piano-key.highlight { background: var(--note-root) !important; color: black; }
 
+        /* Estilos para el Mini Piano en las tarjetas */
+        .mini-piano { 
+            display: flex; 
+            justify-content: center; 
+            margin-top: 8px; 
+            background: #000; 
+            padding: 3px; 
+            border-radius: 3px; 
+            width: fit-content; 
+            margin: 10px auto 0 auto; 
+        }
+        .mini-key { 
+            width: 7px; 
+            height: 22px; 
+            background: #eee; 
+            margin: 0.5px; 
+            border-radius: 0 0 1px 1px; 
+        }
+        .mini-key.black { 
+            width: 6px; 
+            height: 13px; 
+            background: #444; 
+            margin-left: -3px; 
+            margin-right: -3px; 
+            z-index: 2; 
+        }
+        .mini-key.active { 
+            background: var(--note-root); /* El color naranja para resaltar la nota */
+        }
+
         /* Acordes Listado */
         .chords-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 25px; }
         .chord-card { background: #1a1a1a; border-radius: 8px; padding: 12px; min-width: 105px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
@@ -270,16 +300,35 @@
             });
 
             // Tarjetas de Acordes
-            const cList = document.getElementById('chordsList'); cList.innerHTML = "";
+            const cList = document.getElementById('chordsList'); 
+            cList.innerHTML = "";
+            
             sData.steps.forEach((step, i) => {
                 const cRoot = (root + step) % 12;
+                // Obtenemos las notas de la tríada para el mini teclado
+                const triadNotes = sData.chordNotes[i].slice(0, 3).map(v => (cRoot + v) % 12);
+                
                 const card = document.createElement('div');
                 card.className = `chord-card ${selectedChordIdx === i ? 'selected' : ''}`;
-                card.innerHTML = `<div class="chord-triad">${notes[cRoot]}${sData.triads[i]}</div><div class="chord-tetrad">${notes[cRoot]}${sData.tetrads[i]}</div>`;
+                
+                // Construimos el HTML del mini piano
+                let miniPianoHTML = '<div class="mini-piano">';
+                for (let k = 0; k < 12; k++) {
+                    const isBlack = pianoLayout[k] === 1;
+                    const isActive = triadNotes.includes(k);
+                    miniPianoHTML += `<div class="mini-key ${isBlack ? 'black' : ''} ${isActive ? 'active' : ''}"></div>`;
+                }
+                miniPianoHTML += '</div>';
+            
+                card.innerHTML = `
+                    <div class="chord-triad">${notes[cRoot]}${sData.triads[i]}</div>
+                    <div class="chord-tetrad">${notes[cRoot]}${sData.tetrads[i]}</div>
+                    ${miniPianoHTML}
+                `;
+            
                 card.onclick = () => { 
                     selectedChordIdx = (selectedChordIdx === i) ? null : i; 
                     update(); 
-                    // Al seleccionar la tarjeta, suena la primera posición del acorde de 7
                     let jsonT = sData.tetrads[i] === "Maj7" ? "M7" : (sData.tetrads[i] === "" ? "M" : sData.tetrads[i]);
                     if (libreriaManual && libreriaManual[jsonT] && libreriaManual[jsonT][notes[cRoot]]) {
                         playChord(libreriaManual[jsonT][notes[cRoot]][0]);
