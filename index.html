@@ -318,8 +318,8 @@
             }
             
             // Función auxiliar para no repetir código al crear cards
-            function crearCard(container, chordId, index = null) {
-                const [nota, tipo] = chordId.split('-');
+            function crearCard(container, chordId, index = null, sData = null) {
+                const [nota, tipoTetrad] = chordId.split('-');
                 const isActive = favoritos.includes(chordId);
                 
                 // Si tenemos sData, buscamos la tríada correspondiente para mostrarla también
