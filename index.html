@@ -98,6 +98,9 @@
 
         button, select { padding: 10px 15px; cursor: pointer; background: var(--accent); border: none; color: white; border-radius: 5px; font-weight: bold; }
         .btn-nav { text-decoration: none; background: #2980b9; color: white; padding: 10px 15px; border-radius: 5px; font-weight: bold; font-size: 13px; }
+        .btn-piano { text-decoration: none; background: #27ae60; /* Un verde piano elegante */ color: white; padding: 10px 15px; 
+            border-radius: 5px; font-weight: bold; font-size: 13px; transition: 0.3s; display: inline-block; }
+        .btn-piano:hover { background: #2ecc71; transform: translateY(-2px); }
     </style>
 </head>
 <body>
@@ -120,6 +123,7 @@
         </div>
         <button id="toggleBtn">Intervalos: OFF</button>
         <a href="libreria.html" class="btn-nav">📚 Diccionario</a>
+        <a href="libpiano.html" class="btn-piano">🎹 Lib. Piano</a>
     </div>
 
     <div id="piano" class="piano-container"></div>
