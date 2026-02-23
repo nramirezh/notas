@@ -60,6 +60,30 @@
 
         button, select { padding: 10px 15px; cursor: pointer; background: var(--accent); border: none; color: white; border-radius: 5px; font-weight: bold; }
         .btn-nav { text-decoration: none; background: #2980b9; color: white; padding: 10px 15px; border-radius: 5px; font-weight: bold; font-size: 13px; }
+
+        /* Botones de acción extra */
+        .extra-actions { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .btn-random { background: #8e44ad !important; }
+        .btn-favs { background: #c0392b !important; }
+        
+        /* Icono de favorito en la card */
+        .fav-btn {
+            position: absolute; top: 5px; right: 5px;
+            background: none; border: none; color: #555;
+            font-size: 18px; cursor: pointer; transition: 0.2s;
+            padding: 0; line-height: 1;
+        }
+        .fav-btn.active { color: #e74c3c; }
+        .chord-card { position: relative; } /* Para posicionar el corazón */
+        
+        /* Panel de Progresión Aleatoria */
+        #randomPanel {
+            background: #16a085; color: white; padding: 15px;
+            border-radius: 8px; margin-bottom: 20px; display: none;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      
     </style>
 </head>
 <body>
@@ -83,6 +107,13 @@
         <button id="toggleBtn">Intervalos: OFF</button>
         <a href="libreria.html" class="btn-nav">📚 Diccionario</a>
     </div>
+
+    <div class="extra-actions">
+        <button class="btn-random" onclick="generarProgresionAleatoria()">🎲 Jam Aleatoria</button>
+        <button class="btn-favs" onclick="toggleModoFavoritos()">❤️ Ver Mis Favoritos</button>
+    </div>
+
+    <div id="randomPanel"></div>
 
     <div id="piano" class="piano-container"></div>
     <div id="chordsList" class="chords-container"></div>
@@ -271,7 +302,56 @@
             });
 
             // Tarjetas de Acordes
-            const cList = document.getElementById('chordsList'); cList.innerHTML = "";
+            // ... dentro de la función update(), busca la parte de las tarjetas:
+            const cList = document.getElementById('chordsList'); 
+            cList.innerHTML = "";
+            
+            if (modoFavoritos) {
+                // MODO FAVORITOS: Solo mostramos lo guardado
+                if (favoritos.length === 0) {
+                    cList.innerHTML = "<p>No tienes favoritos guardados aún.</p>";
+                }
+                favoritos.forEach(favId => {
+                    // favId es algo como "Do-M" o "Sol-m7"
+                    crearCard(cList, favId);
+                });
+            } else {
+                // MODO NORMAL: Escala
+                sData.steps.forEach((step, i) => {
+                    const cRoot = (root + step) % 12;
+                    const chordId = `${notes[cRoot]}-${sData.tetrads[i] || 'M'}`;
+                    crearCard(cList, chordId, i);
+                });
+            }
+            
+            // Función auxiliar para no repetir código al crear cards
+            function crearCard(container, chordId, index = null) {
+                const [nota, tipo] = chordId.split('-');
+                const isActive = favoritos.includes(chordId);
+                
+                const card = document.createElement('div');
+                card.className = `chord-card ${selectedChordIdx === index ? 'selected' : ''}`;
+                card.innerHTML = `
+                    <button class="fav-btn ${isActive ? 'active' : ''}" onclick="toggleFavorito(event, '${chordId}')">
+                        ${isActive ? '❤️' : '🤍'}
+                    </button>
+                    <div class="chord-triad">${nota}${tipo}</div>
+                `;
+                
+                card.onclick = () => {
+                    if (index !== null) {
+                        selectedChordIdx = (selectedChordIdx === index) ? null : index;
+                        update();
+                    }
+                    // Sonar acorde
+                    let jsonT = tipo === "Maj7" ? "M7" : (tipo === "" ? "M" : tipo);
+                    if (libreriaManual && libreriaManual[jsonT] && libreriaManual[jsonT][nota]) {
+                        playChord(libreriaManual[jsonT][nota][0]);
+                    }
+                };
+                container.appendChild(card);
+            }
+            /*const cList = document.getElementById('chordsList'); cList.innerHTML = "";
             sData.steps.forEach((step, i) => {
                 const cRoot = (root + step) % 12;
                 const card = document.createElement('div');
@@ -287,7 +367,7 @@
                     }
                 };
                 cList.appendChild(card);
-            });
+            });*/
         }
 
         window.zoomAndPlay = (el, pos) => {
@@ -320,6 +400,61 @@
                 }
             });
             return svg + "</svg>";
+        }
+    // --- SISTEMA DE FAVORITOS ---
+        let favoritos = JSON.parse(localStorage.getItem('pumuchords_favs')) || [];
+        let modoFavoritos = false;
+        
+        function toggleFavorito(e, chordId) {
+            e.stopPropagation();
+            const index = favoritos.indexOf(chordId);
+            if (index > -1) favoritos.splice(index, 1);
+            else favoritos.push(chordId);
+            
+            localStorage.setItem('pumuchords_favs', JSON.stringify(favoritos));
+            update(); // Refrescar para ver el corazón pintado
+        }
+        
+        function toggleModoFavoritos() {
+            modoFavoritos = !modoFavoritos;
+            const btn = document.querySelector('.btn-favs');
+            btn.innerText = modoFavoritos ? "⬅ Volver a Escalas" : "❤️ Ver Mis Favoritos";
+            btn.style.background = modoFavoritos ? "#2c3e50" : "#c0392b";
+            update();
+        }
+        
+        // --- GENERADOR ALEATORIO ---
+        function generarProgresionAleatoria() {
+            modoFavoritos = false; // Salir de favoritos si estamos ahí
+            
+            // 1. Elegir Nota y Escala al azar
+            const randomRoot = Math.floor(Math.random() * 12);
+            const scaleKeys = Object.keys(scales);
+            const randomScaleKey = scaleKeys[Math.floor(Math.random() * scaleKeys.length)];
+            
+            // 2. Aplicar a los selectores
+            document.getElementById('rootSelect').value = randomRoot;
+            document.getElementById('scaleSelect').value = randomScaleKey;
+            
+            // 3. Elegir 4 grados de la escala (progresión)
+            const sData = scales[randomScaleKey];
+            const numGrados = sData.steps.length;
+            let progresion = [];
+            for(let i=0; i<4; i++) {
+                progresion.push(Math.floor(Math.random() * numGrados));
+            }
+            
+            update(); // Actualizar interfaz
+            
+            // 4. Mostrar panel informativo
+            const panel = document.getElementById('randomPanel');
+            panel.style.display = "block";
+            const nombresAcordes = progresion.map(grado => {
+                const nIdx = (randomRoot + sData.steps[grado]) % 12;
+                return `<b>${notes[nIdx]}${sData.triads[grado]}</b>`;
+            });
+            
+            panel.innerHTML = `🎸 <b>Sugerencia de composición:</b> En ${notes[randomRoot]} ${randomScaleKey}, prueba esta secuencia: ${nombresAcordes.join(' - ')}`;
         }
 
         cargarDatosYArrancar();
