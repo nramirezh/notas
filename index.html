@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>PUMUCHORDS v3.1</title>
+    <title>PUMUCHORDS v3</title>
     <style>
         :root {
             --bg-color: #2c3e50; --fretboard-wood: #3d2b1f; --string-color: #bdc3c7;
@@ -82,6 +82,45 @@
         .note.dimmed { opacity: 0.2; transform: scale(0.85); }
         .note.root { background: var(--note-root); }
 
+        /*METRONOMO*/
+        .metronome-container {
+            background: #1a1a1a;
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            margin-bottom: 20px;
+            border: 1px solid #444;
+        }
+        
+        .metro-controls { display: flex; flex-direction: column; align-items: center; }
+        .metro-controls label { font-size: 0.6rem; opacity: 0.6; margin-bottom: 2px; }
+        
+        #bpmInput {
+            width: 50px;
+            background: transparent;
+            border: 1px solid #555;
+            color: var(--accent);
+            text-align: center;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+        
+        .beat-indicator { display: flex; gap: 6px; }
+        .dot { width: 10px; height: 10px; background: #333; border-radius: 50%; transition: 0.1s; }
+        .dot.active { background: var(--accent); transform: scale(1.2); box-shadow: 0 0 8px var(--accent); }
+        
+        #metroPlayBtn {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
         /* Panel de Info y Zoom */
         .info-panel { background: #1a1a1a; padding: 20px; border-radius: 12px; display: inline-block; border: 1px solid #444; min-width: 85%; margin-top: 20px; }
         .svg-card { 
@@ -107,7 +146,7 @@
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.1</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.2</span></h2>
 
     <div class="controls">
         <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
@@ -124,6 +163,20 @@
         <button id="toggleBtn">Intervalos: OFF</button>
         <a href="libreria.html" class="btn-nav">📚 Diccionario</a>
         <a href="libpiano.html" class="btn-piano">🎹 Lib. Piano</a>
+    </div>
+
+    <div class="metronome-container">
+    <button id="metroPlayBtn" onclick="toggleMetronome()">▶</button>
+        <div class="metro-controls">
+            <label>BPM</label>
+            <input type="number" id="bpmInput" value="80" min="40" max="250" onchange="updateBPM()">
+        </div>
+        <div class="beat-indicator">
+            <div class="dot" id="dot-0"></div>
+            <div class="dot" id="dot-1"></div>
+            <div class="dot" id="dot-2"></div>
+            <div class="dot" id="dot-3"></div>
+        </div>
     </div>
 
     <div id="piano" class="piano-container"></div>
@@ -171,6 +224,71 @@
                 if (res.ok) libreriaManual = await res.json();
             } catch (e) { console.warn("Error JSON"); }
             init();
+        }
+
+        // --- LÓGICA DEL METRÓNOMO ---
+        let isMetroRunning = false;
+        let metroInterval = null;
+        let currentBeat = 0;
+        let bpm = 80;
+        
+        function toggleMetronome() {
+            const btn = document.getElementById('metroPlayBtn');
+            if (isMetroRunning) {
+                clearInterval(metroInterval);
+                isMetroRunning = false;
+                btn.innerText = "▶";
+                resetDots();
+            } else {
+                isMetroRunning = true;
+                btn.innerText = "⏹";
+                startMetro();
+            }
+        }
+        
+        function updateBPM() {
+            bpm = document.getElementById('bpmInput').value;
+            if (isMetroRunning) {
+                clearInterval(metroInterval);
+                startMetro();
+            }
+        }
+        
+        function startMetro() {
+            const ms = 60000 / bpm;
+            metroInterval = setInterval(() => {
+                playMetroSound();
+                updateDots();
+            }, ms);
+        }
+        
+        function playMetroSound() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            // Frecuencia más alta para el primer tiempo (el "tic")
+            osc.frequency.setValueAtTime(currentBeat === 0 ? 880 : 440, audioCtx.currentTime);
+            osc.type = 'sine';
+            
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+        
+        function updateDots() {
+            resetDots();
+            document.getElementById(`dot-${currentBeat}`).classList.add('active');
+            currentBeat = (currentBeat + 1) % 4;
+        }
+        
+        function resetDots() {
+            document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
         }
 
         // --- AUDIO ENGINE ---
