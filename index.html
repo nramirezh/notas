@@ -120,7 +120,7 @@
             justify-content: center;
             align-items: center;
         }
-        /*AFINADOR*/
+        /*AFINADOR
         .tuner-container {
             border-left: 1px solid #444;
             padding-left: 15px;
@@ -151,7 +151,8 @@
             background: var(--accent); 
             color: #000; 
             box-shadow: 0 0 10px var(--accent);
-        }
+        }*/
+        
         /*AFINADOR CROMÁTICO*/
         .tuner-pro-container {
                 background: #111;
@@ -354,7 +355,7 @@
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.4</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.5</span></h2>
 
     <div class="controls">
         <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
@@ -387,18 +388,6 @@
         </div>
     </div>
  
-    <div class="tuner-pro-container">
-        <div class="tuner-display">
-            <div class="tuner-note" id="liveNote">--</div>
-            <div class="tuner-meter">
-                <div class="tuner-pointer" id="tunerPointer"></div>
-                <div class="tuner-center"></div>
-            </div>
-            <div class="tuner-status" id="tunerStatus">Pulsa "Escuchar" para afinar</div>
-        </div>
-        <button id="micBtn" onclick="toggleLiveTuner()" style="background: #27ae60;">🎤 Escuchar Guitarra</button>
-    </div>
-
     <div class="main-interface">
             <div id="piano" class="piano-container"></div>
     
@@ -409,9 +398,9 @@
                     <div class="tuner-pointer" id="tunerPointer"></div>
                     <div class="tuner-center"></div>
                 </div>
-                <div class="tuner-status" id="tunerStatus">AFINADOR READY</div>
+                <div class="tuner-status" id="tunerStatus">AFINADOR</div>
             </div>
-            <button id="micBtn" onclick="toggleLiveTuner()">🎤 ESCUCHAR</button>
+            <button id="micBtn" onclick="toggleLiveTuner()">🎤 ACTIVAR</button>
         </div>
         
     </div>
@@ -549,7 +538,7 @@
             });
         }
         
-        function playTunerNote(noteIdx, stringIdx, btn) {
+        /*function playTunerNote(noteIdx, stringIdx, btn) {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             
             // Si ya está sonando algo, lo paramos
@@ -590,7 +579,7 @@
                 tunerOsc = null;
             }
         }
-        //FIN AFINADOR
+        //FIN AFINADOR*/
 
         //AFINADOR CROMÁTICO
         let audioStream = null;
