@@ -120,7 +120,39 @@
             justify-content: center;
             align-items: center;
         }
-
+        /*AFINADOR*/
+        .tuner-container {
+            border-left: 1px solid #444;
+            padding-left: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .tuner-container label { font-size: 0.6rem; opacity: 0.6; margin-bottom: 5px; }
+        .tuner-buttons { display: flex; gap: 5px; }
+        
+        .tuner-btn {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            border: 1px solid var(--accent);
+            background: transparent;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.2s;
+        }
+        .tuner-btn:hover { background: var(--accent); color: #000; }
+        .tuner-btn.playing { 
+            background: var(--accent); 
+            color: #000; 
+            box-shadow: 0 0 10px var(--accent);
+        }
+                
         /* Panel de Info y Zoom */
         .info-panel { background: #1a1a1a; padding: 20px; border-radius: 12px; display: inline-block; border: 1px solid #444; min-width: 85%; margin-top: 20px; }
         .svg-card { 
@@ -178,6 +210,12 @@
             <div class="dot" id="dot-3"></div>
         </div>
     </div>
+
+    <div class="tuner-container">
+            <label>AFINADOR</label>
+            <div class="tuner-buttons" id="tunerButtons">
+                </div>
+        </div>
 
     <div id="piano" class="piano-container"></div>
     <div id="chordsList" class="chords-container"></div>
@@ -290,6 +328,74 @@
         function resetDots() {
             document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
         }
+
+        // --- LÓGICA DEL AFINADOR ---
+        let tunerOsc = null;
+        let tunerGain = null;
+        
+        function updateTunerButtons() {
+            const container = document.getElementById('tunerButtons');
+            container.innerHTML = "";
+            
+            // Invertimos el orden para que la cuerda 6 (E grave) esté a la izquierda
+            const currentNotes = [...currentTuning].reverse();
+            const stringNames = ['E', 'A', 'D', 'G', 'B', 'e'].reverse(); 
+        
+            currentNotes.forEach((noteIdx, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'tuner-btn';
+                btn.innerText = notes[noteIdx];
+                btn.onclick = () => playTunerNote(noteIdx, i, btn);
+                container.appendChild(btn);
+            });
+        }
+        
+        function playTunerNote(noteIdx, stringIdx, btn) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Si ya está sonando algo, lo paramos
+            stopTuner();
+        
+            if (btn.classList.contains('playing')) {
+                btn.classList.remove('playing');
+                return;
+            }
+        
+            // Quitar clase 'playing' de otros botones
+            document.querySelectorAll('.tuner-btn').forEach(b => b.classList.remove('playing'));
+            btn.classList.add('playing');
+        
+            tunerOsc = audioCtx.createOscillator();
+            tunerGain = audioCtx.createGain();
+        
+            // Calculamos la frecuencia base (Octava 2 para la 6ª cuerda aprox)
+            // Ajustamos la octava según la cuerda para que suene natural
+            const octaves = [2, 2, 3, 3, 3, 4].reverse();
+            const freq = 440 * Math.pow(2, (noteIdx - 9) / 12) * Math.pow(2, octaves[stringIdx] - 4);
+        
+            tunerOsc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            tunerOsc.type = 'sine';
+            
+            tunerGain.gain.setValueAtTime(0, audioCtx.currentTime);
+            tunerGain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.1);
+            
+            tunerOsc.connect(tunerGain);
+            tunerGain.connect(audioCtx.destination);
+            
+            tunerOsc.start();
+        }
+        
+        function stopTuner() {
+            if (tunerOsc) {
+                tunerOsc.stop();
+                tunerOsc = null;
+            }
+        }
+        
+        // IMPORTANTE: Llama a updateTunerButtons() dentro de tu función init() 
+        // y también dentro de la función que cambia la afinación (tuningSelect.onchange)
+
+        //FIN AFINADOR
 
         // --- AUDIO ENGINE ---
         function playChord(fretStr) {
