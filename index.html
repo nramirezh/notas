@@ -324,15 +324,16 @@
                 
                 // Si tenemos sData, buscamos la tríada correspondiente para mostrarla también
                 let tipoTriad = (index !== null && sData) ? sData.triads[index] : "";
-              
+            
                 const card = document.createElement('div');
                 card.className = `chord-card ${selectedChordIdx === index ? 'selected' : ''}`;
                 card.style.paddingTop = "20px"; // Espacio extra para el corazón
+            
                 card.innerHTML = `
                     <button class="fav-btn ${isActive ? 'active' : ''}" onclick="toggleFavorito(event, '${chordId}')">
                         ${isActive ? '❤️' : '🤍'}
                     </button>
-                    <div class="chord-triad">${nota}${tipo}</div>
+                    <div class="chord-triad">${nota}${tipoTriad}</div>
                     <div class="chord-tetrad" style="font-size:0.75rem; opacity:0.6;">${nota}${tipoTetrad}</div>
                 `;
                 
@@ -341,7 +342,6 @@
                         selectedChordIdx = (selectedChordIdx === index) ? null : index;
                         update();
                     }
-                    // Sonar acorde
                     let jsonT = tipoTetrad === "Maj7" ? "M7" : (tipoTetrad === "" ? "M" : tipoTetrad);
                     if (libreriaManual && libreriaManual[jsonT] && libreriaManual[jsonT][nota]) {
                         playChord(libreriaManual[jsonT][nota][0]);
