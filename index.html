@@ -152,6 +152,32 @@
             color: #000; 
             box-shadow: 0 0 10px var(--accent);
         }
+        /*AFINADOR CROMÁTICO*/
+        .tuner-pro-container {
+                background: #111;
+                padding: 15px;
+                border-radius: 15px;
+                border: 2px solid #333;
+                width: 200px;
+                margin: 10px auto;
+            }
+            .tuner-display { position: relative; height: 100px; overflow: hidden; }
+            .tuner-note { font-size: 2.5rem; font-weight: bold; color: var(--note-root); margin-bottom: 5px; }
+            .tuner-meter { 
+                position: relative; width: 100%; height: 20px; 
+                background: linear-gradient(90deg, #e74c3c 0%, #2ecc71 50%, #e74c3c 100%);
+                border-radius: 10px; margin-top: 10px;
+            }
+            .tuner-pointer {
+                position: absolute; top: -5px; left: 50%;
+                width: 4px; height: 30px; background: white;
+                transform: translateX(-50%); transition: left 0.1s ease-out;
+            }
+            .tuner-center {
+                position: absolute; left: 50%; top: 0;
+                width: 2px; height: 20px; background: rgba(0,0,0,0.5);
+            }
+            .tuner-status { font-size: 0.7rem; margin-top: 15px; opacity: 0.7; }
                 
         /* Panel de Info y Zoom */
         .info-panel { background: #1a1a1a; padding: 20px; border-radius: 12px; display: inline-block; border: 1px solid #444; min-width: 85%; margin-top: 20px; }
@@ -178,7 +204,7 @@
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.3</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.4</span></h2>
 
     <div class="controls">
         <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
@@ -210,12 +236,18 @@
             <div class="dot" id="dot-3"></div>
         </div>
     </div>
-
-    <div class="tuner-container">
-            <label>AFINADOR</label>
-            <div class="tuner-buttons" id="tunerButtons">
-                </div>
+ 
+    <div class="tuner-pro-container">
+        <div class="tuner-display">
+            <div class="tuner-note" id="liveNote">--</div>
+            <div class="tuner-meter">
+                <div class="tuner-pointer" id="tunerPointer"></div>
+                <div class="tuner-center"></div>
+            </div>
+            <div class="tuner-status" id="tunerStatus">Pulsa "Escuchar" para afinar</div>
         </div>
+        <button id="micBtn" onclick="toggleLiveTuner()" style="background: #27ae60;">🎤 Escuchar Guitarra</button>
+    </div>
 
     <div id="piano" class="piano-container"></div>
     <div id="chordsList" class="chords-container"></div>
@@ -391,11 +423,107 @@
                 tunerOsc = null;
             }
         }
-        
-        // IMPORTANTE: Llama a updateTunerButtons() dentro de tu función init() 
-        // y también dentro de la función que cambia la afinación (tuningSelect.onchange)
-
         //FIN AFINADOR
+
+        //AFINADOR CROMÁTICO
+        let audioStream = null;
+        let analyser = null;
+        let isLiveTunerOn = false;
+        
+        async function toggleLiveTuner() {
+            if (isLiveTunerOn) {
+                stopLiveTuner();
+                return;
+            }
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioCtx = audioCtx || new AudioContext();
+                analyser = audioCtx.createAnalyser();
+                const source = audioCtx.createMediaStreamSource(stream);
+                source.connect(analyser);
+                
+                analyser.fftSize = 2048;
+                audioStream = stream;
+                isLiveTunerOn = true;
+                document.getElementById('micBtn').innerText = "⏹ Detener";
+                document.getElementById('micBtn').style.background = "#c0392b";
+                processTuning();
+            } catch (err) {
+                alert("Necesitas permitir el acceso al micrófono para usar el afinador.");
+            }
+        }
+        
+        function stopLiveTuner() {
+            if (audioStream) audioStream.getTracks().forEach(t => t.stop());
+            isLiveTunerOn = false;
+            document.getElementById('micBtn').innerText = "🎤 Escuchar Guitarra";
+            document.getElementById('micBtn').style.background = "#27ae60";
+            document.getElementById('liveNote').innerText = "--";
+            document.getElementById('tunerPointer').style.left = "50%";
+        }
+        
+        function processTuning() {
+            if (!isLiveTunerOn) return;
+        
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Float32Array(bufferLength);
+            analyser.getFloatTimeDomainData(dataArray);
+        
+            const frequency = autoCorrelate(dataArray, audioCtx.sampleRate);
+        
+            if (frequency !== -1) {
+                const noteInfo = getNoteFromFrequency(frequency);
+                document.getElementById('liveNote').innerText = noteInfo.name;
+                
+                // Mover la aguja (cents es la desviación)
+                // Mapeamos -50/+50 cents a 0%/100% de la barra
+                const pointerPos = 50 + (noteInfo.cents);
+                document.getElementById('tunerPointer').style.left = `${Math.max(0, Math.min(100, pointerPos))}%`;
+                
+                const status = document.getElementById('tunerStatus');
+                if (Math.abs(noteInfo.cents) < 5) status.innerText = "¡Perfecto!";
+                else if (noteInfo.cents < 0) status.innerText = "Demasiado bajo...";
+                else status.innerText = "Demasiado alto...";
+            }
+        
+            requestAnimationFrame(processTuning);
+        }
+        
+        // Algoritmo para detectar la frecuencia fundamental
+        function autoCorrelate(buf, sampleRate) {
+            let SIZE = buf.length;
+            let rms = 0;
+            for (let i=0; i<SIZE; i++) rms += buf[i]*buf[i];
+            rms = Math.sqrt(rms/SIZE);
+            if (rms < 0.01) return -1; // Ruido de fondo
+        
+            let r1=0, r2=SIZE-1, thres=0.2;
+            for (let i=0; i<SIZE/2; i++) if (Math.abs(buf[i])<thres) { r1=i; break; }
+            for (let i=1; i<SIZE/2; i++) if (Math.abs(buf[SIZE-i])<thres) { r2=SIZE-i; break; }
+            buf = buf.slice(r1,r2);
+            SIZE = buf.length;
+        
+            let c = new Array(SIZE).fill(0);
+            for (let i=0; i<SIZE; i++) for (let j=0; j<SIZE-i; j++) c[i] = c[i] + buf[j]*buf[j+i];
+        
+            let d=0; while (c[d]>c[d+1]) d++;
+            let maxval=-1, maxpos=-1;
+            for (let i=d; i<SIZE; i++) {
+                if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
+            }
+            return sampleRate/maxpos;
+        }
+        
+        function getNoteFromFrequency(f) {
+            const noteNum = 12 * (Math.log(f / 440) / Math.log(2));
+            const roundedNote = Math.round(noteNum) + 69;
+            const cents = Math.floor((noteNum - Math.round(noteNum)) * 100);
+            return {
+                name: notes[(roundedNote) % 12],
+                cents: cents
+            };
+        }
 
         // --- AUDIO ENGINE ---
         function playChord(fretStr) {
