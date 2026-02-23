@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>PUMUCHORDS v4.0</title>
+    <title>PUMUCHORDS v4.0 Elite</title>
     <style>
         :root {
             --bg-color: #2c3e50; --fretboard-wood: #3d2b1f; --string-color: #bdc3c7;
@@ -14,11 +14,16 @@
         .control-group { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
         label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px; }
 
-        /* PIANO STYLES */
+        /* PIANO STYLES RECORREGIDOS */
         .piano-container { display: inline-flex; background: #111; padding: 10px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
         .piano-key { width: 32px; height: 110px; background: white; border: 1px solid #ccc; border-radius: 0 0 4px 4px; position: relative; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; color: #333; font-size: 9px; font-weight: bold; box-sizing: border-box; cursor: pointer; }
         .piano-key.black { width: 22px; height: 70px; background: #222; margin-left: -11px; margin-right: -11px; z-index: 2; border: 1px solid #000; color: white; }
-        .piano-key.active { background: #d1d8e0; box-shadow: inset 0 -4px 0 #95a5a6; }
+        
+        /* Estado 1: Notas de la escala (Gris suave) */
+        .piano-key.active { background: #d1d8e0 !important; box-shadow: inset 0 -4px 0 #95a5a6; }
+        .piano-key.black.active { background: #444 !important; border-color: #555; }
+
+        /* Estado 2: Notas del ACORDE (Resaltado amarillo) */
         .piano-key.chord-highlight { 
             background: var(--note-root) !important; 
             color: black !important; 
@@ -74,7 +79,7 @@
 <body>
 
     <div id="overlay"></div>
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v4.0</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v4.0 Elite</span></h2>
 
     <div class="controls">
         <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
@@ -154,7 +159,7 @@
         function playSingleNote(index) {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const now = audioCtx.currentTime;
-            const freq = 261.63 * Math.pow(2, index / 12); // C4 como base
+            const freq = 261.63 * Math.pow(2, index / 12); 
             const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
             osc.type = 'sine'; osc.frequency.setValueAtTime(freq, now);
             gain.gain.setValueAtTime(0.2, now);
@@ -244,12 +249,20 @@
                 }
             });
 
-            // Piano (Recuperado y Actualizado)
+            // PIANO - Lógica de estados recuperada
             document.querySelectorAll('.piano-key').forEach(el => {
                 const n = parseInt(el.dataset.note); 
                 el.classList.remove('active', 'chord-highlight');
-                if (scaleNotes.includes(n)) el.classList.add('active');
-                if (selectedChordIdx !== null && chordNotes.includes(n)) el.classList.add('chord-highlight');
+                
+                // 1. Marcar si está en la escala
+                if (scaleNotes.includes(n)) {
+                    el.classList.add('active');
+                }
+                
+                // 2. Marcar si está en el acorde (sobreescribe visualmente si es seleccionado)
+                if (selectedChordIdx !== null && chordNotes.includes(n)) {
+                    el.classList.add('chord-highlight');
+                }
             });
 
             // Lista de Acordes
