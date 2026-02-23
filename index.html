@@ -68,13 +68,12 @@
         
         /* Icono de favorito en la card */
         .fav-btn {
-            position: absolute; top: 5px; right: 5px;
+            position: absolute; top: 2px; right: 5px;
             background: none; border: none; color: #555;
-            font-size: 18px; cursor: pointer; transition: 0.2s;
-            padding: 0; line-height: 1;
+            font-size: 14px; cursor: pointer; z-index: 10;
         }
         .fav-btn.active { color: #e74c3c; }
-        .chord-card { position: relative; } /* Para posicionar el corazón */
+        .chord-card { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70px; }/* Para posicionar el corazón */
         
         /* Panel de Progresión Aleatoria */
         #randomPanel {
@@ -232,19 +231,7 @@
                 b.appendChild(sDiv);
             });
         }
-        /*function createFretboard() {
-            const b = document.getElementById('fretboard'); b.innerHTML = "";
-            currentTuning.forEach((start, sIdx) => {
-                const sDiv = document.createElement('div'); sDiv.className = 'string';
-                for (let f = 0; f <= 17; f++) {
-                    const fDiv = document.createElement('div'); fDiv.className = 'fret';
-                    fDiv.innerHTML = `<div class="note" data-note="${(start + f) % 12}"></div>`;
-                    sDiv.appendChild(fDiv);
-                }
-                b.appendChild(sDiv);
-            });
-        }*/
-
+        
         function update() {
             const root = parseInt(document.getElementById('rootSelect').value);
             const sData = scales[document.getElementById('scaleSelect').value];
@@ -267,19 +254,26 @@
                 infoPanel.innerHTML = `<div style="margin-bottom:10px;">Notas de <b>${dispTet}</b>: ${chordNotes.map(n => notes[n]).join(' - ')}</div>`;
                 let html = '<div style="display:flex; justify-content:center; gap:15px; margin-top:15px; flex-wrap:wrap;">';
 
-                const addDiagrams = (type, label) => {
+                const addDiagrams = (type, label, color = "--accent") => {
                     if (libreriaManual && libreriaManual[type] && libreriaManual[type][noteName]) {
                         libreriaManual[type][noteName].forEach(pos => {
-                            html += `<div class="svg-card" onclick="zoomAndPlay(this, '${pos}')">
-                                        <div class="svg-label">${label}</div>
-                                        ${drawSVG(pos.split('-'))}
-                                     </div>`;
+                            html += `<div class="svg-card" onclick="zoomAndPlay(this, '${pos}')" style="border-top-color: var(${color});">
+                                <div class="svg-label">${label}</div>
+                                ${drawSVG(pos.split('-'))}
+                             </div>`;
                         });
                     }
                 };
-                addDiagrams(jsonTet, dispTet);
-                if (jsonTri !== jsonTet) addDiagrams(jsonTri, dispTri);
-                infoPanel.innerHTML += html + '</div>';
+                // --- AQUÍ CAMBIAMOS EL ORDEN ---
+                // 1. Añadimos primero las TRÍADAS (con un color más suave si quieres)
+                if (jsonTri !== jsonTet) {
+                    addDiagrams(jsonTri, dispTri, "--string-color"); 
+                }
+                
+                // 2. Añadimos después las SÉPTIMAS (con el color acento principal)
+                addDiagrams(jsonTet, dispTet, "--accent");
+                
+                infoPanel.innerHTML += html + '</div>'
             }
 
             // Actualizar Mástil y Piano
@@ -302,7 +296,6 @@
             });
 
             // Tarjetas de Acordes
-            // ... dentro de la función update(), busca la parte de las tarjetas:
             const cList = document.getElementById('chordsList'); 
             cList.innerHTML = "";
             
@@ -320,7 +313,7 @@
                 sData.steps.forEach((step, i) => {
                     const cRoot = (root + step) % 12;
                     const chordId = `${notes[cRoot]}-${sData.tetrads[i] || 'M'}`;
-                    crearCard(cList, chordId, i);
+                    crearCard(cList, chordId, i,sData);
                 });
             }
             
@@ -329,13 +322,18 @@
                 const [nota, tipo] = chordId.split('-');
                 const isActive = favoritos.includes(chordId);
                 
+                // Si tenemos sData, buscamos la tríada correspondiente para mostrarla también
+                let tipoTriad = (index !== null && sData) ? sData.triads[index] : "";
+              
                 const card = document.createElement('div');
                 card.className = `chord-card ${selectedChordIdx === index ? 'selected' : ''}`;
+                card.style.paddingTop = "20px"; // Espacio extra para el corazón
                 card.innerHTML = `
                     <button class="fav-btn ${isActive ? 'active' : ''}" onclick="toggleFavorito(event, '${chordId}')">
                         ${isActive ? '❤️' : '🤍'}
                     </button>
                     <div class="chord-triad">${nota}${tipo}</div>
+                    <div class="chord-tetrad" style="font-size:0.75rem; opacity:0.6;">${nota}${tipoTetrad}</div>
                 `;
                 
                 card.onclick = () => {
@@ -344,30 +342,13 @@
                         update();
                     }
                     // Sonar acorde
-                    let jsonT = tipo === "Maj7" ? "M7" : (tipo === "" ? "M" : tipo);
+                    let jsonT = tipoTetrad === "Maj7" ? "M7" : (tipoTetrad === "" ? "M" : tipoTetrad);
                     if (libreriaManual && libreriaManual[jsonT] && libreriaManual[jsonT][nota]) {
                         playChord(libreriaManual[jsonT][nota][0]);
                     }
                 };
                 container.appendChild(card);
             }
-            /*const cList = document.getElementById('chordsList'); cList.innerHTML = "";
-            sData.steps.forEach((step, i) => {
-                const cRoot = (root + step) % 12;
-                const card = document.createElement('div');
-                card.className = `chord-card ${selectedChordIdx === i ? 'selected' : ''}`;
-                card.innerHTML = `<div class="chord-triad">${notes[cRoot]}${sData.triads[i]}</div><div class="chord-tetrad">${notes[cRoot]}${sData.tetrads[i]}</div>`;
-                card.onclick = () => { 
-                    selectedChordIdx = (selectedChordIdx === i) ? null : i; 
-                    update(); 
-                    // Al seleccionar la tarjeta, suena la primera posición del acorde de 7
-                    let jsonT = sData.tetrads[i] === "Maj7" ? "M7" : (sData.tetrads[i] === "" ? "M" : sData.tetrads[i]);
-                    if (libreriaManual && libreriaManual[jsonT] && libreriaManual[jsonT][notes[cRoot]]) {
-                        playChord(libreriaManual[jsonT][notes[cRoot]][0]);
-                    }
-                };
-                cList.appendChild(card);
-            });*/
         }
 
         window.zoomAndPlay = (el, pos) => {
