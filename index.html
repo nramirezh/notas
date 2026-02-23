@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>PUMUCHORDS v4.0 Elite</title>
+    <title>PUMUCHORDS v4.0</title>
     <style>
         :root {
             --bg-color: #2c3e50; --fretboard-wood: #3d2b1f; --string-color: #bdc3c7;
@@ -14,25 +14,19 @@
         .control-group { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
         label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px; }
 
+        /* PIANO STYLES */
         .piano-container { display: inline-flex; background: #111; padding: 10px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
-        .piano-key { width: 32px; height: 110px; background: white; border: 1px solid #ccc; border-radius: 0 0 4px 4px; position: relative; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; color: #333; font-size: 9px; font-weight: bold; box-sizing: border-box; }
+        .piano-key { width: 32px; height: 110px; background: white; border: 1px solid #ccc; border-radius: 0 0 4px 4px; position: relative; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; color: #333; font-size: 9px; font-weight: bold; box-sizing: border-box; cursor: pointer; }
         .piano-key.black { width: 22px; height: 70px; background: #222; margin-left: -11px; margin-right: -11px; z-index: 2; border: 1px solid #000; color: white; }
-        /*.piano-key.active { background: #d1d8e0; box-shadow: inset 0 -4px 0 var(--accent); }*/
-        .piano-key.highlight { background: var(--note-root) !important; color: black; }
-        /* Color para las notas de la escala (Activas) */
         .piano-key.active { background: #d1d8e0; box-shadow: inset 0 -4px 0 #95a5a6; }
-        
-        /* Color para las notas del ACORDE seleccionado (Recuperado) */
         .piano-key.chord-highlight { 
             background: var(--note-root) !important; 
             color: black !important; 
             box-shadow: inset 0 -6px 0 rgba(0,0,0,0.2);
-            z-index: 3; /* Para que resalte */
+            z-index: 3;
         }
 
         .chords-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 25px; }
-        
-        /* Card Corregida */
         .chord-card { 
             background: #1a1a1a; border-radius: 8px; padding: 20px 12px 12px 12px; 
             min-width: 105px; cursor: pointer; border: 2px solid transparent; 
@@ -60,9 +54,9 @@
         .note.root { background: var(--note-root); }
 
         .info-panel { background: #1a1a1a; padding: 20px; border-radius: 12px; display: inline-block; border: 1px solid #444; min-width: 85%; margin-top: 20px; }
-        .svg-card { background: #fff; padding: 10px; border-radius: 5px; cursor: zoom-in; transition: transform 0.3s; border-top: 4px solid var(--accent); }
+        .svg-card { background: #fff; padding: 10px; border-radius: 5px; cursor: zoom-in; transition: transform 0.3s; border-top: 4px solid var(--accent); color: #333; }
         .svg-card.expanded { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(2.5); z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.8); cursor: zoom-out; }
-        .svg-label { color: #333; font-size: 10px; font-weight: 800; margin-bottom: 5px; border-bottom: 1px solid #eee; }
+        .svg-label { font-size: 10px; font-weight: 800; margin-bottom: 5px; border-bottom: 1px solid #eee; }
         
         #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 999; backdrop-filter: blur(4px); }
 
@@ -80,7 +74,7 @@
 <body>
 
     <div id="overlay"></div>
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v4.0 Elite</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v4.0</span></h2>
 
     <div class="controls">
         <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
@@ -120,15 +114,6 @@
         let currentTuning = tuningPresets.standard;
         let showIntervals = false;
 
-        /*const scales = {
-            "Mayor (Jónico)": { steps: [0, 2, 4, 5, 7, 9, 11], triads: ["", "m", "m", "", "", "m", "dim"], tetrads: ["Maj7", "m7", "m7", "Maj7", "7", "m7", "m7b5"], chordNotes: [[0,4,7,11], [0,3,7,10], [0,3,7,10], [0,4,7,11], [0,4,7,10], [0,3,7,10], [0,3,6,10]] },
-            "Dórico": { steps: [0, 2, 3, 5, 7, 9, 10], triads: ["m", "m", "", "", "m", "dim", ""], tetrads: ["m7", "m7", "Maj7", "7", "m7", "m7b5", "Maj7"], chordNotes: [[0,3,7,10], [0,3,7,10], [0,4,7,11], [0,4,7,10], [0,3,7,10], [0,3,6,10], [0,4,7,11]] },
-            "Frigio": { steps: [0, 1, 3, 5, 7, 8, 10], triads: ["m", "", "", "m", "dim", "", "m"], tetrads: ["m7", "Maj7", "7", "m7", "m7b5", "Maj7", "m7"], chordNotes: [[0,3,7,10], [0,4,7,11], [0,4,7,10], [0,3,7,10], [0,3,6,10], [0,4,7,11], [0,3,7,10]] },
-            "Lidio": { steps: [0, 2, 4, 6, 7, 9, 11], triads: ["", "", "m", "dim", "", "m", "m"], tetrads: ["Maj7", "7", "m7", "m7b5", "Maj7", "m7", "m7"], chordNotes: [[0,4,7,11], [0,4,7,10], [0,3,7,10], [0,3,6,10], [0,4,7,11], [0,3,7,10], [0,3,7,10]] },
-            "Mixolidio": { steps: [0, 2, 4, 5, 7, 9, 10], triads: ["", "m", "dim", "", "m", "m", ""], tetrads: ["7", "m7", "m7b5", "Maj7", "m7", "m7", "Maj7"], chordNotes: [[0,4,7,10], [0,3,7,10], [0,3,6,10], [0,4,7,11], [0,3,7,10], [0,3,7,10], [0,4,7,11]] },
-            "Eólico (Menor)": { steps: [0, 2, 3, 5, 7, 8, 10], triads: ["m", "dim", "", "m", "m", "", ""], tetrads: ["m7", "m7b5", "Maj7", "m7", "m7", "Maj7", "7"], chordNotes: [[0,3,7,10], [0,3,6,10], [0,4,7,11], [0,3,7,10], [0,3,7,10], [0,4,7,11], [0,4,7,10]] },
-            "Locrio": { steps: [0, 1, 3, 5, 6, 8, 10], triads: ["dim", "", "m", "m", "", "", "m"], tetrads: ["m7b5", "Maj7", "m7", "m7", "Maj7", "7", "m7"], chordNotes: [[0,3,6,10], [0,4,7,11], [0,3,7,10], [0,3,7,10], [0,4,7,11], [0,4,7,10], [0,3,7,10]] }
-        };*/
         const scales = {
             "Mayor (Jónico)": { steps: [0, 2, 4, 5, 7, 9, 11], triads: ["", "m", "m", "", "", "m", "dim"], tetrads: ["Maj7", "m7", "m7", "Maj7", "7", "m7", "m7b5"], chordNotes: [[0,4,7,11], [0,3,7,10], [0,3,7,10], [0,4,7,11], [0,4,7,10], [0,3,7,10], [0,3,6,10]] },
             "Dórico": { steps: [0, 2, 3, 5, 7, 9, 10], triads: ["m", "m", "", "", "m", "dim", ""], tetrads: ["m7", "m7", "Maj7", "7", "m7", "m7b5", "Maj7"], chordNotes: [[0,3,7,10], [0,3,7,10], [0,4,7,11], [0,4,7,10], [0,3,7,10], [0,3,6,10], [0,4,7,11]] },
@@ -166,6 +151,18 @@
             });
         }
 
+        function playSingleNote(index) {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const now = audioCtx.currentTime;
+            const freq = 261.63 * Math.pow(2, index / 12); // C4 como base
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(freq, now);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(now + 0.6);
+        }
+
         function init() {
             const rootSel = document.getElementById('rootSelect'), scaleSel = document.getElementById('scaleSelect');
             notes.forEach((n, i) => rootSel.innerHTML += `<option value="${i}">${n}</option>`);
@@ -181,7 +178,9 @@
             const p = document.getElementById('piano'); p.innerHTML = "";
             for (let i = 0; i < 24; i++) {
                 const k = document.createElement('div'); k.className = `piano-key ${pianoLayout[i%12] ? 'black' : ''}`;
-                k.dataset.note = i % 12; k.innerText = notes[i%12]; p.appendChild(k);
+                k.dataset.note = i % 12; k.innerText = notes[i%12]; 
+                k.onclick = () => playSingleNote(i);
+                p.appendChild(k);
             }
         }
 
@@ -229,13 +228,12 @@
                     }
                 };
 
-                // ORDEN: Tríadas primero, Séptimas después
                 if (jsonTri !== jsonTet) addDiagrams(jsonTri, noteName + triad, "#bdc3c7");
                 addDiagrams(jsonTet, noteName + tetrad, "#e67e22");
                 infoPanel.innerHTML += html + '</div>';
             }
 
-            // Mástil y Piano
+            // Mástil
             document.querySelectorAll('.note').forEach(el => {
                 const n = parseInt(el.dataset.note); el.classList.remove('active', 'root', 'chord-highlight', 'dimmed');
                 if (scaleNotes.includes(n)) {
@@ -246,18 +244,12 @@
                 }
             });
 
-            /*document.querySelectorAll('.piano-key').forEach(el => {
-                const n = parseInt(el.dataset.note); el.classList.remove('active', 'highlight');
-                if (scaleNotes.includes(n)) el.classList.add('active');
-                if (selectedChordIdx !== null && chordNotes.includes(n)) el.classList.add('highlight');
-            });*/
+            // Piano (Recuperado y Actualizado)
             document.querySelectorAll('.piano-key').forEach(el => {
-                const n = parseInt(el.dataset.note); el.classList.remove('active', 'chord-highlight');
-                if (scaleNotes.includes(n)) {el.classList.add('active');
-                }
-                // 2. Iluminamos si la nota pertenece al ACORDE SELECCIONADO
-                if (selectedChordIdx !== null && chordNotes.includes(n)) { el.classList.add('chord-highlight');
-                }
+                const n = parseInt(el.dataset.note); 
+                el.classList.remove('active', 'chord-highlight');
+                if (scaleNotes.includes(n)) el.classList.add('active');
+                if (selectedChordIdx !== null && chordNotes.includes(n)) el.classList.add('chord-highlight');
             });
 
             // Lista de Acordes
@@ -275,7 +267,9 @@
         }
 
         function crearCard(container, chordId, index = null, sData = null) {
-            const [nota, tipoTetrad] = chordId.split('-');
+            const parts = chordId.split('-');
+            const nota = parts[0];
+            const tipoTetrad = parts[1] || "";
             const isActive = favoritos.includes(chordId);
             let tipoTriad = (index !== null && sData) ? sData.triads[index] : "";
             const card = document.createElement('div');
@@ -310,50 +304,35 @@
 
         function generarProgresionAleatoria() {
             modoFavoritos = false;
-            
-            // 1. Elegir Tónica y Escala al azar
             const randomRoot = Math.floor(Math.random() * 12);
             const scaleKeys = Object.keys(scales);
             const randomScaleKey = scaleKeys[Math.floor(Math.random() * scaleKeys.length)];
             
-            // Aplicar a los selectores
             document.getElementById('rootSelect').value = randomRoot;
             document.getElementById('scaleSelect').value = randomScaleKey;
             
-            // 2. Generar progresión lógica (I - ? - ? - ?)
             const sData = scales[randomScaleKey];
             const numGrados = sData.steps.length;
-            
-            let progresion = [0]; // Empezamos siempre en el grado I (Tónica)
-            
+            let progresion = [0]; 
             while(progresion.length < 4) {
                 let nuevoGrado = Math.floor(Math.random() * numGrados);
-                // Regla: Que no sea igual al último acorde añadido (evita repeticiones)
-                if (nuevoGrado !== progresion[progresion.length - 1]) {
-                    progresion.push(nuevoGrado);
-                }
+                if (nuevoGrado !== progresion[progresion.length - 1]) progresion.push(nuevoGrado);
             }
             
-            update(); // Actualizamos la interfaz
+            selectedChordIdx = null; 
+            update();
             
-            // 3. Mostrar nombres claros
             const nombresAcordes = progresion.map(grado => {
                 const nIdx = (randomRoot + sData.steps[grado]) % 12;
                 const triada = sData.triads[grado];
-                return `<span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:4px; margin:0 4px;">
-                            ${notes[nIdx]}${triada}
-                        </span>`;
+                return `<span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:4px; margin:0 4px;">${notes[nIdx]}${triada}</span>`;
             });
             
             const panel = document.getElementById('randomPanel');
             panel.style.display = "block";
             panel.innerHTML = `
-                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 8px;">
-                    🎲 Nueva idea en <b>${notes[randomRoot]} ${randomScaleKey}</b>:
-                </div>
-                <div style="font-size: 1.2rem;">
-                    ${nombresAcordes.join(' <span style="opacity:0.5">→</span> ')}
-                </div>
+                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 8px;">🎲 Idea en <b>${notes[randomRoot]} ${randomScaleKey}</b>:</div>
+                <div style="font-size: 1.2rem;">${nombresAcordes.join(' → ')}</div>
             `;
         }
 
