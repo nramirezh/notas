@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>PUMUCHORDS v4.2 Pro - Metrónomo & Jam</title>
+    <title>PUMUCHORDS v4.3 - Definitive Edition</title>
     <style>
         :root {
             --bg-color: #2c3e50; --fretboard-wood: #3d2b1f; --string-color: #bdc3c7;
@@ -10,16 +10,14 @@
         }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: white; padding: 20px; margin: 0; text-align: center; }
         
-        /* CONTROLES */
         .controls { background: #34495e; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); align-items: flex-end; }
         .control-group { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
         label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px; }
 
         /* METRÓNOMO */
         .metronome-box { background: #1a1a1a; padding: 10px 20px; border-radius: 50px; display: inline-flex; align-items: center; gap: 15px; margin-bottom: 20px; border: 2px solid #444; }
-        .beat-dot { width: 12px; height: 12px; background: #333; border-radius: 50%; transition: 0.1s; }
+        .beat-dot { width: 12px; height: 12px; background: #333; border-radius: 50%; }
         .beat-dot.active { background: var(--accent); transform: scale(1.3); box-shadow: 0 0 10px var(--accent); }
-        #bpmDisplay { font-weight: bold; color: var(--accent); min-width: 35px; }
 
         /* PIANO PRINCIPAL */
         .piano-container { display: inline-flex; background: #111; padding: 10px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
@@ -36,11 +34,11 @@
 
         /* ACORDES */
         .chords-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 25px; }
-        .chord-card { background: #1a1a1a; border-radius: 8px; padding: 12px; min-width: 105px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; position: relative; }
+        .chord-card { background: #1a1a1a; border-radius: 8px; padding: 12px; min-width: 105px; cursor: pointer; border: 2px solid transparent; position: relative; }
         .chord-card.selected { border-color: var(--note-root); background: #2c3e50; }
         .chord-triad { font-size: 1rem; font-weight: bold; }
-        .chord-tetrad { font-size: 0.8rem; color: var(--note-root); opacity: 0.7; margin-bottom: 4px; }
-        .fav-btn { position: absolute; top: 4px; right: 4px; background: none; border: none; font-size: 12px; cursor: pointer; color: #444; }
+        .chord-tetrad { font-size: 0.8rem; color: var(--note-root); opacity: 0.7; }
+        .fav-btn { position: absolute; top: 4px; right: 4px; background: none; border: none; font-size: 14px; cursor: pointer; color: #444; }
         .fav-btn.active { color: #e74c3c; }
 
         /* MÁSTIL */
@@ -50,62 +48,50 @@
         .fret { width: 55px; border-right: 2px solid var(--fret-color); display: flex; justify-content: center; align-items: center; position: relative; }
         .fret:first-child { background: #111; border-right: 5px solid #444; width: 45px; }
         .fret.inlay-dot::after { content: "●"; position: absolute; bottom: -35px; color: #aaa; font-size: 14px; }
-        .fret.inlay-dot-double::after { content: "● ●"; position: absolute; bottom: -35px; color: #aaa; font-size: 14px; letter-spacing: 2px; }
         
         .note { width: 26px; height: 26px; border-radius: 50%; background: var(--note-default); color: #000; font-size: 10px; font-weight: bold; display: none; justify-content: center; align-items: center; z-index: 2; }
         .note.active { display: flex; }
         .note.chord-highlight { transform: scale(1.2); box-shadow: 0 0 10px var(--note-root); border: 2px solid #000; }
-        .note.dimmed { opacity: 0.2; transform: scale(0.85); }
+        .note.dimmed { opacity: 0.2; }
         .note.root { background: var(--note-root); }
 
+        /* PANEL INFO / DICCIONARIO */
         .info-panel { background: #1a1a1a; padding: 20px; border-radius: 12px; display: inline-block; border: 1px solid #444; min-width: 85%; margin-top: 20px; }
-        .svg-card { background: #fff; padding: 10px; border-radius: 5px; cursor: pointer; border-top: 4px solid var(--accent); color: #333; }
-        .svg-card.expanded { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(2.5); z-index: 1000; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        .svg-card { background: #fff; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); margin: 5px; }
+        .svg-label { color: #333; font-size: 9px; font-weight: bold; border-bottom: 1px solid #eee; margin-bottom: 5px; }
         
-        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 999; backdrop-filter: blur(4px); }
-        button, select { padding: 10px 15px; cursor: pointer; background: var(--accent); border: none; color: white; border-radius: 5px; font-weight: bold; }
+        button { padding: 10px 15px; cursor: pointer; background: var(--accent); border: none; color: white; border-radius: 5px; font-weight: bold; }
         .btn-random { background: #8e44ad !important; }
         .btn-favs { background: #c0392b !important; }
-        #randomPanel { background: #16a085; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: none; }
     </style>
 </head>
 <body>
 
-    <div id="overlay"></div>
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v4.2 Pro</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v4.3 Definitive</span></h2>
 
     <div class="controls">
         <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
         <div class="control-group"><label>Escala</label><select id="scaleSelect"></select></div>
-        <div class="control-group">
-            <label>Afinación</label>
+        <div class="control-group"><label>Afinación</label>
             <select id="tuningSelect">
-                <option value="standard">Standard (EADGBe)</option>
+                <option value="standard">Standard</option>
                 <option value="dropD">Drop D</option>
-                <option value="eb">Eb (-1/2)</option>
-                <option value="d">D (-1)</option>
             </select>
         </div>
         <button id="toggleBtn">Intervalos: OFF</button>
-        <button class="btn-random" onclick="generarProgresionAleatoria()">🎲 Jam</button>
-        <button class="btn-favs" onclick="toggleModoFavoritos()">❤️ Favs</button>
+        <button class="btn-random" onclick="generarJam()">🎲 Jam</button>
+        <button class="btn-favs" id="favModeBtn" onclick="toggleModoFavoritos()">❤️ Favs: OFF</button>
     </div>
 
     <div class="metronome-box">
-        <button onclick="toggleMetronome()" id="metroBtn">▶</button>
-        <div class="control-group" style="align-items: center;">
-            <input type="range" id="bpmSlider" min="40" max="220" value="80" oninput="updateBPM(this.value)">
-            <span id="bpmDisplay">80</span> <label>BPM</label>
-        </div>
-        <div style="display: flex; gap: 5px;">
-            <div class="beat-dot" id="dot0"></div>
-            <div class="beat-dot" id="dot1"></div>
-            <div class="beat-dot" id="dot2"></div>
-            <div class="beat-dot" id="dot3"></div>
+        <button onclick="toggleMetro()">▶</button>
+        <input type="range" id="bpmSlider" min="40" max="200" value="80" oninput="document.getElementById('bpmVal').innerText=this.value; bpm=this.value;">
+        <span id="bpmVal">80</span> BPM
+        <div style="display: flex; gap: 5px; margin-left: 10px;">
+            <div class="beat-dot" id="dot0"></div><div class="beat-dot" id="dot1"></div><div class="beat-dot" id="dot2"></div><div class="beat-dot" id="dot3"></div>
         </div>
     </div>
 
-    <div id="randomPanel"></div>
     <div id="piano" class="piano-container"></div>
     <div id="chordsList" class="chords-container"></div>
     <div class="overflow-container"><div id="fretboard" class="fretboard"></div></div>
@@ -113,13 +99,12 @@
 
     <script>
         const notes = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
+        const intervals = ['1', 'b2', '2', 'b3', '3', '4', 'b5', '5', 'b6', '6', 'b7', '7'];
         const pianoLayout = [0,1,0,1,0,0,1,0,1,0,1,0];
-        let libreriaManual = null, audioCtx = null, modoFavoritos = false, selectedChordIdx = null;
-        let favoritos = JSON.parse(localStorage.getItem('pumuchords_favs')) || [];
-        let currentTuning = [4, 11, 7, 2, 9, 4], showIntervals = false;
-
-        // Metrónomo variables
-        let metroInterval = null, bpm = 80, currentBeat = 0, isMetroPlaying = false;
+        let libreriaManual = null, selectedChordIdx = null, showIntervals = false, modoFavoritos = false;
+        let favoritos = JSON.parse(localStorage.getItem('p_favs')) || [];
+        let tuning = [4, 11, 7, 2, 9, 4];
+        let audioCtx, metroInt, bpm = 80, currentBeat = 0;
 
         const scales = {
             "Mayor (Jónico)": { steps: [0, 2, 4, 5, 7, 9, 11], triads: ["", "m", "m", "", "", "m", "dim"], tetrads: ["Maj7", "m7", "m7", "Maj7", "7", "m7", "m7b5"], chordNotes: [[0,4,7,11], [0,3,7,10], [0,3,7,10], [0,4,7,11], [0,4,7,10], [0,3,7,10], [0,3,6,10]] },
@@ -135,212 +120,184 @@
             "Pentatónica Menor": { steps: [0, 3, 5, 7, 10], triads: ["m", "", "sus4", "m", ""], tetrads: ["m7", "7sus4", "7sus4", "m7", "7"], chordNotes: [[0,3,7], [0,5,7], [0,5,7], [0,3,7], [0,4,7]] }
         };
 
-        async function cargarDatosYArrancar() {
-            try { const res = await fetch('Acordes2.json'); if (res.ok) libreriaManual = await res.json(); } catch (e) {}
-            init();
-        }
-
-        function init() {
-            const rootSel = document.getElementById('rootSelect'), scaleSel = document.getElementById('scaleSelect');
-            notes.forEach((n, i) => rootSel.innerHTML += `<option value="${i}">${n}</option>`);
-            Object.keys(scales).forEach(s => scaleSel.innerHTML += `<option value="${s}">${s}</option>`);
-            createPiano(); createFretboard(); update();
+        async function init() {
+            try { const res = await fetch('Acordes2.json'); if(res.ok) libreriaManual = await res.json(); } catch(e){}
             
-            rootSel.onchange = scaleSel.onchange = () => { selectedChordIdx = null; update(); };
-            document.getElementById('overlay').onclick = () => { document.querySelectorAll('.svg-card').forEach(c => c.classList.remove('expanded')); document.getElementById('overlay').style.display = 'none'; };
+            const rs = document.getElementById('rootSelect'), ss = document.getElementById('scaleSelect');
+            notes.forEach((n, i) => rs.innerHTML += `<option value="${i}">${n}</option>`);
+            Object.keys(scales).forEach(s => ss.innerHTML += `<option value="${s}">${s}</option>`);
+
+            rs.onchange = ss.onchange = () => { selectedChordIdx = null; update(); };
+            document.getElementById('toggleBtn').onclick = (e) => { 
+                showIntervals = !showIntervals; 
+                e.target.innerText = `Intervalos: ${showIntervals ? 'ON' : 'OFF'}`;
+                update(); 
+            };
+
+            createPiano(); createFretboard(); update();
         }
 
         function createPiano() {
             const p = document.getElementById('piano'); p.innerHTML = "";
             for (let i = 0; i < 24; i++) {
-                const k = document.createElement('div'); k.className = `piano-key ${pianoLayout[i%12] ? 'black' : ''}`;
-                k.dataset.note = i % 12; k.innerText = notes[i%12]; 
-                k.onclick = () => playSingleNote(i);
+                const k = document.createElement('div');
+                k.className = `piano-key ${pianoLayout[i%12] ? 'black' : ''}`;
+                k.dataset.note = i % 12; k.innerText = notes[i%12];
+                k.onclick = () => playNote(i);
                 p.appendChild(k);
             }
         }
 
         function createFretboard() {
-            const b = document.getElementById('fretboard'); b.innerHTML = "";
-            currentTuning.forEach((start, sIdx) => {
-                const sDiv = document.createElement('div'); sDiv.className = 'string';
-                for (let f = 0; f <= 17; f++) {
-                    const fDiv = document.createElement('div'); fDiv.className = 'fret';
-                    fDiv.innerHTML = `<div class="note" data-note="${(start + f) % 12}"></div>`;
-                    sDiv.appendChild(fDiv);
+            const f = document.getElementById('fretboard'); f.innerHTML = "";
+            tuning.forEach((start) => {
+                const s = document.createElement('div'); s.className = 'string';
+                for (let i = 0; i <= 17; i++) {
+                    const fr = document.createElement('div'); fr.className = 'fret';
+                    fr.innerHTML = `<div class="note" data-note="${(start + i) % 12}"></div>`;
+                    s.appendChild(fr);
                 }
-                b.appendChild(sDiv);
+                f.appendChild(s);
             });
         }
 
         function update() {
             const root = parseInt(document.getElementById('rootSelect').value);
-            const scaleName = document.getElementById('scaleSelect').value;
-            const sData = scales[scaleName];
+            const sName = document.getElementById('scaleSelect').value;
+            const sData = scales[sName];
             const scaleNotes = sData.steps.map(v => (root + v) % 12);
             let chordNotes = [];
 
-            if (selectedChordIdx !== null && !modoFavoritos) {
-                const cRoot = scaleNotes[selectedChordIdx];
-                chordNotes = sData.chordNotes[selectedChordIdx].map(v => (cRoot + v) % 12);
-                renderInfoPanel(cRoot, sData);
+            if (selectedChordIdx !== null) {
+                if (modoFavoritos) {
+                    const f = favoritos[selectedChordIdx];
+                    const nIdx = notes.indexOf(f.split('-')[0]);
+                    chordNotes = [nIdx, (nIdx+4)%12, (nIdx+7)%12]; // Tríada estimada
+                    renderDiccionario(f.split('-')[0], f.split('-')[1]);
+                } else {
+                    const cRoot = scaleNotes[selectedChordIdx];
+                    chordNotes = sData.chordNotes[selectedChordIdx].map(v => (cRoot + v) % 12);
+                    renderDiccionario(notes[cRoot], sData.tetrads[selectedChordIdx], sData.triads[selectedChordIdx]);
+                }
+            } else {
+                document.getElementById('chordInfo').innerHTML = "Selecciona un acorde";
             }
 
-            // Si es modo favoritos y hay uno seleccionado
-            if (modoFavoritos && selectedChordIdx !== null) {
-                const favId = favoritos[selectedChordIdx];
-                const parts = favId.split('-');
-                const noteIdx = notes.indexOf(parts[0]);
-                // Estimamos notas (triada simple) para iluminar piano
-                chordNotes = [noteIdx, (noteIdx+4)%12, (noteIdx+7)%12]; 
-                document.getElementById('chordInfo').innerText = `Acorde Favorito: ${favId}`;
-            }
-
-            // Piano & Mástil
+            // Actualizar Piano y Guitarra
             document.querySelectorAll('.piano-key, .note').forEach(el => {
                 const n = parseInt(el.dataset.note);
-                el.classList.remove('active', 'highlight', 'chord-highlight', 'dimmed');
+                el.classList.remove('active', 'highlight', 'chord-highlight', 'dimmed', 'root');
                 
-                if (modoFavoritos && selectedChordIdx !== null) {
-                    if (chordNotes.includes(n)) el.classList.add('highlight', 'active', 'chord-highlight');
-                } else {
-                    if (scaleNotes.includes(n)) {
-                        el.classList.add('active');
-                        if (selectedChordIdx !== null) chordNotes.includes(n) ? el.classList.add('highlight', 'chord-highlight') : el.classList.add('dimmed');
+                if (scaleNotes.includes(n)) {
+                    el.classList.add('active');
+                    if (n === root) el.classList.add('root');
+                    if (selectedChordIdx !== null) {
+                        chordNotes.includes(n) ? el.classList.add('highlight', 'chord-highlight') : el.classList.add('dimmed');
+                    }
+                    if (el.classList.contains('note')) {
+                        el.innerText = showIntervals ? intervals[(n - root + 12) % 12] : notes[n];
                     }
                 }
             });
 
             // Tarjetas
-            const cList = document.getElementById('chordsList'); cList.innerHTML = "";
-            if (modoFavoritos) {
-                favoritos.forEach((favId, idx) => {
-                    const parts = favId.split('-');
-                    crearTarjeta(cList, parts[0], parts[1], idx, [notes.indexOf(parts[0])], true, favId);
-                });
-            } else {
-                sData.steps.forEach((step, i) => {
-                    const cRoot = (root + step) % 12;
-                    const triadNotes = sData.chordNotes[i].slice(0, 3).map(v => (cRoot + v) % 12);
-                    crearTarjeta(cList, notes[cRoot], sData.triads[i], i, triadNotes, false, `${notes[cRoot]}-${sData.tetrads[i]}`);
+            const list = document.getElementById('chordsList'); list.innerHTML = "";
+            const items = modoFavoritos ? favoritos : sData.steps;
+            
+            items.forEach((item, i) => {
+                let n, t, tet, fullId, triadN;
+                if (modoFavoritos) {
+                    [n, tet] = item.split('-'); t = ""; fullId = item; triadN = [notes.indexOf(n)];
+                } else {
+                    const cR = (root + item) % 12;
+                    n = notes[cR]; t = sData.triads[i]; tet = sData.tetrads[i];
+                    fullId = `${n}-${tet}`; triadN = sData.chordNotes[i].slice(0,3).map(v=>(cR+v)%12);
+                }
+
+                const card = document.createElement('div');
+                card.className = `chord-card ${selectedChordIdx === i ? 'selected' : ''}`;
+                card.innerHTML = `
+                    <button class="fav-btn ${favoritos.includes(fullId)?'active':''}" onclick="addFav(event,'${fullId}')">❤️</button>
+                    <div class="chord-triad">${n}${t}</div>
+                    <div class="chord-tetrad">${tet}</div>
+                    <div class="mini-piano">${Array.from({length:12},(_,k)=>`<div class="mini-key ${pianoLayout[k]?'black':''} ${triadN.includes(k)?'active':''}"></div>`).join('')}</div>
+                `;
+                card.onclick = () => { selectedChordIdx = i; update(); };
+                list.appendChild(card);
+            });
+        }
+
+        function renderDiccionario(nota, tet, tri = "M") {
+            const panel = document.getElementById('chordInfo');
+            let jT = tet === "Maj7" ? "M7" : (tet === "" ? "M" : tet);
+            let html = `<div>Acorde: <b>${nota} ${tet}</b></div><div style="display:flex; flex-wrap:wrap; justify-content:center; margin-top:10px;">`;
+            
+            if (libreriaManual && libreriaManual[jT] && libreriaManual[jT][nota]) {
+                libreriaManual[jT][nota].forEach(p => {
+                    html += `<div class="svg-card"><div class="svg-label">${jT}</div>${drawSVG(p.split('-'))}</div>`;
                 });
             }
+            panel.innerHTML = html + "</div>";
         }
 
-        function crearTarjeta(container, nota, tipo, index, miniNotes, isFavMode, fullId) {
-            const isSelected = selectedChordIdx === index;
-            const card = document.createElement('div');
-            card.className = `chord-card ${isSelected ? 'selected' : ''}`;
-            const isActualFav = favoritos.includes(fullId);
-            
-            card.innerHTML = `
-                <button class="fav-btn ${isActualFav ? 'active' : ''}" onclick="toggleFavorito(event, '${fullId}')">❤️</button>
-                <div class="chord-triad">${nota}${tipo}</div>
-                <div class="mini-piano">
-                    ${Array.from({length:12}, (_,k)=>`<div class="mini-key ${pianoLayout[k]?'black':''} ${miniNotes.includes(k)?'active':''}"></div>`).join('')}
-                </div>`;
-            card.onclick = () => { selectedChordIdx = isSelected ? null : index; update(); };
-            container.appendChild(card);
-        }
-
-        function toggleMetronome() {
-            if (isMetroPlaying) {
-                clearInterval(metroInterval);
-                isMetroPlaying = false;
-                document.getElementById('metroBtn').innerText = "▶";
-                document.querySelectorAll('.beat-dot').forEach(d => d.classList.remove('active'));
-            } else {
-                isMetroPlaying = true;
-                document.getElementById('metroBtn').innerText = "⏹";
-                const ms = 60000 / bpm;
-                metroInterval = setInterval(playBeat, ms);
-            }
-        }
-
-        function playBeat() {
-            if (!audioCtx) audioCtx = new AudioContext();
-            const osc = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            osc.frequency.value = currentBeat === 0 ? 880 : 440;
-            osc.connect(g); g.connect(audioCtx.destination);
-            osc.start(); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.1);
-            osc.stop(audioCtx.currentTime + 0.1);
-            
-            document.querySelectorAll('.beat-dot').forEach(d => d.classList.remove('active'));
-            document.getElementById(`dot${currentBeat}`).classList.add('active');
-            currentBeat = (currentBeat + 1) % 4;
-        }
-
-        function updateBPM(val) {
-            bpm = val;
-            document.getElementById('bpmDisplay').innerText = val;
-            if (isMetroPlaying) { toggleMetronome(); toggleMetronome(); }
-        }
-
-        function generarProgresionAleatoria() {
-            const rRoot = Math.floor(Math.random() * 12);
-            const rScaleKeys = Object.keys(scales);
-            const rScale = rScaleKeys[Math.floor(Math.random() * rScaleKeys.length)];
-            
-            document.getElementById('rootSelect').value = rRoot;
-            document.getElementById('scaleSelect').value = rScale;
-            modoFavoritos = false;
-            selectedChordIdx = null;
-            update();
-            
-            const panel = document.getElementById('randomPanel');
-            panel.style.display = "block";
-            panel.innerHTML = `🎲 Jam en <b>${notes[rRoot]} ${rScale}</b>`;
+        function drawSVG(f) {
+            const num = f.filter(v=>v!=='x').map(v=>parseInt(v));
+            const start = num.length > 0 ? Math.min(...num.filter(n=>n>0)) : 1;
+            let s = `<svg width="60" height="80" viewBox="0 0 100 120"><text x="2" y="40" font-size="12" fill="orange">${start}</text><rect x="25" y="20" width="60" height="80" fill="none" stroke="#333" stroke-width="2"/>`;
+            f.forEach((v, i) => {
+                const x = 25 + (i * 12);
+                if (v === 'x') s += `<text x="${x-3}" y="15" font-size="10" fill="red">x</text>`;
+                else if (v === '0') s += `<circle cx="${x}" cy="12" r="3" fill="none" stroke="green"/>`;
+                else { const y = 20 + (parseInt(v)-start+1)*20 - 10; s += `<circle cx="${x}" cy="${y}" r="5" fill="#444"/>`; }
+            });
+            return s + "</svg>";
         }
 
         function toggleModoFavoritos() {
             modoFavoritos = !modoFavoritos;
             selectedChordIdx = null;
-            document.querySelector('.btn-favs').innerText = modoFavoritos ? "⬅ Escalas" : "❤️ Favs";
+            document.getElementById('favModeBtn').innerText = `❤️ Favs: ${modoFavoritos ? 'ON' : 'OFF'}`;
             update();
         }
 
-        function toggleFavorito(e, id) {
+        function addFav(e, id) {
             e.stopPropagation();
-            const i = favoritos.indexOf(id);
-            if (i > -1) favoritos.splice(i, 1); else favoritos.push(id);
-            localStorage.setItem('pumuchords_favs', JSON.stringify(favoritos)); update();
+            const idx = favoritos.indexOf(id);
+            if(idx > -1) favoritos.splice(idx,1); else favoritos.push(id);
+            localStorage.setItem('p_favs', JSON.stringify(favoritos)); update();
         }
 
-        function renderInfoPanel(cRoot, sData) {
-            const info = document.getElementById('chordInfo');
-            const noteName = notes[cRoot], tetrad = sData.tetrads[selectedChordIdx];
-            let jTet = tetrad === "Maj7" ? "M7" : (tetrad === "" ? "M" : tetrad);
-            let html = `<div>Acorde <b>${noteName}${tetrad}</b></div><div style="display:flex; justify-content:center; gap:10px; margin-top:10px;">`;
-            if (libreriaManual && libreriaManual[jTet] && libreriaManual[jTet][noteName]) {
-                libreriaManual[jTet][noteName].forEach(pos => html += `<div class="svg-card" onclick="this.classList.toggle('expanded'); document.getElementById('overlay').style.display='block'">${drawSVG(pos.split('-'))}</div>`);
-            }
-            info.innerHTML = html + "</div>";
+        function generarJam() {
+            document.getElementById('rootSelect').value = Math.floor(Math.random()*12);
+            const sk = Object.keys(scales);
+            document.getElementById('scaleSelect').value = sk[Math.floor(Math.random()*sk.length)];
+            selectedChordIdx = null; modoFavoritos = false; update();
         }
 
-        function drawSVG(frets) {
-            const num = frets.filter(f => f !== 'x').map(f => parseInt(f));
-            const sF = num.length > 0 ? Math.min(...num.filter(f => f > 0)) : 1;
-            let svg = `<svg width="60" height="80" viewBox="0 0 120 130"><text x="5" y="45" font-size="16" fill="#e67e22">${sF}</text><rect x="35" y="25" width="60" height="80" fill="none" stroke="#333" stroke-width="2"/>${[45,65,85].map(y => `<line x1="35" y1="${y}" x2="95" y2="${y}" stroke="#ccc"/>`).join('')}${[35,47,59,71,83,95].map(x => `<line x1="${x}" y1="25" x2="${x}" y2="105" stroke="#333"/>`).join('')}`;
-            frets.forEach((f, i) => {
-                const x = 35 + (i * 12);
-                if (f === 'x') svg += `<text x="${x-4}" y="18" font-size="12" fill="red">×</text>`;
-                else if (f == '0') svg += `<circle cx="${x}" cy="15" r="4" fill="none" stroke="green"/>`;
-                else { const y = 25 + ((parseInt(f) - sF + 1) * 20) - 10; if (y >= 25 && y <= 105) svg += `<circle cx="${x}" cy="${y}" r="7" fill="#333"/>`; }
-            });
-            return svg + "</svg>";
+        function toggleMetro() {
+            if(metroInt) { clearInterval(metroInt); metroInt = null; }
+            else { metroInt = setInterval(tick, 60000/bpm); }
         }
 
-        function playSingleNote(i) {
-            if (!audioCtx) audioCtx = new AudioContext();
-            const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
-            osc.frequency.value = 261.63 * Math.pow(2, i/12);
-            osc.connect(g); g.connect(audioCtx.destination);
-            osc.start(); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.6);
-            osc.stop(audioCtx.currentTime + 0.6);
+        function tick() {
+            if(!audioCtx) audioCtx = new AudioContext();
+            const osc = audioCtx.createOscillator();
+            osc.frequency.value = currentBeat === 0 ? 880 : 440;
+            osc.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            document.querySelectorAll('.beat-dot').forEach((d,i)=>d.classList.toggle('active', i===currentBeat));
+            currentBeat = (currentBeat + 1) % 4;
         }
 
-        cargarDatosYArrancar();
+        function playNote(i) {
+            if(!audioCtx) audioCtx = new AudioContext();
+            const o = audioCtx.createOscillator();
+            o.frequency.value = 261.63 * Math.pow(2, i/12);
+            o.connect(audioCtx.destination);
+            o.start(); o.stop(audioCtx.currentTime + 0.3);
+        }
+
+        init();
     </script>
 </body>
 </html>
