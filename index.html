@@ -291,11 +291,52 @@
         }
 
         function generarProgresionAleatoria() {
-            const rR = Math.floor(Math.random() * 12), sK = Object.keys(scales), rS = sK[Math.floor(Math.random() * sK.length)];
-            document.getElementById('rootSelect').value = rR; document.getElementById('scaleSelect').value = rS;
-            update();
-            const panel = document.getElementById('randomPanel'); panel.style.display = "block";
-            panel.innerHTML = `🎸 <b>Jam en ${notes[rR]} ${rS}</b>`;
+            modoFavoritos = false;
+            
+            // 1. Elegir Tónica y Escala al azar
+            const randomRoot = Math.floor(Math.random() * 12);
+            const scaleKeys = Object.keys(scales);
+            const randomScaleKey = scaleKeys[Math.floor(Math.random() * scaleKeys.length)];
+            
+            // Aplicar a los selectores
+            document.getElementById('rootSelect').value = randomRoot;
+            document.getElementById('scaleSelect').value = randomScaleKey;
+            
+            // 2. Generar progresión lógica (I - ? - ? - ?)
+            const sData = scales[randomScaleKey];
+            const numGrados = sData.steps.length;
+            
+            let progresion = [0]; // Empezamos siempre en el grado I (Tónica)
+            
+            while(progresion.length < 4) {
+                let nuevoGrado = Math.floor(Math.random() * numGrados);
+                // Regla: Que no sea igual al último acorde añadido (evita repeticiones)
+                if (nuevoGrado !== progresion[progresion.length - 1]) {
+                    progresion.push(nuevoGrado);
+                }
+            }
+            
+            update(); // Actualizamos la interfaz
+            
+            // 3. Mostrar nombres claros
+            const nombresAcordes = progresion.map(grado => {
+                const nIdx = (randomRoot + sData.steps[grado]) % 12;
+                const triada = sData.triads[grado];
+                return `<span style="background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:4px; margin:0 4px;">
+                            ${notes[nIdx]}${triada}
+                        </span>`;
+            });
+            
+            const panel = document.getElementById('randomPanel');
+            panel.style.display = "block";
+            panel.innerHTML = `
+                <div style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 8px;">
+                    🎲 Nueva idea en <b>${notes[randomRoot]} ${randomScaleKey}</b>:
+                </div>
+                <div style="font-size: 1.2rem;">
+                    ${nombresAcordes.join(' <span style="opacity:0.5">→</span> ')}
+                </div>
+            `;
         }
 
         function drawSVG(frets) {
