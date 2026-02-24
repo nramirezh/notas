@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Diccionario Pro - PUMUCHORDS</title>
+    <title>Diccionario - PUMUCHORDS</title>
     <style>
         :root { --bg-color: #2c3e50; --accent: #e67e22; --card-bg: #ffffff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: white; padding: 20px; text-align: center; margin: 0; }
@@ -58,6 +58,7 @@
             }
             /* Ocultar los que NO son favoritos al imprimir */
             .chord-box:not(.is-favorite) { display: none !important; }
+            .print-footer {display: block !important; position: fixed; bottom: 0; width: 100%; text-align: center; font-size: 10px; color: #7f8c8d;}
         }
     </style>
 </head>
@@ -78,7 +79,7 @@
         </div>
         <div class="filter-group">
             <label>Acciones</label>
-            <button class="btn-print" onclick="window.print()">🖨️ Favoritos</button>
+            <button class="btn-print" onclick="window.print()">🖨️ Imprimir Favoritos</button>
         </div>
         <div style="align-self: flex-end; font-size: 11px; opacity: 0.6; padding-bottom: 10px;">
             Haz clic en ★ para guardar e imprimir
@@ -118,7 +119,7 @@
             render(); // Refrescamos para actualizar el estado de las estrellas
         }
 
-        // --- MOTOR DE AUDIO (Mismo que el tuyo) ---
+        // --- MOTOR DE AUDIO ---
         function playChord(fretStr) {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const frets = fretStr.split('-');
@@ -221,5 +222,10 @@
 
         cargarLibreria();
     </script>
+
+    <div class="print-footer" style="display: none;">
+        <hr>
+        <p>Generado con <strong>PUMUCHORDS</strong> - Diccionario de Acordes Personalizado - 2026</p>
+    </div>
 </body>
 </html>
