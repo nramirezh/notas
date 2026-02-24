@@ -141,16 +141,36 @@
     <script>
         const notes = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
         const chordTypes = {
+            // --- BÁSICOS ---
             "Mayor": [0, 4, 7],
             "Menor": [0, 3, 7],
             "Aumentado": [0, 4, 8],
             "Disminuido": [0, 3, 6],
+            
+            // --- SÉPTIMAS ---
+            "7": [0, 4, 7, 10],
             "Maj7": [0, 4, 7, 11],
             "m7": [0, 3, 7, 10],
-            "7": [0, 4, 7, 10],
             "m7b5": [0, 3, 6, 10],
+            "dim7": [0, 3, 6, 9],
+            
+            // --- NOVENAS (Extensiones) ---
+            "9": [0, 4, 7, 10, 14],      // Dominante 9
+            "Maj9": [0, 4, 7, 11, 14],   // Mayor 9
+            "m9": [0, 3, 7, 10, 14],    // Menor 9
+            "add9": [0, 4, 7, 14],      // Tríada mayor con 9ª añadida
+            
+            // --- ONCENAS Y TRECENAS ---
+            "11": [0, 4, 7, 10, 14, 17],    // Dominante 11
+            "m11": [0, 3, 7, 10, 14, 17],   // Menor 11
+            "13": [0, 4, 7, 10, 14, 17, 21], // Dominante 13 (Acorde completo de 7 notas)
+            "Maj13": [0, 4, 7, 11, 14, 17, 21],
+            
+            // --- SUSPENDIDOS Y OTROS ---
             "sus4": [0, 5, 7],
-            "dim7": [0, 3, 6, 9]
+            "7sus4": [0, 5, 7, 10],
+            "6": [0, 4, 7, 9],
+            "m6": [0, 3, 7, 9]
         };
         const pianoLayout = [0,1,0,1,0,0,1,0,1,0,1,0];
 
