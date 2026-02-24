@@ -205,35 +205,48 @@
 
         let audioCtx = null;
 
-        //MOTOR DE AUDIO
-
         function playPianoChord(activeNotes) {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             
             const now = audioCtx.currentTime;
             
             activeNotes.forEach((noteIdx, i) => {
-                // Calculamos la frecuencia (empezando desde el Do central aprox. 261.63Hz)
+                // Frecuencia base (Do central)
                 const freq = 261.63 * Math.pow(2, noteIdx / 12);
                 
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
+                // --- OSCILADOR 1: El Cuerpo (Onda Triangular) ---
+                const osc1 = audioCtx.createOscillator();
+                const gain1 = audioCtx.createGain();
+                osc1.type = 'triangle';
+                osc1.frequency.setValueAtTime(freq, now);
                 
-                // Usamos 'triangle' para un sonido más dulce tipo piano eléctrico
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(freq, now);
+                // --- OSCILADOR 2: El Armónico/Ataque (Onda Senoidal alta) ---
+                const osc2 = audioCtx.createOscillator();
+                const gain2 = audioCtx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(freq * 2, now); // Una octava arriba para dar brillo
+
+                // --- ENVOLVENTE (Efecto Piano de Cola) ---
+                // Nota: El ataque es inmediato (0.005s) y el decaimiento es largo
+                [gain1, gain2].forEach((g, idx) => {
+                    const vol = idx === 0 ? 0.4 : 0.15; // El segundo oscilador es más sutil
+                    g.gain.setValueAtTime(0, now);
+                    g.gain.linearRampToValueAtTime(vol, now + 0.005); 
+                    g.gain.exponentialRampToValueAtTime(0.0001, now + 2.5);
+                    
+                    g.connect(audioCtx.destination);
+                });
+
+                osc1.connect(gain1);
+                osc2.connect(gain2);
                 
-                // Envolvente de sonido de piano (ataque rápido, caída lenta)
-                gain.gain.setValueAtTime(0, now);
-                gain.gain.linearRampToValueAtTime(0.2, now + 0.01); // Ataque
-                gain.gain.exponentialRampToValueAtTime(0.0001, now + 2); // Decaimiento
+                // El "Strum" o rasgueo: un pequeñísimo retardo (0.015s) entre notas 
+                // para que no suene como un acorde de teclado electrónico perfecto.
+                osc1.start(now + (i * 0.015));
+                osc2.start(now + (i * 0.015));
                 
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                
-                // Un ligerísimo retraso entre notas (10ms) para naturalidad
-                osc.start(now + (i * 0.01));
-                osc.stop(now + 2);
+                osc1.stop(now + 2.5);
+                osc2.stop(now + 2.5);
             });
         }
 
