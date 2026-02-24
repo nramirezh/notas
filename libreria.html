@@ -7,7 +7,7 @@
         :root { --bg-color: #2c3e50; --accent: #e67e22; --card-bg: #ffffff; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: white; padding: 20px; text-align: center; margin: 0; }
         
-        /* Filtros */
+        /* Filtros y Controles */
         .filters { background: #34495e; padding: 20px; border-radius: 12px; margin-bottom: 30px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; position: sticky; top: 10px; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .filter-group { display: flex; flex-direction: column; align-items: flex-start; }
         label { font-size: 10px; text-transform: uppercase; opacity: 0.7; margin-bottom: 5px; }
@@ -24,6 +24,13 @@
         .chord-name { font-weight: 800; font-size: 18px; color: var(--accent); border-bottom: 2px solid #eee; margin-bottom: 10px; padding-bottom: 5px; }
         .chord-fret-str { font-family: monospace; font-size: 10px; color: #7f8c8d; margin-top: 8px; background: #eee; padding: 2px; border-radius: 3px; }
 
+        /* Favoritos */
+        .fav-star { position: absolute; top: 5px; right: 5px; font-size: 20px; color: #ccc; transition: 0.2s; }
+        .fav-star.active { color: #f1c40f; text-shadow: 0 0 5px rgba(241, 196, 15, 0.5); }
+        
+        .btn-print { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-print:hover { background: #2ecc71; }
+
         /* Zoom */
         .chord-box.expanded {
             position: fixed; top: 50%; left: 50%;
@@ -39,6 +46,19 @@
 
         select { padding: 8px 12px; border-radius: 5px; background: #2c3e50; color: white; border: 1px solid var(--accent); font-weight: bold; }
         .btn-back { display: inline-block; margin-bottom: 20px; color: white; text-decoration: none; border: 1px solid white; padding: 8px 15px; border-radius: 5px; }
+
+        /* ESTILOS DE IMPRESIÓN */
+        @media print {
+            body { background: white; color: black; padding: 0; }
+            .filters, .btn-back, h1, .fav-star, #overlay { display: none !important; }
+            .grid { display: block; column-count: 4; gap: 10px; }
+            .chord-box { 
+                break-inside: avoid; border: 1px solid #ddd; 
+                box-shadow: none; margin-bottom: 10px; page-break-inside: avoid;
+            }
+            /* Ocultar los que NO son favoritos al imprimir */
+            .chord-box:not(.is-favorite) { display: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -56,8 +76,12 @@
             <label>Tipo</label>
             <select id="typeFilter"><option value="ALL">Todos</option></select>
         </div>
+        <div class="filter-group">
+            <label>Acciones</label>
+            <button class="btn-print" onclick="window.print()">🖨️ Imprimir Favoritos</button>
+        </div>
         <div style="align-self: flex-end; font-size: 11px; opacity: 0.6; padding-bottom: 10px;">
-            Haz clic para ampliar y escuchar
+            Haz clic en ★ para guardar e imprimir
         </div>
     </div>
 
@@ -65,10 +89,12 @@
 
     <script>
         const notes = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
-        // Frecuencias base de las cuerdas al aire (E2, A2, D3, G3, B3, E4)
         const stringBaseFreqs = [82.41, 110.00, 146.83, 196.00, 246.94, 329.63];
         let libreriaManual = null;
         let audioCtx = null;
+        
+        // Cargar favoritos de LocalStorage
+        let favorites = JSON.parse(localStorage.getItem('pumu_favs')) || [];
 
         async function cargarLibreria() {
             try {
@@ -79,34 +105,36 @@
             } catch (e) { console.error("Error al cargar JSON"); }
         }
 
-        // --- MOTOR DE AUDIO ---
+        function toggleFavorite(id, cardElement) {
+            const index = favorites.indexOf(id);
+            if (index > -1) {
+                favorites.splice(index, 1);
+                cardElement.classList.remove('is-favorite');
+            } else {
+                favorites.push(id);
+                cardElement.classList.add('is-favorite');
+            }
+            localStorage.setItem('pumu_favs', JSON.stringify(favorites));
+            render(); // Refrescamos para actualizar el estado de las estrellas
+        }
+
+        // --- MOTOR DE AUDIO (Mismo que el tuyo) ---
         function playChord(fretStr) {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const frets = fretStr.split('-');
             const now = audioCtx.currentTime;
-
             frets.forEach((fret, i) => {
                 if (fret.toLowerCase() === 'x') return;
-                
                 const f = parseInt(fret);
-                // Calcular frecuencia: freq = base * 2^(traste/12)
                 const freq = stringBaseFreqs[i] * Math.pow(2, f / 12);
-                
-                // Sintetizador simple de cuerda
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                
-                osc.type = 'triangle'; // Sonido más suave que 'sawtooth'
+                osc.type = 'triangle';
                 osc.frequency.setValueAtTime(freq, now);
-                
-                gain.gain.setValueAtTime(0.3, now + (i * 0.05)); // Rasgueo progresivo
+                gain.gain.setValueAtTime(0.3, now + (i * 0.05));
                 gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
-                
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                
-                osc.start(now + (i * 0.05));
-                osc.stop(now + 1.5);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(now + (i * 0.05)); osc.stop(now + 1.5);
             });
         }
 
@@ -132,11 +160,15 @@
                 for (let noteKey in libreriaManual[typeKey]) {
                     if (rootVal !== "ALL" && rootVal !== noteKey) continue;
 
-                    libreriaManual[typeKey][noteKey].forEach(pos => {
+                    libreriaManual[typeKey][noteKey].forEach((pos, idx) => {
                         let displayType = typeKey === "M" ? "" : typeKey;
+                        const chordId = `${noteKey}-${typeKey}-${pos}`; // ID Único para favoritos
+                        const isFav = favorites.includes(chordId);
+
                         const card = document.createElement('div');
-                        card.className = "chord-box";
+                        card.className = `chord-box ${isFav ? 'is-favorite' : ''}`;
                         card.innerHTML = `
+                            <span class="fav-star ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite('${chordId}', this.parentElement)">${isFav ? '★' : '☆'}</span>
                             <div class="chord-name">${noteKey}${displayType}</div>
                             ${drawSVG(pos.split('-'))}
                             <div class="chord-fret-str">${pos}</div>
@@ -150,7 +182,7 @@
                             if (!isExpanded) {
                                 card.classList.add('expanded');
                                 document.getElementById('overlay').style.display = 'block';
-                                playChord(pos); // <-- AQUÍ SUENA EL ACORDE
+                                playChord(pos);
                             } else {
                                 document.getElementById('overlay').style.display = 'none';
                             }
