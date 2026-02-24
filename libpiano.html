@@ -55,6 +55,10 @@
         .key.white { fill: var(--key-white); }
         .key.black { fill: var(--key-black); }
         .key.active { fill: var(--accent) !important; }
+
+        /*Brillo al pulsar las teclas*/
+        .chord-card:active {transform: scale(0.98);background: #fdfdfd;}
+        .chord-card:active .key.active {fill: #ffdb58 !important;filter: drop-shadow(0 0 5px var(--accent));}
         
         .notes-text { font-size: 0.75rem; margin-top: 10px; opacity: 0.8; font-weight: bold; color: #7f8c8d; }
 
