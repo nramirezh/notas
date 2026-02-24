@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PUMUCHORDS - Librería de Piano Pro</title>
     <style>
         :root {
@@ -25,8 +26,15 @@
         label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.7; }
         select { padding: 8px; border-radius: 5px; border: none; background: white; font-weight: bold; cursor: pointer; }
 
-        .btn-print { background: #27ae60; color: white; border: none; padding: 9px 18px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-
+        .btn-print { background: #757575; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        /*BOTONES FAVORITOS*/
+        .btn-favs-toggle {
+            background: #757575;color: white;border: none;padding: 10px 20px;border-radius: 5px;cursor: pointer;
+            font-weight: bold;transition: 0.3s;}
+        /* Estado cuando el filtro está activo */
+        .btn-favs-toggle.active {
+            background: #2c3e50;border: 1px solid var(--accent);
+        }
         .library-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); 
@@ -120,19 +128,23 @@
 
     <div class="filters">
         <div class="filter-group">
-            <label>Filtrar por Nota</label>
+            <label for="rootFilter">Filtrar por Nota</label>
             <select id="rootFilter" onchange="renderLibrary()">
                 <option value="all">Todas</option>
             </select>
         </div>
         <div class="filter-group">
-            <label>Tipo de Acorde</label>
+            <label for="typeFilter">Tipo de Acorde</label>
             <select id="typeFilter" onchange="renderLibrary()">
                 <option value="all">Todos</option>
             </select>
         </div>
         <div class="filter-group">
-            <button class="btn-print" onclick="window.print()">🖨️ Favoritos</button>
+            <label>Acciones</label>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnToggleFavs" class="btn-favs-toggle" onclick="toggleModoFavoritos()">❤️ Ver Mis Favoritos</button>
+                <button class="btn-print" onclick="window.print()">🖨️ Favoritos</button>   
+            </div>
         </div>
     </div>
 
@@ -185,6 +197,22 @@
             renderLibrary();
         }
 
+        let modoSoloFavoritos = false;
+
+        function toggleModoFavoritos() {
+            modoSoloFavoritos = !modoSoloFavoritos;
+            const btn = document.getElementById('btnToggleFavs');
+            
+            if (modoSoloFavoritos) {
+                btn.innerText = "⬅ Volver a Librería";
+                btn.classList.add('active');
+            } else {
+                btn.innerText = "❤️ Ver Mis Favoritos";
+                btn.classList.remove('active');
+            }
+            renderLibrary(); // Llamamos a tu función de piano
+        }
+
         function toggleFavorite(id) {
             const index = favorites.indexOf(id);
             if (index > -1) {
@@ -193,7 +221,7 @@
                 favorites.push(id);
             }
             localStorage.setItem('pumu_piano_favs', JSON.stringify(favorites));
-            renderLibrary();
+            renderLibrary(); // Re-renderizamos siempre
         }
 
         function renderLibrary() {
@@ -210,83 +238,61 @@
 
                     const chordId = `${note}-${typeName}`;
                     const isFav = favorites.includes(chordId);
-                    
-                    // Calculamos las notas base
-                    let currentIntervals = [...intervals];
+
+                    // --- ESTE ES EL FILTRO NUEVO ---
+                    if (modoSoloFavoritos && !isFav) return; 
+                    // -------------------------------
                     
                     const card = document.createElement('div');
                     card.className = `chord-card ${isFav ? 'is-favorite' : ''}`;
                     
-                    // Función interna para actualizar el contenido visual
-                    const updateCardContent = (invIdx) => {
-                        // Lógica de inversión: sacamos la primera y la ponemos al final (+12 semitonos)
+                    // Lógica de inicio (Posición fundamental)
+                    let invCount = 0;
+                    const initialAbs = intervals.map(i => nIdx + i);
+
+                    card.innerHTML = `
+                        <span class="fav-star ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite('${chordId}')">
+                            ${isFav ? '★' : '☆'}
+                        </span>
+                        <div class="chord-name">${note} <small>${typeName}</small></div>
+                        ${drawPiano(initialAbs)}
+                        <div class="notes-text">${initialAbs.map(idx => notes[idx % 12]).join(' · ')}</div>
+                        <button class="btn-invert">🔄 Invertir</button>
+                    `;
+
+                    card.onclick = () => playPianoChord(initialAbs);
+
+                    // Lógica del botón Invertir corregida para tu estructura
+                    card.querySelector('.btn-invert').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        invCount = (invCount + 1) % intervals.length;
+                        
                         let displayIntervals = [...intervals];
-                        for(let i = 0; i < invIdx; i++) {
+                        for(let i = 0; i < invCount; i++) {
                             let first = displayIntervals.shift();
                             displayIntervals.push(first + 12);
                         }
 
-                        const absoluteNotes = displayIntervals.map(i => (nIdx + i) % 24); // %24 para permitir 2 octavas
+                        const newAbs = displayIntervals.map(i => nIdx + i);
                         
-                        card.innerHTML = `
-                            <span class="fav-star ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite('${chordId}')">${isFav ? '★' : '☆'}</span>
-                            <div class="chord-name">${note} <small>${typeName}${invIdx > 0 ? ' ('+invIdx+'ª inv.)' : ''}</small></div>
-                            ${drawPiano(absoluteNotes)}
-                            <div class="notes-text">${absoluteNotes.map(idx => notes[idx % 12]).join(' · ')}</div>
-                            <button class="btn-invert" onclick="event.stopPropagation(); this.dataset.inv = (parseInt(this.dataset.inv)+1)%${intervals.length}; updateCardInternal(this.dataset.inv)">🔄 Invertir</button>
-                        `;
-
-                        card.onclick = () => playPianoChord(absoluteNotes);
-                    };
-
-                    // Guardamos el estado de la inversión en el botón (empezamos en 0)
-                    card.dataset.inv = 0;
-                    
-                    // Necesitamos una función que la tarjeta pueda llamar internamente
-                    window.updateCardInternal = (newInv) => { /* Esta lógica se gestiona mejor con el render */ };
-
-                    // Para hacerlo más limpio, simplemente reinyectamos el HTML al pulsar:
-                    let invCount = 0;
-                    // Dentro del evento del botón Invertir:
-                    card.addEventListener('click', (e) => {
-                        if(e.target.classList.contains('btn-invert')) {
-                            invCount = (invCount + 1) % intervals.length;
-                            
-                            let displayIntervals = [...intervals];
-                            for(let i = 0; i < invCount; i++) {
-                                let first = displayIntervals.shift();
-                                displayIntervals.push(first + 12); // Sube una octava
-                            }
-
-                            // Calculamos las posiciones absolutas en el piano de 2 octavas
-                            const newAbs = displayIntervals.map(i => nIdx + i);
-                            
-                            // Actualizamos el dibujo pasando los números TAL CUAL (ej: 4, 7, 12)
-                            card.querySelector('.piano-svg').outerHTML = drawPiano(newAbs);
-                            card.querySelector('.notes-text').innerText = newAbs.map(idx => notes[idx % 12]).join(' · ');
-                            card.querySelector('small').innerText = `${typeName}${invCount > 0 ? ' ('+invCount+'ª inv.)' : ''}`;
-                            
-                            // Actualizamos el sonido
-                            card.onclick = () => playPianoChord(newAbs);
-                            
-                            e.stopPropagation();
-                        }
+                        card.querySelector('.piano-svg').outerHTML = drawPiano(newAbs);
+                        card.querySelector('.notes-text').innerText = newAbs.map(idx => notes[idx % 12]).join(' · ');
+                        card.querySelector('small').innerText = `${typeName}${invCount > 0 ? ' ('+invCount+'ª inv.)' : ''}`;
+                        
+                        card.onclick = () => playPianoChord(newAbs);
                     });
-
-                    // Render inicial
-                    const initialAbs = intervals.map(i => (nIdx + i));
-                    card.innerHTML = `
-                        <span class="fav-star ${isFav ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite('${chordId}')">${isFav ? '★' : '☆'}</span>
-                        <div class="chord-name">${note} <small>${typeName}</small></div>
-                        ${drawPiano(initialAbs.map(n => n % 24))}
-                        <div class="notes-text">${initialAbs.map(idx => notes[idx % 12]).join(' · ')}</div>
-                        <button class="btn-invert">🔄 Invertir</button>
-                    `;
-                    card.onclick = () => playPianoChord(initialAbs);
 
                     grid.appendChild(card);
                 });
             });
+
+            // Mensaje de lista vacía
+            if (modoSoloFavoritos && grid.innerHTML === "") {
+                grid.innerHTML = `<div style="grid-column: 1/-1; padding: 40px; opacity: 0.5;">
+                    <h3>No hay barraquitos aquí... ☕</h3>
+                    <p>Marca algunos acordes con estrella para verlos agrupados.</p>
+                </div>`;
+            }
         }
 
         function drawPiano(activeNotes) {
@@ -365,39 +371,7 @@
             });
         }
 
-        /*let audioCtx = null;
 
-        //MOTOR DE AUDIO
-
-        function playPianoChord(activeNotes) {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
-            const now = audioCtx.currentTime;
-            
-            activeNotes.forEach((noteIdx, i) => {
-                // Calculamos la frecuencia (empezando desde el Do central aprox. 261.63Hz)
-                const freq = 261.63 * Math.pow(2, noteIdx / 12);
-                
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                
-                // Usamos 'triangle' para un sonido más dulce tipo piano eléctrico
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(freq, now);
-                
-                // Envolvente de sonido de piano (ataque rápido, caída lenta)
-                gain.gain.setValueAtTime(0, now);
-                gain.gain.linearRampToValueAtTime(0.2, now + 0.01); // Ataque
-                gain.gain.exponentialRampToValueAtTime(0.0001, now + 2); // Decaimiento
-                
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                
-                // Un ligerísimo retraso entre notas (10ms) para naturalidad
-                osc.start(now + (i * 0.01));
-                osc.stop(now + 2);
-            });
-        }*/
 
         init();
     </script>
