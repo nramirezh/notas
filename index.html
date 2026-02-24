@@ -216,9 +216,19 @@
 
         button, select { padding: 10px 15px; cursor: pointer; background: var(--accent); border: none; color: white; border-radius: 5px; font-weight: bold; }
         .btn-nav { text-decoration: none; background: #2980b9; color: white; padding: 10px 15px; border-radius: 5px; font-weight: bold; font-size: 13px; }
-        .btn-piano { text-decoration: none; background: #27ae60; /* Un verde piano elegante */ color: white; padding: 10px 15px; 
+        .btn-piano { text-decoration: none; background: #2980b9; /* Un verde piano elegante */ color: white; padding: 10px 15px; 
             border-radius: 5px; font-weight: bold; font-size: 13px; transition: 0.3s; display: inline-block; }
         .btn-piano:hover { background: #2ecc71; transform: translateY(-2px); }
+
+        /*BOTÓN RANDON*/
+        #randomBtn {
+            background: #8e44ad; /* Un púrpura elegante para el modo aleatorio */
+            transition: 0.3s;
+        }
+        #randomBtn:hover {
+            background: #9b59b6;
+            transform: translateY(-2px);
+        }
 
     </style>
 </head>
@@ -241,9 +251,10 @@
             </select>
         </div>
         <button id="toggleBtn">Intervalos: OFF</button>
-        <a href="libreria.html" class="btn-nav">📚 Diccionario</a>
+        <a href="libreria.html" class="btn-nav">🎸 Lib. Guitarra</a>
         <a href="libpiano.html" class="btn-piano">🎹 Lib. Piano</a>
-        
+        <button id="randomBtn" onclick="setRandomScale()" style="background: #8e44ad;">🎲</button>
+
     </div>
 
 
@@ -635,8 +646,8 @@
                         });
                     }
                 };
-                addDiagrams(jsonTet, dispTet);
                 if (jsonTri !== jsonTet) addDiagrams(jsonTri, dispTri);
+                addDiagrams(jsonTet, dispTet);
                 infoPanel.innerHTML += html + '</div>';
             }
 
@@ -681,15 +692,15 @@
                 miniPianoHTML += '</div>';
             
                 card.innerHTML = `
-                    <div class="chord-triad">${notes[cRoot]}${sData.triads[i]}</div>
-                    <div class="chord-tetrad">${notes[cRoot]}${sData.tetrads[i]}</div>
+                    <div class="chord-triad" style="color: white; font-size: 1.1rem;">${notes[cRoot]}${sData.triads[i]}</div>
+                    <div class="chord-tetrad" style="color: var(--note-root); opacity: 0.8; font-size: 0.8rem;">${notes[cRoot]}${sData.tetrads[i]}</div>
                     ${miniPianoHTML}
                 `;
             
                 card.onclick = () => { 
                     selectedChordIdx = (selectedChordIdx === i) ? null : i; 
                     update(); 
-                    let jsonT = sData.tetrads[i] === "Maj7" ? "M7" : (sData.tetrads[i] === "" ? "M" : sData.tetrads[i]);
+                    let jsonT = sData.triads[i] === "" ? "M" : sData.triads[i]; 
                     if (libreriaManual && libreriaManual[jsonT] && libreriaManual[jsonT][notes[cRoot]]) {
                         playChord(libreriaManual[jsonT][notes[cRoot]][0]);
                     }
@@ -728,6 +739,32 @@
                 }
             });
             return svg + "</svg>";
+        }
+
+        function setRandomScale() {
+            const rootSel = document.getElementById('rootSelect');
+            const scaleSel = document.getElementById('scaleSelect');
+
+            // 1. Elegir tónica aleatoria
+            const randomRootIndex = Math.floor(Math.random() * notes.length);
+            rootSel.value = randomRootIndex;
+
+            // 2. Elegir escala aleatoria
+            const scaleKeys = Object.keys(scales);
+            const randomScaleKey = scaleKeys[Math.floor(Math.random() * scaleKeys.length)];
+            scaleSel.value = randomScaleKey;
+
+            // 3. Resetear el acorde seleccionado y actualizar todo
+            selectedChordIdx = null;
+            update();
+
+            // 4. Feedback visual opcional: "Destello" en el piano
+            const piano = document.getElementById('piano');
+            piano.style.transition = "0.2s";
+            piano.style.boxShadow = "0 0 30px var(--note-root)";
+            setTimeout(() => {
+                piano.style.boxShadow = "0 8px 20px rgba(0,0,0,0.5)";
+            }, 300);
         }
 
         cargarDatosYArrancar();
