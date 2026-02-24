@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diccionario - PUMUCHORDS</title>
     <style>
         :root { --bg-color: #2c3e50; --accent: #e67e22; --card-bg: #ffffff; }
@@ -28,8 +29,22 @@
         .fav-star { position: absolute; top: 5px; right: 5px; font-size: 20px; color: #ccc; transition: 0.2s; }
         .fav-star.active { color: #f1c40f; text-shadow: 0 0 5px rgba(241, 196, 15, 0.5); }
         
-        .btn-print { background: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-print:hover { background: #2ecc71; }
+        .btn-print { background: #757575; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-favs-toggle {
+            background: #757575;color: white;border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-favs-toggle:hover { background: #000000; }
+        /* Estado cuando el filtro está activo */
+        .btn-favs-toggle.active {
+            background: #2c3e50;
+            border: 1px solid var(--accent);
+        }
+        .btn-print:hover { background: #000000; }
 
         /* Zoom */
         .chord-box.expanded {
@@ -40,7 +55,7 @@
 
         #overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: none; z-index: 999;
+            background: rgba(0,0,0,0.8); display: none; z-index: 999;-webkit-backdrop-filter: blur(3px);
             backdrop-filter: blur(3px);
         }
 
@@ -70,16 +85,19 @@
 
     <div class="filters">
         <div class="filter-group">
-            <label>Nota Raíz</label>
+            <label for="rootFilter">Nota Raíz</label>
             <select id="rootFilter"><option value="ALL">Todas</option></select>
         </div>
         <div class="filter-group">
-            <label>Tipo</label>
+            <label for="typeFilter">Tipo</label>
             <select id="typeFilter"><option value="ALL">Todos</option></select>
         </div>
         <div class="filter-group">
             <label>Acciones</label>
-            <button class="btn-print" onclick="window.print()">🖨️ Imprimir Favoritos</button>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnToggleFavs" class="btn-favs-toggle" onclick="toggleModoFavoritos()">❤️ Ver Mis Favoritos</button>
+                <button class="btn-print" onclick="window.print()">🖨️ Imprimir Favoritos</button>
+            </div>    
         </div>
         <div style="align-self: flex-end; font-size: 11px; opacity: 0.6; padding-bottom: 10px;">
             Haz clic en ★ para guardar e imprimir
@@ -150,6 +168,22 @@
             typeSel.onchange = render;
         }
 
+        let modoSoloFavoritos = false; // Variable de control
+
+        function toggleModoFavoritos() {
+            modoSoloFavoritos = !modoSoloFavoritos;
+            const btn = document.getElementById('btnToggleFavs');
+            
+            if (modoSoloFavoritos) {
+                btn.innerText = "⬅ Volver a Librería";
+                btn.classList.add('active');
+            } else {
+                btn.innerText = "❤️ Ver Mis Favoritos";
+                btn.classList.remove('active');
+            }
+            render(); // Refrescamos la vista
+        }
+
         function render() {
             const grid = document.getElementById('chordGrid');
             const rootVal = document.getElementById('rootFilter').value;
@@ -162,10 +196,15 @@
                     if (rootVal !== "ALL" && rootVal !== noteKey) continue;
 
                     libreriaManual[typeKey][noteKey].forEach((pos, idx) => {
-                        let displayType = typeKey === "M" ? "" : typeKey;
-                        const chordId = `${noteKey}-${typeKey}-${pos}`; // ID Único para favoritos
+                        const chordId = `${noteKey}-${typeKey}-${pos}`;
                         const isFav = favorites.includes(chordId);
 
+                        // --- NUEVA LÓGICA DE FILTRO ---
+                        if (modoSoloFavoritos && !isFav) return; 
+                        // Si el modo favoritos está activo y este acorde NO es fav, lo saltamos
+                        // ------------------------------
+
+                        let displayType = typeKey === "M" ? "" : typeKey;
                         const card = document.createElement('div');
                         card.className = `chord-box ${isFav ? 'is-favorite' : ''}`;
                         card.innerHTML = `
@@ -191,6 +230,11 @@
                         grid.appendChild(card);
                     });
                 }
+            }
+            
+            // Mensaje si no hay favoritos
+            if (modoSoloFavoritos && grid.innerHTML === "") {
+                grid.innerHTML = "<p style='grid-column: 1/-1; opacity: 0.5;'>No tienes favoritos guardados con estos filtros.</p>";
             }
         }
 
