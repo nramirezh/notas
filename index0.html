@@ -230,6 +230,33 @@
             transform: translateY(-2px);
         }
 
+        #chordsList {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* Centra las tarjetas si son 5 */
+            gap: 15px;
+        }
+        /*INFORMACIÓN SOBRE LA ESCALA*/
+        .scale-info-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            margin: 20px auto;
+            max-width: 800px;
+            border-radius: 0 8px 8px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            text-align: left;
+            backdrop-filter: blur(5px);
+        }
+
+        .info-icon { font-size: 1.5rem; }
+        #scaleText { margin: 0; font-size: 0.95rem; line-height: 1.4; opacity: 0.9; }
+
+        /* Para que sea sutil en el piano o guitarra */
+        @media print { .scale-info-box { display: none; } }
+
     </style>
 </head>
 <body>
@@ -254,6 +281,10 @@
         <a href="libreria.html" class="btn-nav">🎸 Lib. Guitarra</a>
         <a href="libpiano.html" class="btn-piano">🎹 Lib. Piano</a>
         <button id="randomBtn" onclick="setRandomScale()" style="background: #8e44ad;">🎲</button>
+        <div id="scaleDescription" class="scale-info-box">
+            <span class="info-icon">ℹ️</span>
+            <p id="scaleText">Selecciona una escala para conocer su origen.</p>
+        </div>
 
     </div>
 
@@ -321,7 +352,18 @@
             "Menor Armónica": { steps: [0, 2, 3, 5, 7, 8, 11], triads: ["m", "dim", "aug", "m", "", "", "dim"], tetrads: ["m(Maj7)", "m7b5", "Maj7#5", "m7", "7", "Maj7", "dim7"], chordNotes: [[0,3,7,11], [0,3,6,10], [0,4,8,11], [0,3,7,10], [0,4,7,10], [0,4,7,11], [0,3,6,9]] },
             "Menor Melódica": { steps: [0, 2, 3, 5, 7, 9, 11], triads: ["m", "m", "aug", "", "", "dim", "dim"], tetrads: ["m(Maj7)", "m7", "Maj7#5", "7", "7", "m7b5", "m7b5"], chordNotes: [[0,3,7,11], [0,3,7,10], [0,4,8,11], [0,4,7,10], [0,4,7,10], [0,3,6,10], [0,3,6,10]] },
             "Pentatónica Mayor": { steps: [0, 2, 4, 7, 9], triads: ["", "sus2", "m", "", "sus4"], tetrads: ["add9", "7sus2", "m7", "6", "7sus4"], chordNotes: [[0,4,7], [0,2,7], [0,3,7], [0,4,7], [0,5,7]] },
-            "Pentatónica Menor": { steps: [0, 3, 5, 7, 10], triads: ["m", "", "sus4", "m", ""], tetrads: ["m7", "7sus4", "7sus4", "m7", "7"], chordNotes: [[0,3,7], [0,5,7], [0,5,7], [0,3,7], [0,4,7]] }
+            "Pentatónica Menor": { steps: [0, 3, 5, 7, 10], triads: ["m", "", "sus4", "m", ""], tetrads: ["m7", "7sus4", "7sus4", "m7", "7"], chordNotes: [[0,3,7], [0,5,7], [0,5,7], [0,3,7], [0,4,7]] },
+            "Hijaz (Frigia Dominante)": {steps: [0, 1, 4, 5, 7, 8, 10], triads: ["", "dim", "aug", "m", "dim", "Maj", "m"], tetrads: ["7", "Maj7b5", "aug7", "m7", "m7b5", "Maj7", "m7"]},
+            "Nakriz (Misolidia #4)": {steps: [0, 2, 3, 6, 7, 9, 10], triads: ["m", "dim", "aug", "Maj", "m", "dim", "Maj"], tetrads: ["mMaj7", "m7b5", "Maj7#5", "7#11", "m7", "m7b5", "Maj7"]},
+            "Hirajoshi": {steps: [0, 2, 3, 7, 8], /*Escala pentatónica japonesa*/ triads: ["m", "dim", "Maj", "Maj", "m"], tetrads: ["m7", "m7b5", "Maj7", "6", "m7"],chordNotes: [ [0,3,7], [0,3,6], [0,4,7], [0,4,7], [0,3,7] ] /* 5 elementos*/}
+            };
+
+        const scaleDescriptions = {
+            "Mayor": "La base de la música occidental. Transmite brillo, alegría y estabilidad.",
+            "Menor": "Su sonido melancólico y profundo es el pilar de las baladas y el drama musical.",
+            "Hijaz (Frigia Dominante)": "El alma del flamenco y el misticismo árabe. Su intervalo de segunda aumentada crea una tensión exótica irresistible.",
+            "Nakriz (Misolidia #4)": "Famosa en la música de Europa del Este y Oriente Medio. Tiene un aire cinematográfico, como un desierto al atardecer.",
+            "Hirajoshi": "Escala pentatónica japonesa inspirada en el Koto. Evoca paz, naturaleza y la elegancia del Japón tradicional."
         };
 
         let currentTuning = tuningPresets.standard;
