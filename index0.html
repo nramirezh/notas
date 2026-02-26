@@ -263,7 +263,7 @@
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.7</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.7.1</span></h2>
 
     <div class="controls">
         <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
@@ -656,6 +656,13 @@
             });
         }
 
+        function updateScaleInfo() {
+                const selectedScale = document.getElementById('scaleSelect').value;
+                const infoBox = document.getElementById('scaleText');
+                // Si tenemos descripción la ponemos, si no, un texto genérico
+                infoBox.innerText = scaleDescriptions[selectedScale] || "Una sonoridad única para explorar nuevas fronteras musicales.";
+            }
+
         function update() {
             const root = parseInt(document.getElementById('rootSelect').value);
             const sData = scales[document.getElementById('scaleSelect').value];
@@ -749,14 +756,7 @@
                 };
                 cList.appendChild(card);
             });
-            function updateScaleInfo() {
-                const selectedScale = document.getElementById('scaleSelect').value;
-                const infoBox = document.getElementById('scaleText');
-                
-                // Si tenemos descripción la ponemos, si no, un texto genérico
-                infoBox.innerText = scaleDescriptions[selectedScale] || "Una sonoridad única para explorar nuevas fronteras musicales.";
-            }
-
+            updateScaleInfo();
         }
 
         window.zoomAndPlay = (el, pos) => {
