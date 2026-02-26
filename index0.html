@@ -749,6 +749,14 @@
                 };
                 cList.appendChild(card);
             });
+            function updateScaleInfo() {
+                const selectedScale = document.getElementById('scaleSelect').value;
+                const infoBox = document.getElementById('scaleText');
+                
+                // Si tenemos descripción la ponemos, si no, un texto genérico
+                infoBox.innerText = scaleDescriptions[selectedScale] || "Una sonoridad única para explorar nuevas fronteras musicales.";
+            }
+
         }
 
         window.zoomAndPlay = (el, pos) => {
