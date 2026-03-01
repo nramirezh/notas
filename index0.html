@@ -258,13 +258,24 @@
         /* Para que sea sutil en el piano o guitarra */
         @media print { .scale-info-box { display: none; } }
 
+        .looper-container {
+            background: rgba(0,0,0,0.4);
+            padding: 15px;border-radius: 12px; border: 1px solid var(--accent);margin: 20px auto;max-width: 400px;}
+        .looper-status { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
+        .red-dot { width: 12px; height: 12px; background: red; border-radius: 50%; display: none; }
+        .red-dot.active { display: block; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .looper-controls button { padding: 8px 15px; cursor: pointer; border-radius: 5px; border: none; background: #333; color: white; }
+        .looper-controls button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+
     </style>
 </head>
 <body>
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.7.4</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.8</span></h2>
 
     <div class="controls">
         <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
@@ -305,6 +316,20 @@
                 <div class="dot" id="dot-3"></div>
             </div>
         </div>
+        <div class="looper-container">
+            <div class="looper-status">
+            <span id="loopTimer">00:00</span>
+            <div id="recDot" class="red-dot"></div>
+        </div>
+        <div class="looper-controls">
+              <button id="btnRec" onclick="toggleRecord()">🔴 Rec</button>
+              <button id="btnPlay" onclick="playLoop()" disabled>▶️ Play</button>
+              <button id="btnStop" onclick="stopLoop()">⏹️ Stop</button>
+              <button id="btnClear" onclick="clearLoop()">🗑️ Clear</button>
+        </div>
+        <div id="metronomeStatus" style="font-size: 0.8rem; opacity: 0.7;"></div>
+        </div>
+
     
         <div class="tuner-pro-container">
             <div class="tuner-display">
