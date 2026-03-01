@@ -275,7 +275,7 @@
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.8</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.8.1</span></h2>
 
     <div class="controls">
         <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
@@ -642,16 +642,15 @@
         
                 osc.connect(gain);
         
-             // --- CONEXIONES DUALES ---
+                // --- CONEXIONES DUALES ---
                  gain.connect(audioCtx.destination); // Sonido a tus altavoces
-        
-             if (window.loopDest) { 
+                
+                if (window.loopDest) { 
                  gain.connect(loopDest); // Sonido al grabador de loops
-             }
+                }
              // -------------------------
-
-             osc.start(now + (i * 0.05));
-             osc.stop(now + 1.2);
+                osc.start(now + (i * 0.05));
+                osc.stop(now + 1.2);
              });
         }
 
