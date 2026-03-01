@@ -621,24 +621,38 @@
         // --- AUDIO ENGINE ---
         function playChord(fretStr) {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // IMPORTANTE: Asegúrate de que 'loopDest' esté definido globalmente 
+    // o creado antes de llamar a esta función.
             const frets = fretStr.split('-');
             const now = audioCtx.currentTime;
+            
             frets.forEach((fret, i) => {
                 if (fret.toLowerCase() === 'x') return;
+                
                 const freq = stringBaseFreqs[i] * Math.pow(2, parseInt(fret) / 12);
                 const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
+                const gain = audioCtx.createGain(); // Tu variable se llama 'gain'
+                
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(freq, now);
+        
                 gain.gain.setValueAtTime(0.3, now + (i * 0.05));
                 gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(now + (i * 0.05)); osc.stop(now + 1.2);
-                // Conecta el sonido a los altavoces Y al grabador
-                gainNode.connect(audioCtx.destination);
-                gainNode.connect(loopDest);
+        
+                osc.connect(gain);
+        
+             // --- CONEXIONES DUALES ---
+                 gain.connect(audioCtx.destination); // Sonido a tus altavoces
+        
+             if (window.loopDest) { 
+                 gain.connect(loopDest); // Sonido al grabador de loops
+             }
+             // -------------------------
 
-            });
+             osc.start(now + (i * 0.05));
+             osc.stop(now + 1.2);
+             });
         }
 
         function init() {
