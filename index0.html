@@ -634,6 +634,10 @@
                 gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
                 osc.connect(gain); gain.connect(audioCtx.destination);
                 osc.start(now + (i * 0.05)); osc.stop(now + 1.2);
+                // Conecta el sonido a los altavoces Y al grabador
+                gainNode.connect(audioCtx.destination);
+                gainNode.connect(loopDest);
+
             });
         }
 
