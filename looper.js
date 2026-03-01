@@ -6,7 +6,10 @@ let metronomeInterval;
 
 // ESTO ES VITAL: Necesitamos que tus funciones playPiano/playGuitar 
 // envíen el audio a este "Destination" además de a los altavoces.
-const loopDest = audioCtx.createMediaStreamDestination();
+//const loopDest = audioCtx.createMediaStreamDestination();
+// Dentro de looper.js (debe estar fuera de cualquier función)
+window.loopDest = audioCtx.createMediaStreamDestination(); 
+
 
 // --- Función para el Metrónomo de entrada ---
 function startMetronome(callback) {
