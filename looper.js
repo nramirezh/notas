@@ -3,72 +3,37 @@ let audioChunks = [];
 let loopAudio = null;
 let isRecording = false;
 
-// Definimos la variable pero NO la inicializamos hasta que haya un AudioContext activo
-window.loopDest = null;
-
-function ensureLoopDest() {
-    if (!window.loopDest && audioCtx) {
-        window.loopDest = audioCtx.createMediaStreamDestination();
-    }
-}
-
-// --- Metrónomo de entrada sincronizado con el BPM de la web ---
-function startMetronome(callback) {
-    let counts = 0;
-    const status = document.getElementById('metronomeStatus');
-    // Leemos el BPM actual de tu input de la interfaz
-    const currentBpm = document.getElementById('bpmInput').value || 100;
-    const intervalMs = 60000 / currentBpm;
-
-    status.innerText = "Preparando... 4";
-    
-    const interval = setInterval(() => {
-        counts++;
-        status.innerText = `Preparando... ${4 - counts}`;
-        playClickSound(counts === 4 ? 880 : 440); 
-        
-        if (counts === 4) {
-            clearInterval(interval);
-            status.innerText = "¡GRABANDO!";
-            callback();
-        }
-    }, intervalMs); // Ahora la cuenta atrás va al ritmo de tu BPM
-}
-
-function playClickSound(freq) {
-    if (!audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.1);
-}
-
-// --- Grabación ---
-function toggleRecord() {
-    // Nos aseguramos de tener el contexto y el destino creados
-    if (!audioCtx) {
-        alert("Primero toca una nota para activar el sistema de audio.");
-        return;
-    }
-    ensureLoopDest();
-
+// --- Metrónomo de entrada y Grabación ---
+async function toggleRecord() {
     if (!isRecording) {
-        startMetronome(() => {
-            isRecording = true;
-            audioChunks = [];
-            document.getElementById('recDot').classList.add('active');
-            
-            // Usamos el stream del destino que creamos
-            mediaRecorder = new MediaRecorder(window.loopDest.stream);
-            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-            mediaRecorder.onstop = saveLoop;
-            mediaRecorder.start();
-        });
+        try {
+            // Pedimos acceso al micro con alta fidelidad (sin filtros de voz)
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    echoCancellation: false,
+                    noiseSuppression: false,
+                    autoGainControl: false
+                } 
+            });
+
+            startMetronome(() => {
+                isRecording = true;
+                audioChunks = [];
+                document.getElementById('recDot').classList.add('active');
+                
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    saveAndPlayLoop(); // Al parar, procesa y reproduce
+                    // Cerramos el stream del micro para ahorrar recursos
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                
+                mediaRecorder.start();
+            });
+        } catch (err) {
+            alert("No se pudo acceder al micrófono: " + err);
+        }
     } else {
         stopRecording();
     }
@@ -83,35 +48,22 @@ function stopRecording() {
     }
 }
 
-function saveLoop() {
+function saveAndPlayLoop() {
     const blob = new Blob(audioChunks, { type: 'audio/ogg; codecs=opus' });
     const url = URL.createObjectURL(blob);
     
-    // Si ya había un loop sonando, lo limpiamos
-    if (loopAudio) {
-        loopAudio.pause();
-        loopAudio = null;
-    }
+    if (loopAudio) loopAudio.pause();
 
     loopAudio = new Audio(url);
-    loopAudio.loop = true;
+    loopAudio.loop = true; // Mantiene el bucle infinito
+    
     document.getElementById('btnPlay').disabled = false;
+    
+    // ¡LA MAGIA! Empieza a sonar solo en cuanto termina la grabación
+    loopAudio.play();
 }
 
-function playLoop() {
-    if (loopAudio) loopAudio.play();
-}
-
-function stopLoop() {
-    if (loopAudio) {
-        loopAudio.pause();
-        loopAudio.currentTime = 0;
-    }
-}
-
-function clearLoop() {
-    stopLoop();
-    loopAudio = null;
-    document.getElementById('btnPlay').disabled = true;
-    document.getElementById('metronomeStatus').innerText = "Loop borrado";
-}
+// Controles manuales
+function playLoop() { if (loopAudio) loopAudio.play(); }
+function stopLoop() { if (loopAudio) { loopAudio.pause(); loopAudio.currentTime = 0; } }
+function clearLoop() { stopLoop(); loopAudio = null; document.getElementById('btnPlay').disabled = true; }
