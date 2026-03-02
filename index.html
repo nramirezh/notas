@@ -10,11 +10,58 @@
         }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: white; padding: 20px; margin: 0; text-align: center; }
         
-        /* Controles */
-        .controls { background: #34495e; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); align-items: flex-end; }
+        /* CONTROLES */
+        .controls { background: #34495e; 
+            padding: 20px 30px; box-sizing: border-box; /* Importante para que el padding no rompa el ancho */
+            border-radius: 12px; margin-bottom: 20px; 
+            display: inline-flex; 
+            flex-direction: column; 
+            gap: 15px; flex-wrap: wrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); align-items: flex-end;
+        } 
+        /* Estilo común para las filas */
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end; /* Alinea etiquetas y selects por la base */
+            gap: 12px;
+            flex-wrap: wrap;       /* Importante para móviles */
+        }
+        #toggleBtn {
+            min-width: 80px; /* Ajusta este valor a tu gusto (ej. 120px) */
+            text-align: center;
+            padding: 11px; /* Mantiene el grosor vertical */
+            padding-left: 30px;
+            padding-right: 30px;
+        }
+        /* Fila de acciones (la segunda línea) */
+        .actions-row {
+            padding-top: 10px;
+            justify-content: center;
+            gap: 12px;
+            padding: 10px;
+            width: 100%;
+            border-top: 1px solid rgba(255,255,255,0.1); /* Una línea sutil divisoria */
+        }
+        .actions-row button, 
+        .actions-row .btn-nav, 
+        .actions-row .btn-piano {
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
         .control-group { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
         label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px; }
 
+
+
+
+        
         /* Piano */
         .piano-container { display: inline-flex; background: #111; padding: 10px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
         .piano-key { width: 32px; height: 110px; background: white; border: 1px solid #ccc; border-radius: 0 0 4px 4px; position: relative; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; color: #333; font-size: 9px; font-weight: bold; box-sizing: border-box; }
@@ -216,19 +263,14 @@
 
         button, select { padding: 10px 15px; cursor: pointer; background: var(--accent); border: none; color: white; border-radius: 5px; font-weight: bold; }
         .btn-nav { text-decoration: none; background: #2980b9; color: white; padding: 10px 15px; border-radius: 5px; font-weight: bold; font-size: 13px; }
+        .btn-nav:hover { background: #000000; transform: translateY(-2px); }
         .btn-piano { text-decoration: none; background: #2980b9; /* Un verde piano elegante */ color: white; padding: 10px 15px; 
             border-radius: 5px; font-weight: bold; font-size: 13px; transition: 0.3s; display: inline-block; }
         .btn-piano:hover { background: #2ecc71; transform: translateY(-2px); }
 
         /*BOTÓN RANDON*/
-        #randomBtn {
-            background: #8e44ad; /* Un púrpura elegante para el modo aleatorio */
-            transition: 0.3s;
-        }
-        #randomBtn:hover {
-            background: #9b59b6;
-            transform: translateY(-2px);
-        }
+        #randomBtn {background: #2980b9; transition: 0.3s;}
+        #randomBtn:hover {background: #000000; transform: translateY(-2px); }
 
     </style>
 </head>
@@ -236,25 +278,40 @@
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.6</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.6.1</span></h2>
 
     <div class="controls">
-        <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
-        <div class="control-group"><label>Escala</label><select id="scaleSelect"></select></div>
-        <div class="control-group">
-            <label>Afinación</label>
-            <select id="tuningSelect">
-                <option value="standard">Standard (EADGBe)</option>
-                <option value="dropD">Drop D</option>
-                <option value="eb">Eb (Medio tono abajo)</option>
-                <option value="d">D (Tono abajo)</option>
+        <div class="controls-row config-row">
+            <div class="control-group">
+            <label>Nivel</label>
+            <select id="levelSelect" onchange="updateScaleSelector()">
+                <option value="Principiante">Principiante</option>
+                <option value="Intermedio" selected>Intermedio</option>
+                <option value="Avanzado">Avanzado</option>
+                <option value="Experto">Experto</option>
             </select>
         </div>
-        <button id="toggleBtn">Intervalos: OFF</button>
-        <a href="libreria.html" class="btn-nav">🎸 Lib. Guitarra</a>
-        <a href="libpiano.html" class="btn-piano">🎹 Lib. Piano</a>
-        <button id="randomBtn" onclick="setRandomScale()" style="background: #8e44ad;">🎲</button>
+            <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
+            <div class="control-group"><label>Escala</label><select id="scaleSelect"></select></div>
+            <div class="control-group">
+                <label>Afinación</label>
+                <select id="tuningSelect">
+                    <option value="standard">Standard (EADGBe)</option>
+                    <option value="dropD">Drop D</option>
+                    <option value="eb">Eb (Medio tono abajo)</option>
+                    <option value="d">D (Tono abajo)</option>
+                </select>
+            </div>
+            <div class="control-group"><label>Intervalos</label>
+            <button id="toggleBtn">OFF</button>
+            </div>  
+        </div>
 
+        <div class="controls-row actions-row">
+            <a href="libreria.html" class="btn-nav">🎸 Lib. Guitarra</a>
+            <a href="libpiano.html" class="btn-piano">🎹 Lib. Piano</a>
+            <button id="randomBtn" onclick="setRandomScale()" >🎲</button>
+        </div>    
     </div>
 
 
@@ -321,8 +378,68 @@
             "Menor Armónica": { steps: [0, 2, 3, 5, 7, 8, 11], triads: ["m", "dim", "aug", "m", "", "", "dim"], tetrads: ["m(Maj7)", "m7b5", "Maj7#5", "m7", "7", "Maj7", "dim7"], chordNotes: [[0,3,7,11], [0,3,6,10], [0,4,8,11], [0,3,7,10], [0,4,7,10], [0,4,7,11], [0,3,6,9]] },
             "Menor Melódica": { steps: [0, 2, 3, 5, 7, 9, 11], triads: ["m", "m", "aug", "", "", "dim", "dim"], tetrads: ["m(Maj7)", "m7", "Maj7#5", "7", "7", "m7b5", "m7b5"], chordNotes: [[0,3,7,11], [0,3,7,10], [0,4,8,11], [0,4,7,10], [0,4,7,10], [0,3,6,10], [0,3,6,10]] },
             "Pentatónica Mayor": { steps: [0, 2, 4, 7, 9], triads: ["", "sus2", "m", "", "sus4"], tetrads: ["add9", "7sus2", "m7", "6", "7sus4"], chordNotes: [[0,4,7], [0,2,7], [0,3,7], [0,4,7], [0,5,7]] },
-            "Pentatónica Menor": { steps: [0, 3, 5, 7, 10], triads: ["m", "", "sus4", "m", ""], tetrads: ["m7", "7sus4", "7sus4", "m7", "7"], chordNotes: [[0,3,7], [0,5,7], [0,5,7], [0,3,7], [0,4,7]] }
+            "Pentatónica Menor": { steps: [0, 3, 5, 7, 10], triads: ["m", "", "sus4", "m", ""], tetrads: ["m7", "7sus4", "7sus4", "m7", "7"], chordNotes: [[0,3,7], [0,5,7], [0,5,7], [0,3,7], [0,4,7]] },
+            "Hijaz (Frigia Dominante)": {steps: [0, 1, 4, 5, 7, 8, 10], triads: ["", "dim", "+", "m", "dim", "Maj", "m"], tetrads: ["7", "Maj7b5", "+7", "m7", "m7b5", "Maj7", "m7"], chordNotes: [
+            [0, 4, 7, 10], // I7
+            [0, 3, 6, 11], // IIdim (Maj7b5)
+            [0, 4, 8, 10], // III+7
+            [0, 3, 7, 10], // ivm7
+            [0, 3, 6, 10], // vdim (m7b5)
+            [0, 4, 7, 11], // VIMaj7
+            [0, 3, 7, 10]  // viim7
+            ]},
+            "Nakriz (Misolidia #4)": {steps: [0, 2, 3, 6, 7, 9, 10], triads: ["m", "dim", "+", "Maj", "m", "dim", "Maj"], tetrads: ["mMaj7", "m7b5", "Maj7#5", "7#11", "m7", "m7b5", "Maj7"],chordNotes: [
+            [0, 3, 7, 11], // imMaj7
+            [0, 3, 6, 10], // iim7b5
+            [0, 4, 8, 11], // III+Maj7
+            [0, 4, 7, 10], // IV7 (#11)
+            [0, 3, 7, 10], // vm7
+            [0, 3, 6, 10], // vidim
+            [0, 4, 7, 11]  // VIIMaj7
+            ]},
+            "Hirajoshi": {steps: [0, 2, 3, 7, 8], /*Escala pentatónica japonesa*/ triads: ["m", "dim", "Maj", "Maj", "m"], tetrads: ["m7", "m7b5", "Maj7", "6", "m7"],chordNotes: [ [0,3,7], [0,3,6], [0,4,7], [0,4,7], [0,3,7] ] /* 5 elementos*/}
+            
         };
+        //FILTRADO POR NIVEL DE DIFICULTAD
+        const escalasPorNivel = {
+            'Principiante': ["Mayor (Jónico)", "Eólico (Menor)"],
+            'Intermedio': [
+                "Mayor (Jónico)", "Eólico (Menor)", 
+                "Dórico", "Frigio", "Lidio", "Mixolidio", "Locrio", 
+                "Pentatónica Mayor", "Pentatónica Menor"
+            ],
+            'Avanzado': [
+                "Mayor (Jónico)", "Eólico (Menor)", "Dórico", "Frigio", "Lidio", "Mixolidio", "Locrio", 
+                "Pentatónica Mayor", "Pentatónica Menor", 
+                "Menor Armónica", "Menor Melódica"
+            ],
+            'Experto': Object.keys(scales) // Todas las escalas definidas en tu objeto 'scales'
+        };
+        //FILTRADO POR ESCALA DE DIFICULTAD
+        function updateScaleSelector() {
+            const level = document.getElementById('levelSelect').value;
+            const scaleSelect = document.getElementById('scaleSelect');
+            const currentScale = scaleSelect.value;
+
+            scaleSelect.innerHTML = "";
+            const escalasPermitidas = escalasPorNivel[level];
+
+            escalasPermitidas.forEach(scaleName => {
+                const option = document.createElement('option');
+                option.value = scaleName;
+                option.innerText = scaleName;
+                scaleSelect.appendChild(option);
+            });
+
+            if (escalasPermitidas.includes(currentScale)) {
+                scaleSelect.value = currentScale;
+            } else {
+                scaleSelect.selectedIndex = 0;
+            }
+            
+            // SIEMPRE llamamos a update al cambiar nivel para asegurar sincronía
+            update();
+        }
 
         let currentTuning = tuningPresets.standard;
         let showIntervals = false;
@@ -553,12 +670,16 @@
             // Llenar selects
             rootSel.innerHTML = ""; // Limpiar antes de llenar
             scaleSel.innerHTML = "";
-            notes.forEach((n, i) => rootSel.innerHTML += `<option value="${i}">${n}</option>`);
+            notes.forEach((n) => { rootSel.innerHTML += `<option value="${n}">${n}</option>`; });
+            //notes.forEach((n, i) => rootSel.innerHTML += `<option value="${i}">${n}</option>`);
             Object.keys(scales).forEach(s => scaleSel.innerHTML += `<option value="${s}">${s}</option>`);
             
             createPiano(); 
             createFretboard(); 
             update();
+
+            // Rellenar escalas por primera vez según el nivel por defecto
+            updateScaleSelector();
 
             // Eventos
             rootSel.onchange = () => { selectedChordIdx = null; update(); };
@@ -574,7 +695,7 @@
 
             document.getElementById('toggleBtn').onclick = (e) => {
                 showIntervals = !showIntervals;
-                e.target.innerText = showIntervals ? "Intervalos: ON" : "Intervalos: OFF";
+                e.target.innerText = showIntervals ? "ON" : "OFF";
                 update();
             };
 
@@ -615,7 +736,10 @@
         }
 
         function update() {
+            // Buscamos el índice de la nota en el array notes
+            const rootName = document.getElementById('rootSelect').value
             const root = parseInt(document.getElementById('rootSelect').value);
+            if (root === -1) return;
             const sData = scales[document.getElementById('scaleSelect').value];
             const scaleNotes = sData.steps.map(v => (root + v) % 12);
             let chordNotes = [];
@@ -744,27 +868,30 @@
         function setRandomScale() {
             const rootSel = document.getElementById('rootSelect');
             const scaleSel = document.getElementById('scaleSelect');
+            const level = document.getElementById('levelSelect').value;
 
-            // 1. Elegir tónica aleatoria
-            const randomRootIndex = Math.floor(Math.random() * notes.length);
-            rootSel.value = randomRootIndex;
+            // 1. Tónica Aleatoria (Nombre)
+            const randomRoot = notes[Math.floor(Math.random() * notes.length)];
+            rootSel.value = randomRoot;
 
-            // 2. Elegir escala aleatoria
-            const scaleKeys = Object.keys(scales);
-            const randomScaleKey = scaleKeys[Math.floor(Math.random() * scaleKeys.length)];
+            // 2. Escala Aleatoria (Filtrada)
+            const permitidas = escalasPorNivel[level];
+            const randomScaleKey = permitidas[Math.floor(Math.random() * permitidas.length)];
             scaleSel.value = randomScaleKey;
 
-            // 3. Resetear el acorde seleccionado y actualizar todo
+            // 3. Reset y Actualización
             selectedChordIdx = null;
             update();
 
-            // 4. Feedback visual opcional: "Destello" en el piano
+            // 4. Destello
             const piano = document.getElementById('piano');
-            piano.style.transition = "0.2s";
-            piano.style.boxShadow = "0 0 30px var(--note-root)";
-            setTimeout(() => {
-                piano.style.boxShadow = "0 8px 20px rgba(0,0,0,0.5)";
-            }, 300);
+            if (piano) {
+                piano.style.transition = "0.2s";
+                piano.style.boxShadow = "0 0 30px var(--note-root)";
+                setTimeout(() => {
+                    piano.style.boxShadow = "0 8px 20px rgba(0,0,0,0.5)";
+                }, 300);
+            }
         }
 
         cargarDatosYArrancar();
