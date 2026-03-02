@@ -258,6 +258,7 @@
         /* Para que sea sutil en el piano o guitarra */
         @media print { .scale-info-box { display: none; } }
 
+        //LOOPER
         .looper-container {
             background: rgba(0,0,0,0.4);
             padding: 15px;border-radius: 12px; border: 1px solid var(--accent);margin: 20px auto;max-width: 400px;}
@@ -267,6 +268,8 @@
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         .looper-controls button { padding: 8px 15px; cursor: pointer; border-radius: 5px; border: none; background: #333; color: white; }
         .looper-controls button:disabled { opacity: 0.3; cursor: not-allowed; }
+        .looper-controls {display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; /* Para que respire en móviles */
+        }
 
 
     </style>
@@ -275,7 +278,7 @@
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.8.1</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.8.2</span></h2>
 
     <div class="controls">
         <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
@@ -646,9 +649,9 @@
                  gain.connect(audioCtx.destination); // Sonido a tus altavoces
                 
                 if (window.loopDest) { 
-                 gain.connect(loopDest); // Sonido al grabador de loops
+                 gain.connect(window.loopDest); // Sonido al grabador de loops
                 }
-             // -------------------------
+                // -------------------------
                 osc.start(now + (i * 0.05));
                 osc.stop(now + 1.2);
              });

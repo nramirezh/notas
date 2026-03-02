@@ -1,26 +1,30 @@
 let mediaRecorder;
 let audioChunks = [];
-let loopAudio = null; // Aquí guardaremos el objeto Audio resultante
+let loopAudio = null;
 let isRecording = false;
-let metronomeInterval;
 
-// ESTO ES VITAL: Necesitamos que tus funciones playPiano/playGuitar 
-// envíen el audio a este "Destination" además de a los altavoces.
-//const loopDest = audioCtx.createMediaStreamDestination();
-// Dentro de looper.js (debe estar fuera de cualquier función)
-window.loopDest = audioCtx.createMediaStreamDestination(); 
+// Definimos la variable pero NO la inicializamos hasta que haya un AudioContext activo
+window.loopDest = null;
 
+function ensureLoopDest() {
+    if (!window.loopDest && audioCtx) {
+        window.loopDest = audioCtx.createMediaStreamDestination();
+    }
+}
 
-// --- Función para el Metrónomo de entrada ---
+// --- Metrónomo de entrada sincronizado con el BPM de la web ---
 function startMetronome(callback) {
     let counts = 0;
     const status = document.getElementById('metronomeStatus');
+    // Leemos el BPM actual de tu input de la interfaz
+    const currentBpm = document.getElementById('bpmInput').value || 100;
+    const intervalMs = 60000 / currentBpm;
+
     status.innerText = "Preparando... 4";
     
     const interval = setInterval(() => {
         counts++;
         status.innerText = `Preparando... ${4 - counts}`;
-        // Sonido de click (puedes usar un oscilador simple aquí)
         playClickSound(counts === 4 ? 880 : 440); 
         
         if (counts === 4) {
@@ -28,10 +32,11 @@ function startMetronome(callback) {
             status.innerText = "¡GRABANDO!";
             callback();
         }
-    }, 1000); // 60 BPM para empezar, luego lo ajustamos
+    }, intervalMs); // Ahora la cuenta atrás va al ritmo de tu BPM
 }
 
 function playClickSound(freq) {
+    if (!audioCtx) return;
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.connect(gain);
@@ -43,15 +48,23 @@ function playClickSound(freq) {
     osc.stop(audioCtx.currentTime + 0.1);
 }
 
-// --- Lógica de Grabación ---
+// --- Grabación ---
 function toggleRecord() {
+    // Nos aseguramos de tener el contexto y el destino creados
+    if (!audioCtx) {
+        alert("Primero toca una nota para activar el sistema de audio.");
+        return;
+    }
+    ensureLoopDest();
+
     if (!isRecording) {
         startMetronome(() => {
             isRecording = true;
             audioChunks = [];
             document.getElementById('recDot').classList.add('active');
             
-            mediaRecorder = new MediaRecorder(loopDest.stream);
+            // Usamos el stream del destino que creamos
+            mediaRecorder = new MediaRecorder(window.loopDest.stream);
             mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
             mediaRecorder.onstop = saveLoop;
             mediaRecorder.start();
@@ -65,14 +78,23 @@ function stopRecording() {
     isRecording = false;
     document.getElementById('recDot').classList.remove('active');
     document.getElementById('metronomeStatus').innerText = "";
-    mediaRecorder.stop();
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+    }
 }
 
 function saveLoop() {
     const blob = new Blob(audioChunks, { type: 'audio/ogg; codecs=opus' });
     const url = URL.createObjectURL(blob);
+    
+    // Si ya había un loop sonando, lo limpiamos
+    if (loopAudio) {
+        loopAudio.pause();
+        loopAudio = null;
+    }
+
     loopAudio = new Audio(url);
-    loopAudio.loop = true; // ¡Aquí está la magia del loop!
+    loopAudio.loop = true;
     document.getElementById('btnPlay').disabled = false;
 }
 
@@ -81,12 +103,15 @@ function playLoop() {
 }
 
 function stopLoop() {
-    if (loopAudio) loopAudio.pause();
-    loopAudio.currentTime = 0;
+    if (loopAudio) {
+        loopAudio.pause();
+        loopAudio.currentTime = 0;
+    }
 }
 
 function clearLoop() {
     stopLoop();
     loopAudio = null;
     document.getElementById('btnPlay').disabled = true;
+    document.getElementById('metronomeStatus').innerText = "Loop borrado";
 }
