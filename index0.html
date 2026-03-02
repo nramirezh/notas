@@ -278,7 +278,7 @@
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.8.4</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.8.5</span></h2>
 
     <div class="controls">
         <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
@@ -623,21 +623,25 @@
 
         // --- AUDIO ENGINE ---
         function playChord(fretStr) {
+            // Aseguramos que audioCtx sea global
             if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            //if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
             const frets = fretStr.split('-');
-            const now = audioCtx.currentTime;
+            const now = window.audioCtx.currentTime; // Usar window.
+            
             frets.forEach((fret, i) => {
                 if (fret.toLowerCase() === 'x') return;
                 const freq = stringBaseFreqs[i] * Math.pow(2, parseInt(fret) / 12);
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
+                const osc = window.audioCtx.createOscillator(); // Usar window.
+                const gain = window.audioCtx.createGain(); // Usar window.
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(freq, now);
                 gain.gain.setValueAtTime(0.3, now + (i * 0.05));
                 gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(now + (i * 0.05)); osc.stop(now + 1.2);
+                osc.connect(gain); 
+                gain.connect(window.audioCtx.destination); // Usar window.
+                osc.start(now + (i * 0.05)); 
+                osc.stop(now + 1.2);
             });
         }
 
