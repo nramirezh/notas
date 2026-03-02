@@ -63,6 +63,48 @@ function saveAndPlayLoop() {
     loopAudio.play();
 }
 
+// --- Función de cuenta atrás para el Looper ---
+function startMetronome(callback) {
+    let counts = 0;
+    const status = document.getElementById('metronomeStatus');
+    // Leemos el BPM del input que tienes en el HTML
+    const bpmInput = document.getElementById('bpmInput');
+    const currentBpm = bpmInput ? bpmInput.value : 100;
+    const intervalMs = 60000 / currentBpm;
+
+    status.innerText = "Preparando... 4";
+    
+    const interval = setInterval(() => {
+        counts++;
+        status.innerText = `Preparando... ${4 - counts}`;
+        
+        // Llamamos a la función de sonido de click
+        playClickSound(counts === 4 ? 880 : 440); 
+        
+        if (counts === 4) {
+            clearInterval(interval);
+            status.innerText = "¡GRABANDO!";
+            callback();
+        }
+    }, intervalMs);
+}
+
+// --- Sonido del click para la cuenta atrás ---
+function playClickSound(freq) {
+    // Usamos el audioCtx global que ya creaste en el HTML
+    if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.1);
+}
+
 // Controles manuales
 function playLoop() { if (loopAudio) loopAudio.play(); }
 function stopLoop() { if (loopAudio) { loopAudio.pause(); loopAudio.currentTime = 0; } }
