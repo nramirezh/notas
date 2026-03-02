@@ -268,8 +268,8 @@
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         .looper-controls button { padding: 8px 15px; cursor: pointer; border-radius: 5px; border: none; background: #333; color: white; }
         .looper-controls button:disabled { opacity: 0.3; cursor: not-allowed; }
-        .looper-controls {display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; /* Para que respire en móviles */
-        }
+        .looper-controls {display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;}
+        #loopTimer {font-family: 'Courier New', monospace; font-weight: bold;font-size: 1.2rem;color: var(--accent);}
 
 
     </style>
@@ -431,12 +431,28 @@
         }
 
         // --- LÓGICA DEL METRÓNOMO ---
-        let isMetroRunning = false;
+        /*let isMetroRunning = false;
         let metroInterval = null;
         let currentBeat = 0;
-        let bpm = 80;
+        let bpm = 80;*/
+
+        window.isMetroRunning = false;
+        window.toggleMetronome = function() {
+            const btn = document.getElementById('metroPlayBtn');
+            if (window.isMetroRunning) {
+                clearInterval(metroInterval);
+                window.isMetroRunning = false;
+                btn.innerText = "▶";
+                resetDots();
+                currentBeat = 0; // Opcional: resetear al primer tiempo siempre
+            } else {
+                window.isMetroRunning = true;
+                btn.innerText = "⏹";
+                startMetro();
+            }
+        };
         
-        function toggleMetronome() {
+        /*function toggleMetronome() {
             const btn = document.getElementById('metroPlayBtn');
             if (isMetroRunning) {
                 clearInterval(metroInterval);
@@ -448,7 +464,7 @@
                 btn.innerText = "⏹";
                 startMetro();
             }
-        }
+        }*/
         
         function updateBPM() {
             bpm = document.getElementById('bpmInput').value;

@@ -26,6 +26,77 @@ window.startMetronome = function(callback) {
     }, intervalMs);
 };
 
+//--- MINUTERO ---
+let startTime;
+let timerInterval;
+
+// --- Función para formatear el tiempo (00:00) ---
+function formatTime(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+    const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
+}
+
+// --- Modifica window.toggleRecord ---
+window.toggleRecord = async function() {
+    if (!isRecording) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } 
+            });
+
+            window.startMetronome(() => {
+                isRecording = true;
+                audioChunks = [];
+                document.getElementById('recDot').classList.add('active');
+                
+                // --- INICIAR CRONÓMETRO ---
+                startTime = Date.now();
+                timerInterval = setInterval(() => {
+                    const elapsed = Date.now() - startTime;
+                    document.getElementById('loopTimer').innerText = formatTime(elapsed);
+                }, 1000);
+
+                if (!window.isMetroRunning) window.toggleMetronome();
+
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = () => {
+                    saveAndPlayLoop();
+                    stream.getTracks().forEach(track => track.stop());
+                };
+                mediaRecorder.start();
+            });
+        } catch (err) {
+            alert("Error: " + err);
+        }
+    } else {
+        stopRecording();
+    }
+};
+
+// --- Modifica stopRecording ---
+function stopRecording() {
+    isRecording = false;
+    document.getElementById('recDot').classList.remove('active');
+    document.getElementById('metronomeStatus').innerText = "";
+    
+    // --- DETENER CRONÓMETRO ---
+    clearInterval(timerInterval);
+    // El tiempo se queda fijo en lo que duró la grabación
+    
+    if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
+}
+
+// --- Modifica clearLoop para resetear el reloj ---
+window.clearLoop = () => { 
+    window.stopLoop(); 
+    loopAudio = null; 
+    document.getElementById('btnPlay').disabled = true; 
+    document.getElementById('loopTimer').innerText = "00:00"; // Reset visual
+};
+
 // --- Sonido del click (Global) ---
 window.playClickSound = function(freq) {
     if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -40,41 +111,6 @@ window.playClickSound = function(freq) {
     osc.stop(window.audioCtx.currentTime + 0.1);
 };
 
-// --- Lógica de Grabación ---
-window.toggleRecord = async function() {
-    if (!isRecording) {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } 
-            });
-
-            window.startMetronome(() => {
-                isRecording = true;
-                audioChunks = [];
-                document.getElementById('recDot').classList.add('active');
-                
-                mediaRecorder = new MediaRecorder(stream);
-                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                mediaRecorder.onstop = () => {
-                    saveAndPlayLoop();
-                    stream.getTracks().forEach(track => track.stop());
-                };
-                mediaRecorder.start();
-            });
-        } catch (err) {
-            alert("No se pudo acceder al micrófono: " + err);
-        }
-    } else {
-        stopRecording();
-    }
-};
-
-function stopRecording() {
-    isRecording = false;
-    document.getElementById('recDot').classList.remove('active');
-    document.getElementById('metronomeStatus').innerText = "";
-    if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
-}
 
 function saveAndPlayLoop() {
     const blob = new Blob(audioChunks, { type: 'audio/ogg; codecs=opus' });
