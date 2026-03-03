@@ -334,6 +334,9 @@
                 <option value="16">16 Compases</option>
             </select>
         </div>
+        <div id="progressContainer" style="width: 180px; height: 5px; background: #333; margin: 10px auto; border-radius: 5px; overflow: hidden; display: none;">
+            <div id="progressBar" style="width: 0%; height: 100%; background: var(--accent); transition: width 0.1s linear;"></div>
+        </div>
         <div class="looper-controls">
               <button id="btnRec" onclick="toggleRecord()">🔴 Rec</button>
               <button id="btnPlay" onclick="playLoop()" disabled>▶️ Play</button>
