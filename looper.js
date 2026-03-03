@@ -84,17 +84,32 @@ function stopRecording() {
     
     // --- DETENER CRONÓMETRO ---
     clearInterval(timerInterval);
+    timerInterval = null;
     // El tiempo se queda fijo en lo que duró la grabación
     
-    if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
+    if (mediaRecorder && mediaRecorder.state !== "inactive"){
+        mediaRecorder.stop();
+    }
 }
 
 // --- Modifica clearLoop para resetear el reloj ---
 window.clearLoop = () => { 
     window.stopLoop(); 
-    loopAudio = null; 
+    loopAudio = null;
+    //---Detenemos el reloj
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    //---Detenemos el metrónomo
+    if (window.isMetroRunning) {
+        window.toggleMetronome(); // Esto detiene el sonido y resetea los puntitos (dots)
+    }
+   
     document.getElementById('btnPlay').disabled = true; 
     document.getElementById('loopTimer').innerText = "00:00"; // Reset visual
+    document.getElementById('metronomeStatus').innerText = "Listo para grabar";
+    console.log("Looper y Metrónomo reseteados.");   
 };
 
 // --- Sonido del click (Global) ---
