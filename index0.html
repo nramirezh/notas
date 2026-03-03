@@ -324,6 +324,16 @@
             <span id="loopTimer">00:00</span>
             <div id="recDot" class="red-dot"></div>
         </div>
+        <div class="control-group">
+            <label>Duración (Compases)</label>
+            <select id="loopBars">
+                <option value="0">Manual (Libre)</option>
+                <option value="2">2 Compases</option>
+                <option value="4" selected>4 Compases</option>
+                <option value="8">8 Compases</option>
+                <option value="16">16 Compases</option>
+            </select>
+        </div>
         <div class="looper-controls">
               <button id="btnRec" onclick="toggleRecord()">🔴 Rec</button>
               <button id="btnPlay" onclick="playLoop()" disabled>▶️ Play</button>
