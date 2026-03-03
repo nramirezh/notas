@@ -519,8 +519,8 @@
         
         function updateDots() {
             resetDots();
-            document.getElementById(`dot-${currentBeat}`).classList.add('active');
-            currentBeat = (currentBeat + 1) % 4;
+            document.getElementById(`dot-${window.currentBeat}`).classList.add('active');
+            window.currentBeat = (window.currentBeat + 1) % 4;
         }
         
         function resetDots() {
