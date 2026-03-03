@@ -2,6 +2,9 @@ let mediaRecorder;
 let audioChunks = [];
 let loopAudio = null;
 let isRecording = false;
+let startTime;
+let timerInterval;
+let progressInterval;
 
 // --- Función de cuenta atrás (Global) ---
 window.startMetronome = function(callback) {
@@ -51,8 +54,28 @@ window.toggleRecord = async function() {
                 audioChunks = [];
                 document.getElementById('recDot').classList.add('active');
                 
-                // --- INICIAR CRONÓMETRO ---
+                const bpm = document.getElementById('bpmInput').value || 100;
+                const bars = parseInt(document.getElementById('loopBars').value);
+                const msPerBeat = 60000 / bpm;
+                const totalMs = msPerBeat * 4 * bars;
+
+                // --- INICIAR CRONÓMETRO Y BARRA ---
                 startTime = Date.now();
+                document.getElementById('loopTimer').innerText = "00:00";
+                
+                // Mostrar y resetear barra si hay compases definidos
+                if (bars > 0) {
+                    const bar = document.getElementById('progressBar');
+                    document.getElementById('progressContainer').style.display = 'block';
+                    bar.style.width = "0%";
+                    
+                    progressInterval = setInterval(() => {
+                        const elapsed = Date.now() - startTime;
+                        const percent = (elapsed / totalMs) * 100;
+                        bar.style.width = Math.min(percent, 100) + "%";
+                    }, 50); // Actualización fluida cada 50ms
+                }
+
                 timerInterval = setInterval(() => {
                     const elapsed = Date.now() - startTime;
                     document.getElementById('loopTimer').innerText = formatTime(elapsed);
@@ -66,20 +89,15 @@ window.toggleRecord = async function() {
                     saveAndPlayLoop();
                     stream.getTracks().forEach(track => track.stop());
                 };
+                
                 mediaRecorder.start();
-                const bpm = document.getElementById('bpmInput').value || 100;
-                const bars = parseInt(document.getElementById('loopBars').value);
                 
+                // --- STOP AUTOMÁTICO ---
                 if (bars > 0) {
-                    // Calculamos la duración total en milisegundos
-                    const msPerBeat = 60000 / bpm;
-                    const totalMs = msPerBeat * 4 * bars; 
-                
-                    // Programamos el "Stop" automático
                     setTimeout(() => {
                         if (isRecording) {
-                            stopRecording();
-                            console.log(`Grabación automática finalizada: ${bars} compases.`);
+                            window.stopRecording(); // Llamada global
+                            console.log(`Auto-stop: ${bars} compases.`);
                         }
                     }, totalMs);
                 }
@@ -88,11 +106,25 @@ window.toggleRecord = async function() {
             alert("Error: " + err);
         }
     } else {
-        stopRecording();
+        window.stopRecording();
     }
 };
-
-// --- Modifica stopRecording ---
+window.stopRecording = function() {
+    isRecording = false;
+    document.getElementById('recDot').classList.remove('active');
+    document.getElementById('metronomeStatus').innerText = "";
+    document.getElementById('progressContainer').style.display = 'none'; // Escondemos barra
+    
+    clearInterval(timerInterval);
+    clearInterval(progressInterval);
+    timerInterval = null;
+    progressInterval = null;
+    
+    if (mediaRecorder && mediaRecorder.state !== "inactive"){
+        mediaRecorder.stop();
+    }
+};
+/* --- Modifica stopRecording ---
 function stopRecording() {
     isRecording = false;
     document.getElementById('recDot').classList.remove('active');
@@ -106,26 +138,21 @@ function stopRecording() {
     if (mediaRecorder && mediaRecorder.state !== "inactive"){
         mediaRecorder.stop();
     }
-}
+}*/
 
 // --- Modifica clearLoop para resetear el reloj ---
 window.clearLoop = () => { 
     window.stopLoop(); 
     loopAudio = null;
-    //---Detenemos el reloj
-    if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-    }
-    //---Detenemos el metrónomo
-    if (window.isMetroRunning) {
-        window.toggleMetronome(); // Esto detiene el sonido y resetea los puntitos (dots)
-    }
+    if (timerInterval) clearInterval(timerInterval);
+    if (progressInterval) clearInterval(progressInterval);
+    if (window.isMetroRunning) window.toggleMetronome();
    
     document.getElementById('btnPlay').disabled = true; 
-    document.getElementById('loopTimer').innerText = "00:00"; // Reset visual
+    document.getElementById('loopTimer').innerText = "00:00";
+    document.getElementById('progressBar').style.width = "0%";
+    document.getElementById('progressContainer').style.display = 'none';
     document.getElementById('metronomeStatus').innerText = "Listo para grabar";
-    console.log("Looper y Metrónomo reseteados.");   
 };
 
 // --- Sonido del click (Global) ---
