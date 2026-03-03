@@ -67,6 +67,22 @@ window.toggleRecord = async function() {
                     stream.getTracks().forEach(track => track.stop());
                 };
                 mediaRecorder.start();
+                const bpm = document.getElementById('bpmInput').value || 100;
+                const bars = parseInt(document.getElementById('loopBars').value);
+                
+                if (bars > 0) {
+                    // Calculamos la duración total en milisegundos
+                    const msPerBeat = 60000 / bpm;
+                    const totalMs = msPerBeat * 4 * bars; 
+                
+                    // Programamos el "Stop" automático
+                    setTimeout(() => {
+                        if (isRecording) {
+                            stopRecording();
+                            console.log(`Grabación automática finalizada: ${bars} compases.`);
+                        }
+                    }, totalMs);
+                }
             });
         } catch (err) {
             alert("Error: " + err);
