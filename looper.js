@@ -29,10 +29,6 @@ window.startMetronome = function(callback) {
     }, intervalMs);
 };
 
-//--- MINUTERO ---
-let startTime;
-let timerInterval;
-
 // --- Función para formatear el tiempo (00:00) ---
 function formatTime(ms) {
     const totalSeconds = Math.floor(ms / 1000);
@@ -41,7 +37,29 @@ function formatTime(ms) {
     return `${minutes}:${seconds}`;
 }
 
-// --- Modifica window.toggleRecord ---
+// --- Detener Grabación (Global) ---
+window.stopRecording = function() {
+    isRecording = false;
+    document.getElementById('recDot').classList.remove('active');
+    document.getElementById('metronomeStatus').innerText = "";
+    
+    // Ocultar barra y resetear color
+    const container = document.getElementById('progressContainer');
+    const bar = document.getElementById('progressBar');
+    if(container) container.style.display = 'none';
+    if(bar) bar.style.backgroundColor = 'var(--accent)'; 
+    
+    clearInterval(timerInterval);
+    clearInterval(progressInterval);
+    timerInterval = null;
+    progressInterval = null;
+    
+    if (mediaRecorder && mediaRecorder.state !== "inactive"){
+        mediaRecorder.stop();
+    }
+};
+
+// --- Iniciar/Parar Grabación ---
 window.toggleRecord = async function() {
     if (!isRecording) {
         try {
@@ -54,16 +72,16 @@ window.toggleRecord = async function() {
                 audioChunks = [];
                 document.getElementById('recDot').classList.add('active');
                 
-                const bpm = document.getElementById('bpmInput').value || 100;
+                const bpm = parseInt(document.getElementById('bpmInput').value) || 100;
                 const bars = parseInt(document.getElementById('loopBars').value);
                 const msPerBeat = 60000 / bpm;
-                const totalMs = msPerBeat * 4 * bars;
+                const msPerBar = msPerBeat * 4;
+                const totalMs = msPerBar * bars;
 
-                // --- INICIAR CRONÓMETRO Y BARRA ---
                 startTime = Date.now();
                 document.getElementById('loopTimer').innerText = "00:00";
                 
-                // Mostrar y resetear barra si hay compases definidos
+                // Configuración de Barra de Progreso
                 if (bars > 0) {
                     const bar = document.getElementById('progressBar');
                     document.getElementById('progressContainer').style.display = 'block';
@@ -73,7 +91,17 @@ window.toggleRecord = async function() {
                         const elapsed = Date.now() - startTime;
                         const percent = (elapsed / totalMs) * 100;
                         bar.style.width = Math.min(percent, 100) + "%";
-                    }, 50); // Actualización fluida cada 50ms
+
+                        // ALERTA VISUAL: Si queda menos de 1 compás, se pone roja
+                        if (totalMs - elapsed < msPerBar) {
+                            bar.style.backgroundColor = "#e74c3c"; // Rojo alerta
+                        }
+                    }, 50);
+
+                    // Auto-stop matemático
+                    setTimeout(() => {
+                        if (isRecording) window.stopRecording();
+                    }, totalMs);
                 }
 
                 timerInterval = setInterval(() => {
@@ -91,56 +119,16 @@ window.toggleRecord = async function() {
                 };
                 
                 mediaRecorder.start();
-                
-                // --- STOP AUTOMÁTICO ---
-                if (bars > 0) {
-                    setTimeout(() => {
-                        if (isRecording) {
-                            window.stopRecording(); // Llamada global
-                            console.log(`Auto-stop: ${bars} compases.`);
-                        }
-                    }, totalMs);
-                }
             });
         } catch (err) {
-            alert("Error: " + err);
+            alert("Error: No se pudo acceder al micrófono. " + err);
         }
     } else {
         window.stopRecording();
     }
 };
-window.stopRecording = function() {
-    isRecording = false;
-    document.getElementById('recDot').classList.remove('active');
-    document.getElementById('metronomeStatus').innerText = "";
-    document.getElementById('progressContainer').style.display = 'none'; // Escondemos barra
-    
-    clearInterval(timerInterval);
-    clearInterval(progressInterval);
-    timerInterval = null;
-    progressInterval = null;
-    
-    if (mediaRecorder && mediaRecorder.state !== "inactive"){
-        mediaRecorder.stop();
-    }
-};
-/* --- Modifica stopRecording ---
-function stopRecording() {
-    isRecording = false;
-    document.getElementById('recDot').classList.remove('active');
-    document.getElementById('metronomeStatus').innerText = "";
-    
-    // --- DETENER CRONÓMETRO ---
-    clearInterval(timerInterval);
-    timerInterval = null;
-    // El tiempo se queda fijo en lo que duró la grabación
-    
-    if (mediaRecorder && mediaRecorder.state !== "inactive"){
-        mediaRecorder.stop();
-    }
-}*/
 
-// --- Modifica clearLoop para resetear el reloj ---
+// --- Limpiar todo ---
 window.clearLoop = () => { 
     window.stopLoop(); 
     loopAudio = null;
@@ -150,12 +138,16 @@ window.clearLoop = () => {
    
     document.getElementById('btnPlay').disabled = true; 
     document.getElementById('loopTimer').innerText = "00:00";
-    document.getElementById('progressBar').style.width = "0%";
+    const bar = document.getElementById('progressBar');
+    if(bar) {
+        bar.style.width = "0%";
+        bar.style.backgroundColor = 'var(--accent)';
+    }
     document.getElementById('progressContainer').style.display = 'none';
     document.getElementById('metronomeStatus').innerText = "Listo para grabar";
 };
 
-// --- Sonido del click (Global) ---
+// --- Audio Engine ---
 window.playClickSound = function(freq) {
     if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const osc = window.audioCtx.createOscillator();
@@ -169,7 +161,6 @@ window.playClickSound = function(freq) {
     osc.stop(window.audioCtx.currentTime + 0.1);
 };
 
-
 function saveAndPlayLoop() {
     const blob = new Blob(audioChunks, { type: 'audio/ogg; codecs=opus' });
     const url = URL.createObjectURL(blob);
@@ -180,7 +171,5 @@ function saveAndPlayLoop() {
     loopAudio.play();
 }
 
-// Funciones para los otros botones
 window.playLoop = () => { if (loopAudio) loopAudio.play(); };
 window.stopLoop = () => { if (loopAudio) { loopAudio.pause(); loopAudio.currentTime = 0; } };
-window.clearLoop = () => { window.stopLoop(); loopAudio = null; document.getElementById('btnPlay').disabled = true; };
