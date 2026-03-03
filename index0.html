@@ -443,29 +443,32 @@
             init();
         }
 
-        // --- LÓGICA DEL METRÓNOMO ---
-        /*let isMetroRunning = false;
-        let metroInterval = null;
-        let currentBeat = 0;
-        let bpm = 80;*/
-
+        // --- LÓGICA DEL METRÓNOMO (Configuración Global Unificada) ---
         window.isMetroRunning = false;
+        window.metroInterval = null;
+        window.currentBeat = 0;
+        window.bpm = 100; // Valor inicial coherente con el HTML
+        
         window.toggleMetronome = function() {
             const btn = document.getElementById('metroPlayBtn');
+            
             if (window.isMetroRunning) {
-                clearInterval(metroInterval);
+                clearInterval(window.metroInterval);
                 window.isMetroRunning = false;
                 btn.innerText = "▶";
                 resetDots();
-                /*currentBeat = 0; // Opcional: resetear al primer tiempo siempre*/
             } else {
+                // Inicializar AudioContext si no existe (vital para navegadores modernos)
+                if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
                 window.isMetroRunning = true;
                 btn.innerText = "⏹";
+                window.currentBeat = 0; // Es mejor que siempre empiece en el beat 1 al dar Play
                 startMetro();
             }
         };
         
-        /*function toggleMetronome() {
+        function toggleMetronome() {
             const btn = document.getElementById('metroPlayBtn');
             if (isMetroRunning) {
                 clearInterval(metroInterval);
@@ -477,7 +480,7 @@
                 btn.innerText = "⏹";
                 startMetro();
             }
-        }*/
+        }
         
         function updateBPM() {
             bpm = document.getElementById('bpmInput').value;
