@@ -12,11 +12,10 @@
             margin: 0;
         }
 
-        /* Título Principal */
         .main-header {
             width: 100%;
             max-width: 1200px;
-            margin: 0 auto 20px auto;
+            margin: 0 auto 30px auto;
             font-size: 2.5rem;
             font-weight: 800;
             color: #1a1a1a;
@@ -25,116 +24,123 @@
             text-transform: uppercase;
         }
 
-        /* Contenedor de Columnas (Grid) */
+        /* Contenedor principal en 3 columnas */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: 1fr 1fr 1fr; /* Tres columnas iguales */
             gap: 20px;
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
+            align-items: start;
         }
 
-        /* Cada Tarjeta Individual */
+        /* Envoltorio para agrupar tarjetas verticalmente dentro de una columna */
+        .column-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
         .card {
             background-color: white;
             border: 1px solid #ddd;
-            padding: 30px;
+            padding: 25px;
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s;
-        }
-
-        .card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
         .category-title {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             font-weight: 700;
             color: #444;
             text-transform: uppercase;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
+
         .category-dist {
-              font-size: 2rem;
-              font-weight: 700;
-              color: #333333;
-              text-transform: uppercase;
-              margin-bottom: 1px;
-              margin-top:20px;
-          }
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #2c82cb;
+            text-transform: uppercase;
+            margin-top: 15px;
+        }
 
         .value-wrapper {
             display: flex;
             align-items: baseline;
             justify-content: flex-start;
-            flex-wrap: wrap;
         }
 
         .number {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 700;
             color: #000;
-            margin-right: 10px;
-        }
-
-        .unit {
-            font-size: 2rem;
-            font-weight: 400;
-            color: #333;
         }
 
         .footer-info {
-            margin-top: auto;
-            padding-top: 15px;
             font-size: 0.8rem;
             color: #999;
-            font-style: italic;
+            margin-top: 5px;
         }
     </style>
 </head>
 
 <body>
     <h1 class="main-header">Presupuestos</h1>
+
     <div class="grid-container">
-        <div class="card">
-            <div class="category-title">FIJO</div>
-            <div class="value-wrapper"><span class="number">5.662.052,80 &euro;</span>&nbsp;</div>
-            <div class="footer-info"><br></div>
+        
+        <div class="column-wrapper">
+            <div class="card">
+                <div class="category-title">FIJO</div>
+                <div class="value-wrapper"><span class="number">5.662.052,80 &euro;</span></div>
+            </div>
+            <div class="card">
+                <div class="category-title">VARIABLE</div>
+                <div class="value-wrapper"><span class="number">14.751.869,08 &euro;</span></div>
+            </div>
         </div>
-        <div class="card">
-            <div class="category-title">TOTAL DISTRITOS</div>
-            <div class="value-wrapper"><span class="number">3.952.981,48 &euro;</span>&nbsp;</div>
+
+        <div class="column-wrapper">
+            <div class="card">
+                <div class="category-title">TOTAL DISTRITOS</div>
+                <div class="value-wrapper" style="border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                    <span class="number">3.952.981,48 &euro;</span>
+                </div>
+                
+                <div class="category-dist">ANAGA</div>
+                <div class="value-wrapper"><span class="number">551.841,77 &euro;</span></div>
+
+                <div class="category-dist">CENTRO</div>
+                <div class="value-wrapper"><span class="number">620.963,24 &euro;</span></div>
+
+                <div class="category-dist">SALUD LA SALLE</div>
+                <div class="value-wrapper"><span class="number">418.405,49 &euro;</span></div>
+
+                <div class="category-dist">OFRA - COSTA SUR</div>
+                <div class="value-wrapper"><span class="number">560.225,88 &euro;</span></div>
+
+                <div class="category-dist">SUROESTE</div>
+                <div class="value-wrapper"><span class="number">1.801.545,10 &euro;</span></div>
+            </div>
         </div>
-        <div class="card">
-            <div class="category-title">VARIABLE</div>
-            <div class="value-wrapper"><span class="number">14.751.869,08 &euro;</span>&nbsp;</div>
+
+        <div class="column-wrapper">
+            <div class="card">
+                <div class="category-title">MODIFICADOS</div>
+                <div class="value-wrapper"><span class="number">2.357.325,00 &euro;</span></div>
+            </div>
+            <div class="card">
+                <div class="category-title">PRORROGA</div>
+                <div class="value-wrapper"><span class="number">2.357.325,00 &euro;</span></div>
+            </div>
+            <div class="card">
+                <div class="category-title">MEJORAS</div>
+                <div class="value-wrapper"><span class="number">2.357.325,00 &euro;</span></div>
+            </div>
         </div>
-        <div class="card">
-            <div class="category-dist" style="line-height: 1.15;"><span style="color: rgb(44, 130, 201);">ANAGA</span></div>
-            <div class="value-wrapper" style="line-height: 1.15;"><span class="number">551.841,77 &euro;<br></span>&nbsp;</div>
-            <div class="category-dist" style="line-height: 1.15;"><span style="color: rgb(44, 130, 201);">CENTRO</span></div>
-            <div class="value-wrapper" style="line-height: 1.15;"><span class="number">620.963,24 &euro;<br></span>&nbsp;</div>
-            <div class="category-dist" style="line-height: 1.15;"><span style="color: rgb(44, 130, 201);">SALUD LA SALLE</span></div>
-            <div class="value-wrapper" style="line-height: 1.15;"><span class="number">418.405,49 &euro;<br></span>&nbsp;</div>
-            <div class="category-dist" style="line-height: 1.15;"><span style="color: rgb(44, 130, 201);">OFRA - COSTA SUR</span></div>
-            <div class="value-wrapper" style="line-height: 1.15;"><span class="number">560.225,88 &euro;<br></span>&nbsp;</div>
-            <div class="category-dist" style="line-height: 1.15;"><span style="color: rgb(44, 130, 201);">SUROESTE</span></div>
-            <div class="value-wrapper" style="line-height: 1.15;"><span class="number">1.801.545,10 &euro;<br></span>&nbsp;</div>
-        </div>
-        <div class="card">
-            <div class="category-title">MODIFICADOS</div>
-            <div class="value-wrapper"><span class="number">2.357.325,00 &euro;</span>&nbsp;</div>
-        </div>
-        <div class="card">
-            <div class="category-title">PRORROGA</div>
-            <div class="value-wrapper"><span class="number">2.357.325,00 &euro;</span>&nbsp;</div>
-        </div>
-        <div class="card">
-            <div class="category-title">MEJORAS</div>
-            <div class="value-wrapper"><span class="number">2.357.325,00 &euro;</span>&nbsp;</div>
-        </div>
+
     </div>
 </body>
-
 </html>
