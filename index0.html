@@ -10,11 +10,58 @@
         }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: white; padding: 20px; margin: 0; text-align: center; }
         
-        /* Controles */
-        .controls { background: #34495e; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); align-items: flex-end; }
+        /* CONTROLES */
+        .controls { background: #34495e; 
+            padding: 20px 30px; box-sizing: border-box; /* Importante para que el padding no rompa el ancho */
+            border-radius: 12px; margin-bottom: 20px; 
+            display: inline-flex; 
+            flex-direction: column; 
+            gap: 15px; flex-wrap: wrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); align-items: flex-end;
+        } 
+        /* Estilo común para las filas */
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end; /* Alinea etiquetas y selects por la base */
+            gap: 12px;
+            flex-wrap: wrap;       /* Importante para móviles */
+        }
+        #toggleBtn {
+            min-width: 100px; /* Ajusta este valor a tu gusto (ej. 120px) */
+            text-align: center;
+            padding: 11px; /* Mantiene el grosor vertical */
+            padding-left: 30px;
+            padding-right: 30px;
+        }
+        /* Fila de acciones (la segunda línea) */
+        .actions-row {
+            padding-top: 10px;
+            justify-content: center;
+            gap: 12px;
+            padding: 10px;
+            width: 100%;
+            border-top: 1px solid rgba(255,255,255,0.1); /* Una línea sutil divisoria */
+        }
+        .actions-row button, 
+        .actions-row .btn-nav, 
+        .actions-row .btn-piano {
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
         .control-group { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
         label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px; }
+        .control-group-loop { padding: 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
 
+        
+        
+        
         /* Piano */
         .piano-container { display: inline-flex; background: #111; padding: 10px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
         .piano-key { width: 32px; height: 110px; background: white; border: 1px solid #ccc; border-radius: 0 0 4px 4px; position: relative; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; color: #333; font-size: 9px; font-weight: bold; box-sizing: border-box; }
@@ -213,7 +260,7 @@
         .svg-label { color: var(--accent); font-size: 11px; font-weight: 800; margin-bottom: 5px; border-bottom: 1px solid #eee; }
         
         #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 999; backdrop-filter: blur(4px); }
-
+        /*BOTONES*/
         button, select { padding: 10px 15px; cursor: pointer; background: var(--accent); border: none; color: white; border-radius: 5px; font-weight: bold; }
         .btn-nav { text-decoration: none; background: #2980b9; color: white; padding: 10px 15px; border-radius: 5px; font-weight: bold; font-size: 13px; }
         .btn-nav:hover { background: #000000; transform: translateY(-2px); }
@@ -222,14 +269,8 @@
         .btn-piano:hover { background: #000000; transform: translateY(-2px); }
 
         /*BOTÓN RANDON*/
-        #randomBtn {
-            background: #34495e; /* Un púrpura elegante para el modo aleatorio */
-            transition: 0.3s;
-        }
-        #randomBtn:hover {
-            background: #000000;
-            transform: translateY(-2px);
-        }
+        #randomBtn {background: #2980b9; transition: 0.3s;}
+        #randomBtn:hover {background: #000000; transform: translateY(-2px); }
 
         #chordsList {
             display: flex;
@@ -260,8 +301,15 @@
 
         /*LOOPER*/
         .looper-container {
-            background: rgba(0,0,0,0.4);
-            padding: 15px;border-radius: 12px; border: 1px solid #444;margin: 20px auto;max-width: 400px;}
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px; 
+            border: 1px solid #444;
+            width: 200px;
+            height: 110px;
+            display:table;
+            margin: 1px auto;
+            max-width: 400px;}
         .looper-status { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
         .red-dot { width: 12px; height: 12px; background: red; border-radius: 50%; display: none; }
         .red-dot.active { display: block; animation: blink 1s infinite; }
@@ -278,32 +326,41 @@
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.8.6</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.8.7</span></h2>
 
     <div class="controls">
-        <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
-        <div class="control-group"><label>Escala</label><select id="scaleSelect"></select></div>
-        <div class="control-group">
-            <label>Afinación</label>
-            <select id="tuningSelect">
-                <option value="standard">Standard (EADGBe)</option>
-                <option value="dropD">Drop D</option>
-                <option value="eb">Eb (Medio tono abajo)</option>
-                <option value="d">D (Tono abajo)</option>
+        <div class="controls-row config-row">
+            <div class="control-group">
+            <label>Nivel</label>
+            <select id="levelSelect" onchange="updateScaleSelector()">
+                <option value="Principiante">Principiante</option>
+                <option value="Intermedio" selected>Intermedio</option>
+                <option value="Avanzado">Avanzado</option>
+                <option value="Experto">Experto</option>
             </select>
         </div>
-        <button id="toggleBtn">Intervalos: OFF</button>
-        <a href="libreria.html" class="btn-nav">🎸 Lib. Guitarra</a>
-        <a href="libpiano.html" class="btn-piano">🎹 Lib. Piano</a>
-        <button id="randomBtn" onclick="setRandomScale()" style="background: #34495e;">🎲</button>
-        <div id="scaleDescription" class="scale-info-box">
-            <span class="info-icon">ℹ️</span>
-            <p id="scaleText">Selecciona una escala para conocer su origen.</p>
+            <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
+            <div class="control-group"><label>Escala</label><select id="scaleSelect"></select></div>
+            <div class="control-group">
+                <label>Afinación</label>
+                <select id="tuningSelect">
+                    <option value="standard">Standard (EADGBe)</option>
+                    <option value="dropD">Drop D</option>
+                    <option value="eb">Eb (Medio tono abajo)</option>
+                    <option value="d">D (Tono abajo)</option>
+                </select>
+            </div>
+            <div class="control-group"><label>Intervalos</label>
+            <button id="toggleBtn">OFF</button>
+            </div>  
         </div>
 
+        <div class="controls-row actions-row">
+            <a href="libreria.html" class="btn-nav">🎸 Lib. Guitarra</a>
+            <a href="libpiano.html" class="btn-piano">🎹 Lib. Piano</a>
+            <button id="randomBtn" onclick="setRandomScale()" >🎲</button>
+        </div>    
     </div>
-
-
  
     <div class="main-interface">
         <div class="metronome-container">
@@ -323,8 +380,9 @@
             <div class="looper-status">
             <span id="loopTimer">00:00</span>
             <div id="recDot" class="red-dot"></div>
+            
         </div>
-        <div class="control-group">
+        <div class="control-group-loop">
             <label>Duración (Compases)</label>
             <select id="loopBars">
                 <option value="0">Manual (Libre)</option>
@@ -334,14 +392,14 @@
                 <option value="16">16 Compases</option>
             </select>
         </div>
-        <div id="progressContainer" style="width: 180px; height: 5px; background: #333; margin: 10px auto; border-radius: 5px; overflow: hidden; display: none;">
+        <div id="progressContainer" style="width: 180px; height: 5px; background: #000000; margin: 10px auto; border-radius: 5px; overflow: hidden; display: none;">
             <div id="progressBar" style="width: 0%; height: 100%; background: var(--accent); transition: width 0.1s linear;"></div>
         </div>
         <div class="looper-controls">
               <button id="btnRec" onclick="toggleRecord()">🔴 Rec</button>
+              <button id="btnClear" onclick="clearLoop()">🗑️ Clear</button>
               <button id="btnPlay" onclick="playLoop()" disabled>▶️ Play</button>
               <button id="btnStop" onclick="stopLoop()">⏹️ Stop</button>
-              <button id="btnClear" onclick="clearLoop()">🗑️ Clear</button>
         </div>
         <div id="metronomeStatus" style="font-size: 0.8rem; opacity: 0.7;"></div>
         </div>
