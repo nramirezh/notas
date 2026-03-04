@@ -2,89 +2,98 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArcGIS - Texto sobre Imagen</title>
     <style>
         body {
-            font-family: 'Segoe UI', sans-serif;
-            /* He puesto un fondo con color para que se note la transparencia */
-            background: linear-gradient(135deg, #f0f2f5 0%, #2c82cb 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
             padding: 40px;
             margin: 0;
+            display: flex;
+            justify-content: center; /* Centra el contenedor en la pantalla */
+            align-items: center;
             min-height: 100vh;
         }
 
-        .section-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            display: flex;
-            gap: 0; /* Sin espacio para que se vea como un solo bloque */
-            
-            /* FONCO BLANCO AL 50% */
-            background-color: rgba(255, 255, 255, 0.5);
-            
-            /* Un ligero desenfoque de fondo queda muy moderno (opcional) */
-            backdrop-filter: blur(10px); 
-            
-            border: 1px solid rgba(255, 255, 255, 0.3);
+        /* 1. EL CONTENEDOR PRINCIPAL (Contiene la imagen base) */
+        .image-overlay-container {
+            position: relative; /* Esencial: establece el marco de referencia para el texto */
+            max-width: 1000px; /* Ancho máximo deseado */
+            width: 100%;
+            height: 900px; /* Altura fija para mantener la proporción */
             border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            overflow:visible; /* Asegura que nada sobresalga de las esquinas redondeadas */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
         }
 
-        .image-box {
-            flex: 1;
-            display: flex;
-            padding: 20px;
-        }
-
-        .image-box img {
+        /* La imagen de fondo */
+        .base-image {
             width: 100%;
             height: auto;
-            object-fit: cover;
-            border-radius: 8px;
+            display: block; /* Elimina espacio en blanco inferior */
         }
 
-        .info-card {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 40px;
+        /* 2. LA TARJETA DE TEXTO (Superpuesta) */
+        .text-card-overlay {
+            position: absolute; /* Se posiciona relativo al contenedor .image-overlay-container */
+            
+            /* Posicionamiento a la DERECHA */
+            top: 75%; /* Centrado verticalmente respecto al top */
+            right: 20%; /* Separación del borde derecho */
+            transform: translateY(-50%); /* Ajuste preciso para el centrado vertical */
+
+            /* Diseño de la tarjeta */
+            width: 350px; /* Ancho fijo para la tarjeta de texto */
+            background-color: rgba(255, 255, 255, 0.85); /* Fondo blanco 85% opaco para legibilidad */
+            backdrop-filter: blur(10px); /* Efecto de cristal esmerilado opcional */
+            padding: 30px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            
+            /* Asegura que el texto sea legible */
+            color: #1a1a1a; 
+            z-index: 10; /* Asegura que esté por encima de la imagen */
         }
 
-        .info-card h2 {
-            font-size: 1.5rem;
-            color: #1a1a1a;
+        /* Estilos de texto dentro de la tarjeta */
+        .text-card-overlay h2 {
+            font-size: 1.4rem;
+            color: #2c82cb; /* Azul ArcGIS */
             margin-top: 0;
             text-transform: uppercase;
-            border-bottom: 3px solid #2c82cb;
+            border-bottom: 2px solid #2c82cb;
             display: inline-block;
-            margin-bottom: 20px;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
         }
 
-        .info-card p {
-            font-size: 1.1rem;
+        .text-card-overlay p {
+            font-size: 1rem;
             line-height: 1.6;
-            color: #222; /* Texto oscuro para que se lea bien sobre el 50% */
             margin: 0;
         }
 
         .app-name {
-            font-weight: 800;
+            font-weight: 700;
         }
+
     </style>
 </head>
 <body>
 
-    <div class="section-container">
-        <div class="info-card">
+    <div class="image-overlay-container">
+        
+        <img src="https://github.com/nramirezh/notas/blob/ffa4b396f28952a4d5bccf724dcbfb23e08bddca/imagenes/app.jpg?raw=true" alt="ArcGIS Apps en campo" class="base-image">
+
+        <div class="text-card-overlay">
             <h2>Tecnología de Campo</h2>
             <p>
                 Empleo de aplicaciones del conjunto de software de <span class="app-name">ArcGIS</span> para la recolección de datos mediante formularios (<span class="app-name">Survey 123</span>), en tiempo real registrando elementos (<span class="app-name">QuickCapture</span>) o trabajando directamente sobre mapas a través de la aplicación <span class="app-name">Field Maps</span>.
             </p>
         </div>
-        <div class="image-box">
-            <img src="https://github.com/nramirezh/notas/blob/ffa4b396f28952a4d5bccf724dcbfb23e08bddca/imagenes/app.jpg?raw=true" alt="ArcGIS Apps">
-        </div>
+
     </div>
 
 </body>
