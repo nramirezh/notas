@@ -2,89 +2,88 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
+            font-family: 'Segoe UI', sans-serif;
+            /* He puesto un fondo con color para que se note la transparencia */
+            background: linear-gradient(135deg, #f0f2f5 0%, #2c82cb 100%);
             padding: 40px;
             margin: 0;
+            min-height: 100vh;
         }
 
         .section-container {
-            max-width: 1200px;
+            max-width: 1000px;
             margin: 0 auto;
             display: flex;
-            gap: 30px;
-            align-items: stretch; /* Para que ambas tengan la misma altura */
-            background-color: white;
-            border: 1px solid #ddd;
-            padding: 20px;
+            gap: 0; /* Sin espacio para que se vea como un solo bloque */
+            
+            /* FONCO BLANCO AL 50% */
+            background-color: rgba(255, 255, 255, 0.5);
+            
+            /* Un ligero desenfoque de fondo queda muy moderno (opcional) */
+            backdrop-filter: blur(10px); 
+            
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
 
-        /* Contenedor de la Imagen */
         .image-box {
-            flex: 1; /* Toma el 50% */
+            flex: 1;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            border-right: 2px solid #f0f2f5;
-            padding-right: 20px;
+            padding: 20px;
         }
 
         .image-box img {
-            max-width: 100%;
+            width: 100%;
             height: auto;
-            border-radius: 4px;
+            object-fit: cover;
+            border-radius: 8px;
         }
 
-        /* Tarjeta de Texto */
         .info-card {
-            flex: 1; /* Toma el otro 50% */
+            flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 20px;
+            padding: 40px;
         }
 
         .info-card h2 {
             font-size: 1.5rem;
-            color: #2c82cb; /* Color azul ArcGIS */
+            color: #1a1a1a;
             margin-top: 0;
             text-transform: uppercase;
-            border-bottom: 2px solid #2c82cb;
+            border-bottom: 3px solid #2c82cb;
             display: inline-block;
-            padding-bottom: 5px;
             margin-bottom: 20px;
         }
 
         .info-card p {
             font-size: 1.1rem;
             line-height: 1.6;
-            color: #333;
+            color: #222; /* Texto oscuro para que se lea bien sobre el 50% */
             margin: 0;
         }
 
-        /* Resaltado para las aplicaciones */
         .app-name {
-            font-weight: 700;
-            color: #1a1a1a;
+            font-weight: 800;
         }
     </style>
 </head>
 <body>
 
     <div class="section-container">
-        <div class="image-box">
-            <img src="https://github.com/nramirezh/notas/blob/ffa4b396f28952a4d5bccf724dcbfb23e08bddca/imagenes/app.jpg?raw=true" alt="ArcGIS Apps">
-        </div>
-
         <div class="info-card">
             <h2>Tecnología de Campo</h2>
             <p>
                 Empleo de aplicaciones del conjunto de software de <span class="app-name">ArcGIS</span> para la recolección de datos mediante formularios (<span class="app-name">Survey 123</span>), en tiempo real registrando elementos (<span class="app-name">QuickCapture</span>) o trabajando directamente sobre mapas a través de la aplicación <span class="app-name">Field Maps</span>.
             </p>
+        </div>
+        <div class="image-box">
+            <img src="https://github.com/nramirezh/notas/blob/ffa4b396f28952a4d5bccf724dcbfb23e08bddca/imagenes/app.jpg?raw=true" alt="ArcGIS Apps">
         </div>
     </div>
 
