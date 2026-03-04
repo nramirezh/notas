@@ -72,8 +72,21 @@
             justify-content: flex-start;
         }
 
+        .value-wrapper-imp {
+            font-size: 0.8rem;
+            display: flex;
+            align-items: baseline;
+            justify-content: flex-start;
+        }
+
         .number {
             font-size: 1.8rem;
+            font-weight: 700;
+            color: #000;
+        }
+
+        .number-imp {
+            font-size: 1.2rem;
             font-weight: 700;
             color: #000;
         }
@@ -93,13 +106,24 @@
         
         <div class="column-wrapper">
             <div class="card">
-                <div class="category-title">FIJO</div>
+                <div class="category-title">MANTENIMIENTO ORDINARIO</div>
                 <div class="value-wrapper"><span class="number">5.662.052,80 &euro;</span></div>
             </div>
             <div class="card">
-                <div class="category-title">VARIABLE</div>
-                <div class="value-wrapper"><span class="number">9.089.816,28 &euro;</span></div>
-            </div>
+                <div class="category-title">MANTENIMIENTO EXTRAORDINARIO</div>
+                <div class="value-wrapper" style="border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                    <span class="number">9.089.816,28 &euro;</span>
+                </div>
+                
+                <div class="category-dist">OBRAS</div>
+                <div class="value-wrapper"><span class="number-imp">4.799.999,88 &euro;</span></div>
+
+                <div class="category-dist">MODIFICADO</div>
+                <div class="value-wrapper"><span class="number-imp">2.357.325,00 &euro;</span></div>
+
+                <div class="category-dist">BAJA RECUPERABLE</div>
+                <div class="value-wrapper"><span class="number-imp">1.932.491,40 &euro;</span></div>
+                </div>
         </div>
 
         <div class="column-wrapper">
@@ -110,30 +134,32 @@
                 </div>
                 
                 <div class="category-dist">ANAGA</div>
-                <div class="value-wrapper"><span class="number">551.841,77 &euro;</span></div>
+                <div class="value-wrapper"><span class="number-imp">551.841,77 &euro;</span></div>
 
                 <div class="category-dist">CENTRO</div>
-                <div class="value-wrapper"><span class="number">620.963,24 &euro;</span></div>
+                <div class="value-wrapper"><span class="number-imp">620.963,24 &euro;</span></div>
 
                 <div class="category-dist">SALUD LA SALLE</div>
-                <div class="value-wrapper"><span class="number">418.405,49 &euro;</span></div>
+                <div class="value-wrapper"><span class="number-imp">418.405,49 &euro;</span></div>
 
                 <div class="category-dist">OFRA - COSTA SUR</div>
-                <div class="value-wrapper"><span class="number">560.225,88 &euro;</span></div>
+                <div class="value-wrapper"><span class="number-imp">560.225,88 &euro;</span></div>
 
                 <div class="category-dist">SUROESTE</div>
-                <div class="value-wrapper"><span class="number">1.801.545,10 &euro;</span></div>
+                <div class="value-wrapper"><span class="number-imp">1.801.545,10 &euro;</span></div>
             </div>
         </div>
 
         <div class="column-wrapper">
             <div class="card">
-                <div class="category-title">MODIFICADOS</div>
-                <div class="value-wrapper"><span class="number">2.357.325,00 &euro;</span></div>
-            </div>
-            <div class="card">
                 <div class="category-title">PRORROGA</div>
-                <div class="value-wrapper"><span class="number">2.615.493,17 &euro;</span></div>
+                <div class="value-wrapper" style="border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 10px;">
+                    <span class="number"> 2.615.493,17 &euro;</span>
+                </div>
+                <div class="category-dist">MANT.ORDINARIO</div>
+                <div class="value-wrapper"><span class="number-imp"> 1.415.493,20 &euro;</span></div>
+                <div class="category-dist">MANT. EXTRAORDINARIO</div>
+                <div class="value-wrapper"><span class="number-imp"> 1.199.999,97 &euro;</span></div>
             </div>
             <div class="card">
                 <div class="category-title">MEJORAS</div>
