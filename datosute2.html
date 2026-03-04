@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            padding: 40px;
+            margin: 0;
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 30px;
+            align-items: stretch; /* Para que ambas tengan la misma altura */
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+        }
+
+        /* Contenedor de la Imagen */
+        .image-box {
+            flex: 1; /* Toma el 50% */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border-right: 2px solid #f0f2f5;
+            padding-right: 20px;
+        }
+
+        .image-box img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        /* Tarjeta de Texto */
+        .info-card {
+            flex: 1; /* Toma el otro 50% */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .info-card h2 {
+            font-size: 1.5rem;
+            color: #2c82cb; /* Color azul ArcGIS */
+            margin-top: 0;
+            text-transform: uppercase;
+            border-bottom: 2px solid #2c82cb;
+            display: inline-block;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+        }
+
+        .info-card p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+        }
+
+        /* Resaltado para las aplicaciones */
+        .app-name {
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="section-container">
+        <div class="image-box">
+            <img src="https://github.com/nramirezh/notas/blob/ffa4b396f28952a4d5bccf724dcbfb23e08bddca/imagenes/app.jpg?raw=true" alt="ArcGIS Apps">
+        </div>
+
+        <div class="info-card">
+            <h2>Tecnología de Campo</h2>
+            <p>
+                Empleo de aplicaciones del conjunto de software de <span class="app-name">ArcGIS</span> para la recolección de datos mediante formularios (<span class="app-name">Survey 123</span>), en tiempo real registrando elementos (<span class="app-name">QuickCapture</span>) o trabajando directamente sobre mapas a través de la aplicación <span class="app-name">Field Maps</span>.
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>
