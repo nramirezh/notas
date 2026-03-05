@@ -59,8 +59,8 @@
         label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px; }
         .control-group-loop { padding: 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
 
-        
-        
+
+
         
         /* Piano */
         .piano-container { display: inline-flex; background: #111; padding: 10px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
@@ -271,24 +271,9 @@
             border-radius: 5px; font-weight: bold; font-size: 13px; transition: 0.3s; display: inline-block; }
         .btn-piano:hover { background: #000000; transform: translateY(-2px); }
 
-        /* BOTÓN RANDOM MEJORADO */
-        #randomBtn {
-            background: #2980b9; transition: all 0.3s ease; border: none; box-shadow: 0 4px 0 #1c5982; /* Efecto 3D abajo */
-        }
-        
-        #randomBtn:hover {
-            background: #3498db; 
-            transform: translateY(-2px);
-            /* Iluminación azul suave al pasar el ratón */
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4); 
-        }
-        
-        /* Esta clase se activará por un segundo al hacer clic */
-        .btn-glow-active {
-            box-shadow: 0 0 20px #3498db !important;
-            background: #3498db !important;
-            transform: scale(1.05);
-        }
+        /*BOTÓN RANDON*/
+        #randomBtn {background: #2980b9; transition: 0.3s;}
+        #randomBtn:hover {background: #000000; transform: translateY(-2px); }
 
         #chordsList {
             display: flex;
@@ -344,7 +329,7 @@
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.8.9</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.6.2</span></h2>
 
     <div class="controls">
         <div class="controls-row config-row">
@@ -379,6 +364,8 @@
             <button id="randomBtn" onclick="setRandomScale()" >🎲</button>
         </div>    
     </div>
+
+
  
     <div class="main-interface">
         <div class="metronome-container">
@@ -394,7 +381,7 @@
                 <div class="dot" id="dot-3"></div>
             </div>
         </div>
-        
+    
         <div class="tuner-pro-container">
             <div class="tuner-display">
                 <div class="tuner-note" id="liveNote">--</div>
@@ -413,8 +400,8 @@
             <div id="recDot" class="red-dot"></div>
             
         </div>
-        
-        <div class="control-group-loop">
+
+                <div class="control-group-loop">
             <label>Duración (Compases)</label>
             <select id="loopBars">
                 <option value="0">Manual (Libre)</option>
@@ -435,6 +422,8 @@
         </div>
         <div id="metronomeStatus" style="font-size: 0.8rem; opacity: 0.7;"></div>
         </div>
+        
+
         <div id="piano" class="piano-container"></div>
 
     </div>
@@ -479,7 +468,7 @@
             [0, 3, 6, 10], // vdim (m7b5)
             [0, 4, 7, 11], // VIMaj7
             [0, 3, 7, 10]  // viim7
-        ]},
+            ]},
             "Nakriz (Misolidia #4)": {steps: [0, 2, 3, 6, 7, 9, 10], triads: ["m", "dim", "+", "Maj", "m", "dim", "Maj"], tetrads: ["mMaj7", "m7b5", "Maj7#5", "7#11", "m7", "m7b5", "Maj7"],chordNotes: [
             [0, 3, 7, 11], // imMaj7
             [0, 3, 6, 10], // iim7b5
@@ -488,11 +477,26 @@
             [0, 3, 7, 10], // vm7
             [0, 3, 6, 10], // vidim
             [0, 4, 7, 11]  // VIIMaj7
-        ]},
+            ]},
             "Hirajoshi": {steps: [0, 2, 3, 7, 8], /*Escala pentatónica japonesa*/ triads: ["m", "dim", "Maj", "Maj", "m"], tetrads: ["m7", "m7b5", "Maj7", "6", "m7"],chordNotes: [ [0,3,7], [0,3,6], [0,4,7], [0,4,7], [0,3,7] ] /* 5 elementos*/}
-            };
             
-                //FILTRADO POR NIVEL DE DIFICULTAD
+        };
+
+        const scaleDescriptions = {
+            "Mayor": "Es el punto de referencia para todo. Si entiendes la escala mayor, entiendes el resto, porque las demás se definen por cómo cambian respecto a esta.",
+            "Eólico (Menor)": "Es la 'hermana triste' de la mayor. Se construye empezando desde el sexto grado de una escala mayor.",
+            "Dórico": "Menor pero con 6ª mayor. Sonido Funk/Jazz",
+            "Frigio": "Menor con 2ª menor. Sonido español/metalero",
+            "Lidio": "Mayor con 4ª aumentada. Sonido místico/espacial", 
+            "Mixolidio": "Mayor con 7ª menor. El rey del Blues y el Rock n' Roll",
+            "Locrio": "Suena inestable y 'disonante'. Muy usado en el Metal extremo",
+            "Menor Armónica": "Tiene un sonido 'arábigo' o neoclásico",
+            "Menor Melódica": "Es la favorita del Jazz por su sonido sofisticado",
+            "Hijaz (Frigia Dominante)": "El alma del flamenco y el misticismo árabe. Su intervalo de segunda aumentada crea una tensión exótica irresistible.",
+            "Nakriz (Misolidia #4)": "Famosa en la música de Europa del Este y Oriente Medio. Tiene un aire cinematográfico, como un desierto al atardecer.",
+            "Hirajoshi": "Escala pentatónica japonesa inspirada en el Koto. Evoca paz, naturaleza y la elegancia del Japón tradicional."
+        };
+        //FILTRADO POR NIVEL DE DIFICULTAD
         const escalasPorNivel = {
             'Principiante': ["Mayor (Jónico)", "Eólico (Menor)"],
             'Intermedio': [
@@ -533,21 +537,6 @@
             update();
         }
 
-        const scaleDescriptions = {
-            "Mayor": "Es el punto de referencia para todo. Si entiendes la escala mayor, entiendes el resto, porque las demás se definen por cómo cambian respecto a esta.",
-            "Eólico (Menor)": "Es la 'hermana triste' de la mayor. Se construye empezando desde el sexto grado de una escala mayor.",
-            "Dórico": "Menor pero con 6ª mayor. Sonido Funk/Jazz",
-            "Frigio": "Menor con 2ª menor. Sonido español/metalero",
-            "Lidio": "Mayor con 4ª aumentada. Sonido místico/espacial", 
-            "Mixolidio": "Mayor con 7ª menor. El rey del Blues y el Rock n' Roll",
-            "Locrio": "Suena inestable y 'disonante'. Muy usado en el Metal extremo",
-            "Menor Armónica": "Tiene un sonido 'arábigo' o neoclásico",
-            "Menor Melódica": "Es la favorita del Jazz por su sonido sofisticado",
-            "Hijaz (Frigia Dominante)": "El alma del flamenco y el misticismo árabe. Su intervalo de segunda aumentada crea una tensión exótica irresistible.",
-            "Nakriz (Misolidia #4)": "Famosa en la música de Europa del Este y Oriente Medio. Tiene un aire cinematográfico, como un desierto al atardecer.",
-            "Hirajoshi": "Escala pentatónica japonesa inspirada en el Koto. Evoca paz, naturaleza y la elegancia del Japón tradicional."
-        };
-
         let currentTuning = tuningPresets.standard;
         let showIntervals = false;
         let selectedChordIdx = null;
@@ -584,7 +573,7 @@
                 startMetro();
             }
         };
-        
+
         function toggleMetronome() {
             const btn = document.getElementById('metroPlayBtn');
             if (isMetroRunning) {
@@ -801,14 +790,13 @@
             // Llenar selects
             rootSel.innerHTML = ""; // Limpiar antes de llenar
             scaleSel.innerHTML = "";
-            notes.forEach((n) => { rootSel.innerHTML += `<option value="${n}">${n}</option>`; });
-            //notes.forEach((n, i) => rootSel.innerHTML += `<option value="${i}">${n}</option>`);
+            notes.forEach((n,i) => { rootSel.innerHTML += `<option value="${n}">${n}</option>`; });
             Object.keys(scales).forEach(s => scaleSel.innerHTML += `<option value="${s}">${s}</option>`);
             
             createPiano(); 
             createFretboard(); 
             update();
-            
+
             // Rellenar escalas por primera vez según el nivel por defecto
             updateScaleSelector();
 
@@ -1024,21 +1012,12 @@
 
             // 4. Destello
             const piano = document.getElementById('piano');
-            const btn = document.getElementById('randomBtn');
             if (piano) {
                 piano.style.transition = "0.2s";
                 piano.style.boxShadow = "0 0 30px var(--note-root)";
                 setTimeout(() => {
                     piano.style.boxShadow = "0 8px 20px rgba(0,0,0,0.5)";
                 }, 300);
-            }
-        
-            // Efecto en el Botón (Iluminación por debajo)
-            if (btn) {
-                btn.classList.add('btn-glow-active');
-                setTimeout(() => {
-                    btn.classList.remove('btn-glow-active');
-                }, 400); // Un poco más largo que el del piano para que se note
             }
         }
 
