@@ -10,11 +10,58 @@
         }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); color: white; padding: 20px; margin: 0; text-align: center; }
         
-        /* Controles */
-        .controls { background: #34495e; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); align-items: flex-end; }
+        /* CONTROLES */
+        .controls { background: #34495e; 
+            padding: 20px 30px; box-sizing: border-box; /* Importante para que el padding no rompa el ancho */
+            border-radius: 12px; margin-bottom: 20px; 
+            display: inline-flex; 
+            flex-direction: column; 
+            gap: 15px; flex-wrap: wrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); align-items: flex-end;
+        } 
+        /* Estilo común para las filas */
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end; /* Alinea etiquetas y selects por la base */
+            gap: 12px;
+            flex-wrap: wrap;       /* Importante para móviles */
+        }
+        #toggleBtn {
+            min-width: 100px; /* Ajusta este valor a tu gusto (ej. 120px) */
+            text-align: center;
+            padding: 11px; /* Mantiene el grosor vertical */
+            padding-left: 30px;
+            padding-right: 30px;
+        }
+        /* Fila de acciones (la segunda línea) */
+        .actions-row {
+            padding-top: 10px;
+            justify-content: center;
+            gap: 12px;
+            padding: 10px;
+            width: 100%;
+            border-top: 1px solid rgba(255,255,255,0.1); /* Una línea sutil divisoria */
+        }
+        .actions-row button, 
+        .actions-row .btn-nav, 
+        .actions-row .btn-piano {
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
         .control-group { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
         label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px; }
 
+
+
+
+        
         /* Piano */
         .piano-container { display: inline-flex; background: #111; padding: 10px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
         .piano-key { width: 32px; height: 110px; background: white; border: 1px solid #ccc; border-radius: 0 0 4px 4px; position: relative; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5px; color: #333; font-size: 9px; font-weight: bold; box-sizing: border-box; }
@@ -88,10 +135,13 @@
             display: inline-flex;
             align-items: center;
             gap: 15px;
-            padding: 10px 20px;
-            border-radius: 50px;
-            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 2px;
             border: 1px solid #444;
+            width: 180px;
+            height: 110px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
         }
         
         .metro-controls { display: flex; flex-direction: column; align-items: center; }
@@ -102,7 +152,7 @@
             background: transparent;
             border: 1px solid #555;
             color: var(--accent);
-            text-align: center;
+            text-align: right;
             font-weight: bold;
             border-radius: 4px;
         }
@@ -120,65 +170,8 @@
             justify-content: center;
             align-items: center;
         }
-        /*AFINADOR*/
-        .tuner-container {
-            border-left: 1px solid #444;
-            padding-left: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .tuner-container label { font-size: 0.6rem; opacity: 0.6; margin-bottom: 5px; }
-        .tuner-buttons { display: flex; gap: 5px; }
         
-        .tuner-btn {
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            border: 1px solid var(--accent);
-            background: transparent;
-            color: white;
-            font-size: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: 0.2s;
-        }
-        .tuner-btn:hover { background: var(--accent); color: #000; }
-        .tuner-btn.playing { 
-            background: var(--accent); 
-            color: #000; 
-            box-shadow: 0 0 10px var(--accent);
-        }
         /*AFINADOR CROMÁTICO*/
-        .tuner-pro-container {
-                background: #111;
-                padding: 15px;
-                border-radius: 15px;
-                border: 2px solid #333;
-                width: 200px;
-                margin: 10px auto;
-            }
-            .tuner-display { position: relative; height: 100px; overflow: hidden; }
-            .tuner-note { font-size: 2.5rem; font-weight: bold; color: var(--note-root); margin-bottom: 5px; }
-            .tuner-meter { 
-                position: relative; width: 100%; height: 20px; 
-                background: linear-gradient(90deg, #e74c3c 0%, #2ecc71 50%, #e74c3c 100%);
-                border-radius: 10px; margin-top: 10px;
-            }
-            .tuner-pointer {
-                position: absolute; top: -5px; left: 50%;
-                width: 4px; height: 30px; background: white;
-                transform: translateX(-50%); transition: left 0.1s ease-out;
-            }
-            .tuner-center {
-                position: absolute; left: 50%; top: 0;
-                width: 2px; height: 20px; background: rgba(0,0,0,0.5);
-            }
-            .tuner-status { font-size: 0.7rem; margin-top: 15px; opacity: 0.7; }
-
         /* Contenedor principal para alinear elementos */
         .main-interface {
             display: flex;
@@ -267,65 +260,76 @@
         .svg-label { color: var(--accent); font-size: 11px; font-weight: 800; margin-bottom: 5px; border-bottom: 1px solid #eee; }
         
         #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 999; backdrop-filter: blur(4px); }
-
+        /*BOTONES*/
         button, select { padding: 10px 15px; cursor: pointer; background: var(--accent); border: none; color: white; border-radius: 5px; font-weight: bold; }
         .btn-nav { text-decoration: none; background: #2980b9; color: white; padding: 10px 15px; border-radius: 5px; font-weight: bold; font-size: 13px; }
-        .btn-piano { text-decoration: none; background: #27ae60; /* Un verde piano elegante */ color: white; padding: 10px 15px; 
+        .btn-nav:hover { background: #000000; transform: translateY(-2px); }
+        .btn-piano { text-decoration: none; background: #2980b9; /* Un verde piano elegante */ color: white; padding: 10px 15px; 
             border-radius: 5px; font-weight: bold; font-size: 13px; transition: 0.3s; display: inline-block; }
-        .btn-piano:hover { background: #2ecc71; transform: translateY(-2px); }
+        .btn-piano:hover { background: #000000; transform: translateY(-2px); }
+
+        /*BOTÓN RANDON*/
+        #randomBtn {background: #2980b9; transition: 0.3s;}
+        #randomBtn:hover {background: #000000; transform: translateY(-2px); }
+
     </style>
 </head>
 <body>
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.4</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.6.2</span></h2>
 
     <div class="controls">
-        <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
-        <div class="control-group"><label>Escala</label><select id="scaleSelect"></select></div>
-        <div class="control-group">
-            <label>Afinación</label>
-            <select id="tuningSelect">
-                <option value="standard">Standard (EADGBe)</option>
-                <option value="dropD">Drop D</option>
-                <option value="eb">Eb (Medio tono abajo)</option>
-                <option value="d">D (Tono abajo)</option>
+        <div class="controls-row config-row">
+            <div class="control-group">
+            <label>Nivel</label>
+            <select id="levelSelect" onchange="updateScaleSelector()">
+                <option value="Principiante">Principiante</option>
+                <option value="Intermedio" selected>Intermedio</option>
+                <option value="Avanzado">Avanzado</option>
+                <option value="Experto">Experto</option>
             </select>
         </div>
-        <button id="toggleBtn">Intervalos: OFF</button>
-        <a href="libreria.html" class="btn-nav">📚 Diccionario</a>
-        <a href="libpiano.html" class="btn-piano">🎹 Lib. Piano</a>
-    </div>
-
-    <div class="metronome-container">
-    <button id="metroPlayBtn" onclick="toggleMetronome()">▶</button>
-        <div class="metro-controls">
-            <label>BPM</label>
-            <input type="number" id="bpmInput" value="80" min="40" max="250" onchange="updateBPM()">
-        </div>
-        <div class="beat-indicator">
-            <div class="dot" id="dot-0"></div>
-            <div class="dot" id="dot-1"></div>
-            <div class="dot" id="dot-2"></div>
-            <div class="dot" id="dot-3"></div>
-        </div>
-    </div>
- 
-    <div class="tuner-pro-container">
-        <div class="tuner-display">
-            <div class="tuner-note" id="liveNote">--</div>
-            <div class="tuner-meter">
-                <div class="tuner-pointer" id="tunerPointer"></div>
-                <div class="tuner-center"></div>
+            <div class="control-group"><label>Tónica</label><select id="rootSelect"></select></div>
+            <div class="control-group"><label>Escala</label><select id="scaleSelect"></select></div>
+            <div class="control-group">
+                <label>Afinación</label>
+                <select id="tuningSelect">
+                    <option value="standard">Standard (EADGBe)</option>
+                    <option value="dropD">Drop D</option>
+                    <option value="eb">Eb (Medio tono abajo)</option>
+                    <option value="d">D (Tono abajo)</option>
+                </select>
             </div>
-            <div class="tuner-status" id="tunerStatus">Pulsa "Escuchar" para afinar</div>
+            <div class="control-group"><label>Intervalos</label>
+            <button id="toggleBtn">OFF</button>
+            </div>  
         </div>
-        <button id="micBtn" onclick="toggleLiveTuner()" style="background: #27ae60;">🎤 Escuchar Guitarra</button>
+
+        <div class="controls-row actions-row">
+            <a href="libreria.html" class="btn-nav">🎸 Lib. Guitarra</a>
+            <a href="libpiano.html" class="btn-piano">🎹 Lib. Piano</a>
+            <button id="randomBtn" onclick="setRandomScale()" >🎲</button>
+        </div>    
     </div>
 
+
+ 
     <div class="main-interface">
-            <div id="piano" class="piano-container"></div>
+        <div class="metronome-container">
+            <button id="metroPlayBtn" onclick="toggleMetronome()">▶</button>
+            <div class="metro-controls">
+                <label>BPM</label>
+                <input type="number" id="bpmInput" value="100" min="40" max="250" onchange="updateBPM()">
+            </div>
+            <div class="beat-indicator">
+                <div class="dot" id="dot-0"></div>
+                <div class="dot" id="dot-1"></div>
+                <div class="dot" id="dot-2"></div>
+                <div class="dot" id="dot-3"></div>
+            </div>
+        </div>
     
         <div class="tuner-pro-container">
             <div class="tuner-display">
@@ -334,14 +338,15 @@
                     <div class="tuner-pointer" id="tunerPointer"></div>
                     <div class="tuner-center"></div>
                 </div>
-                <div class="tuner-status" id="tunerStatus">AFINADOR READY</div>
+                <div class="tuner-status" id="tunerStatus">AFINADOR</div>
             </div>
-            <button id="micBtn" onclick="toggleLiveTuner()">🎤 ESCUCHAR</button>
+            <button id="micBtn" onclick="toggleLiveTuner()">🎤 ACTIVAR</button>
         </div>
-        
+
+        <div id="piano" class="piano-container"></div>
+
     </div>
 
-    <div id="piano" class="piano-container"></div>
     <div id="chordsList" class="chords-container"></div>
     <div class="overflow-container"><div id="fretboard" class="fretboard"></div></div>
     <div id="chordInfo" class="info-panel">Selecciona un grado de la escala para ver acordes</div>
@@ -373,8 +378,68 @@
             "Menor Armónica": { steps: [0, 2, 3, 5, 7, 8, 11], triads: ["m", "dim", "aug", "m", "", "", "dim"], tetrads: ["m(Maj7)", "m7b5", "Maj7#5", "m7", "7", "Maj7", "dim7"], chordNotes: [[0,3,7,11], [0,3,6,10], [0,4,8,11], [0,3,7,10], [0,4,7,10], [0,4,7,11], [0,3,6,9]] },
             "Menor Melódica": { steps: [0, 2, 3, 5, 7, 9, 11], triads: ["m", "m", "aug", "", "", "dim", "dim"], tetrads: ["m(Maj7)", "m7", "Maj7#5", "7", "7", "m7b5", "m7b5"], chordNotes: [[0,3,7,11], [0,3,7,10], [0,4,8,11], [0,4,7,10], [0,4,7,10], [0,3,6,10], [0,3,6,10]] },
             "Pentatónica Mayor": { steps: [0, 2, 4, 7, 9], triads: ["", "sus2", "m", "", "sus4"], tetrads: ["add9", "7sus2", "m7", "6", "7sus4"], chordNotes: [[0,4,7], [0,2,7], [0,3,7], [0,4,7], [0,5,7]] },
-            "Pentatónica Menor": { steps: [0, 3, 5, 7, 10], triads: ["m", "", "sus4", "m", ""], tetrads: ["m7", "7sus4", "7sus4", "m7", "7"], chordNotes: [[0,3,7], [0,5,7], [0,5,7], [0,3,7], [0,4,7]] }
+            "Pentatónica Menor": { steps: [0, 3, 5, 7, 10], triads: ["m", "", "sus4", "m", ""], tetrads: ["m7", "7sus4", "7sus4", "m7", "7"], chordNotes: [[0,3,7], [0,5,7], [0,5,7], [0,3,7], [0,4,7]] },
+            "Hijaz (Frigia Dominante)": {steps: [0, 1, 4, 5, 7, 8, 10], triads: ["", "dim", "+", "m", "dim", "Maj", "m"], tetrads: ["7", "Maj7b5", "+7", "m7", "m7b5", "Maj7", "m7"], chordNotes: [
+            [0, 4, 7, 10], // I7
+            [0, 3, 6, 11], // IIdim (Maj7b5)
+            [0, 4, 8, 10], // III+7
+            [0, 3, 7, 10], // ivm7
+            [0, 3, 6, 10], // vdim (m7b5)
+            [0, 4, 7, 11], // VIMaj7
+            [0, 3, 7, 10]  // viim7
+            ]},
+            "Nakriz (Misolidia #4)": {steps: [0, 2, 3, 6, 7, 9, 10], triads: ["m", "dim", "+", "Maj", "m", "dim", "Maj"], tetrads: ["mMaj7", "m7b5", "Maj7#5", "7#11", "m7", "m7b5", "Maj7"],chordNotes: [
+            [0, 3, 7, 11], // imMaj7
+            [0, 3, 6, 10], // iim7b5
+            [0, 4, 8, 11], // III+Maj7
+            [0, 4, 7, 10], // IV7 (#11)
+            [0, 3, 7, 10], // vm7
+            [0, 3, 6, 10], // vidim
+            [0, 4, 7, 11]  // VIIMaj7
+            ]},
+            "Hirajoshi": {steps: [0, 2, 3, 7, 8], /*Escala pentatónica japonesa*/ triads: ["m", "dim", "Maj", "Maj", "m"], tetrads: ["m7", "m7b5", "Maj7", "6", "m7"],chordNotes: [ [0,3,7], [0,3,6], [0,4,7], [0,4,7], [0,3,7] ] /* 5 elementos*/}
+            
         };
+        //FILTRADO POR NIVEL DE DIFICULTAD
+        const escalasPorNivel = {
+            'Principiante': ["Mayor (Jónico)", "Eólico (Menor)"],
+            'Intermedio': [
+                "Mayor (Jónico)", "Eólico (Menor)", 
+                "Dórico", "Frigio", "Lidio", "Mixolidio", "Locrio", 
+                "Pentatónica Mayor", "Pentatónica Menor"
+            ],
+            'Avanzado': [
+                "Mayor (Jónico)", "Eólico (Menor)", "Dórico", "Frigio", "Lidio", "Mixolidio", "Locrio", 
+                "Pentatónica Mayor", "Pentatónica Menor", 
+                "Menor Armónica", "Menor Melódica"
+            ],
+            'Experto': Object.keys(scales) // Todas las escalas definidas en tu objeto 'scales'
+        };
+        //FILTRADO POR ESCALA DE DIFICULTAD
+        function updateScaleSelector() {
+            const level = document.getElementById('levelSelect').value;
+            const scaleSelect = document.getElementById('scaleSelect');
+            const currentScale = scaleSelect.value;
+
+            scaleSelect.innerHTML = "";
+            const escalasPermitidas = escalasPorNivel[level];
+
+            escalasPermitidas.forEach(scaleName => {
+                const option = document.createElement('option');
+                option.value = scaleName;
+                option.innerText = scaleName;
+                scaleSelect.appendChild(option);
+            });
+
+            if (escalasPermitidas.includes(currentScale)) {
+                scaleSelect.value = currentScale;
+            } else {
+                scaleSelect.selectedIndex = 0;
+            }
+            
+            // SIEMPRE llamamos a update al cambiar nivel para asegurar sincronía
+            update();
+        }
 
         let currentTuning = tuningPresets.standard;
         let showIntervals = false;
@@ -474,49 +539,6 @@
             });
         }
         
-        function playTunerNote(noteIdx, stringIdx, btn) {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
-            // Si ya está sonando algo, lo paramos
-            stopTuner();
-        
-            if (btn.classList.contains('playing')) {
-                btn.classList.remove('playing');
-                return;
-            }
-        
-            // Quitar clase 'playing' de otros botones
-            document.querySelectorAll('.tuner-btn').forEach(b => b.classList.remove('playing'));
-            btn.classList.add('playing');
-        
-            tunerOsc = audioCtx.createOscillator();
-            tunerGain = audioCtx.createGain();
-        
-            // Calculamos la frecuencia base (Octava 2 para la 6ª cuerda aprox)
-            // Ajustamos la octava según la cuerda para que suene natural
-            const octaves = [2, 2, 3, 3, 3, 4].reverse();
-            const freq = 440 * Math.pow(2, (noteIdx - 9) / 12) * Math.pow(2, octaves[stringIdx] - 4);
-        
-            tunerOsc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            tunerOsc.type = 'sine';
-            
-            tunerGain.gain.setValueAtTime(0, audioCtx.currentTime);
-            tunerGain.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.1);
-            
-            tunerOsc.connect(tunerGain);
-            tunerGain.connect(audioCtx.destination);
-            
-            tunerOsc.start();
-        }
-        
-        function stopTuner() {
-            if (tunerOsc) {
-                tunerOsc.stop();
-                tunerOsc = null;
-            }
-        }
-        //FIN AFINADOR
-
         //AFINADOR CROMÁTICO
         let audioStream = null;
         let analyser = null;
@@ -571,12 +593,17 @@
                 // Mover la aguja (cents es la desviación)
                 // Mapeamos -50/+50 cents a 0%/100% de la barra
                 const pointerPos = 50 + (noteInfo.cents);
+                const pointerEl = document.getElementById('tunerPointer');
                 document.getElementById('tunerPointer').style.left = `${Math.max(0, Math.min(100, pointerPos))}%`;
                 
                 const status = document.getElementById('tunerStatus');
-                if (Math.abs(noteInfo.cents) < 5) status.innerText = "¡Perfecto!";
-                else if (noteInfo.cents < 0) status.innerText = "Demasiado bajo...";
-                else status.innerText = "Demasiado alto...";
+                if (Math.abs(noteInfo.cents) < 5) {
+                    pointerEl.style.background = "#2ecc71"; // Verde si está ok
+                } else {
+                    pointerEl.style.background = "var(--accent)"; // Naranja si no
+                }
+                
+                pointerEl.style.left = `${Math.max(0, Math.min(100, pointerPos))}%`;;
             }
         
             requestAnimationFrame(processTuning);
@@ -639,28 +666,43 @@
         function init() {
             const rootSel = document.getElementById('rootSelect');
             const scaleSel = document.getElementById('scaleSelect');
-            notes.forEach((n, i) => rootSel.innerHTML += `<option value="${i}">${n}</option>`);
+            
+            // Llenar selects
+            rootSel.innerHTML = ""; // Limpiar antes de llenar
+            scaleSel.innerHTML = "";
+            notes.forEach((n) => { rootSel.innerHTML += `<option value="${n}">${n}</option>`; });
+            //notes.forEach((n, i) => rootSel.innerHTML += `<option value="${i}">${n}</option>`);
             Object.keys(scales).forEach(s => scaleSel.innerHTML += `<option value="${s}">${s}</option>`);
             
-            createPiano(); createFretboard(); update();
+            createPiano(); 
+            createFretboard(); 
+            update();
 
+            // Rellenar escalas por primera vez según el nivel por defecto
+            updateScaleSelector();
+
+            // Eventos
             rootSel.onchange = () => { selectedChordIdx = null; update(); };
             scaleSel.onchange = () => { selectedChordIdx = null; update(); };
+            
             document.getElementById('tuningSelect').onchange = (e) => { 
                 currentTuning = tuningPresets[e.target.value]; 
-                createFretboard(); update(); 
-                updateTunerButtons();
+                createFretboard(); 
+                update(); 
+                // Si decides mantener los botones de notas de referencia, 
+                // asegúrate de que el ID 'tunerButtons' exista.
             };
+
             document.getElementById('toggleBtn').onclick = (e) => {
                 showIntervals = !showIntervals;
-                e.target.innerText = showIntervals ? "Intervalos: ON" : "Intervalos: OFF";
+                e.target.innerText = showIntervals ? "ON" : "OFF";
                 update();
             };
+
             document.getElementById('overlay').onclick = () => {
                 document.querySelectorAll('.svg-card').forEach(c => c.classList.remove('expanded'));
                 document.getElementById('overlay').style.display = 'none';
             };
-            updateTunerButtons();
         }
 
         function createPiano() {
@@ -694,7 +736,10 @@
         }
 
         function update() {
-            const root = parseInt(document.getElementById('rootSelect').value);
+            // Buscamos el índice de la nota en el array notes
+            const rootName = document.getElementById('rootSelect').value
+            const root = notes.indexOf(rootName);
+            if (root === -1) return;
             const sData = scales[document.getElementById('scaleSelect').value];
             const scaleNotes = sData.steps.map(v => (root + v) % 12);
             let chordNotes = [];
@@ -725,8 +770,8 @@
                         });
                     }
                 };
-                addDiagrams(jsonTet, dispTet);
                 if (jsonTri !== jsonTet) addDiagrams(jsonTri, dispTri);
+                addDiagrams(jsonTet, dispTet);
                 infoPanel.innerHTML += html + '</div>';
             }
 
@@ -771,15 +816,15 @@
                 miniPianoHTML += '</div>';
             
                 card.innerHTML = `
-                    <div class="chord-triad">${notes[cRoot]}${sData.triads[i]}</div>
-                    <div class="chord-tetrad">${notes[cRoot]}${sData.tetrads[i]}</div>
+                    <div class="chord-triad" style="color: white; font-size: 1.1rem;">${notes[cRoot]}${sData.triads[i]}</div>
+                    <div class="chord-tetrad" style="color: var(--note-root); opacity: 0.8; font-size: 0.8rem;">${notes[cRoot]}${sData.tetrads[i]}</div>
                     ${miniPianoHTML}
                 `;
             
                 card.onclick = () => { 
                     selectedChordIdx = (selectedChordIdx === i) ? null : i; 
                     update(); 
-                    let jsonT = sData.tetrads[i] === "Maj7" ? "M7" : (sData.tetrads[i] === "" ? "M" : sData.tetrads[i]);
+                    let jsonT = sData.triads[i] === "" ? "M" : sData.triads[i]; 
                     if (libreriaManual && libreriaManual[jsonT] && libreriaManual[jsonT][notes[cRoot]]) {
                         playChord(libreriaManual[jsonT][notes[cRoot]][0]);
                     }
@@ -818,6 +863,35 @@
                 }
             });
             return svg + "</svg>";
+        }
+
+        function setRandomScale() {
+            const rootSel = document.getElementById('rootSelect');
+            const scaleSel = document.getElementById('scaleSelect');
+            const level = document.getElementById('levelSelect').value;
+
+            // 1. Tónica Aleatoria (Nombre)
+            const randomRoot = notes[Math.floor(Math.random() * notes.length)];
+            rootSel.value = randomRoot;
+
+            // 2. Escala Aleatoria (Filtrada)
+            const permitidas = escalasPorNivel[level];
+            const randomScaleKey = permitidas[Math.floor(Math.random() * permitidas.length)];
+            scaleSel.value = randomScaleKey;
+
+            // 3. Reset y Actualización
+            selectedChordIdx = null;
+            update();
+
+            // 4. Destello
+            const piano = document.getElementById('piano');
+            if (piano) {
+                piano.style.transition = "0.2s";
+                piano.style.boxShadow = "0 0 30px var(--note-root)";
+                setTimeout(() => {
+                    piano.style.boxShadow = "0 8px 20px rgba(0,0,0,0.5)";
+                }, 300);
+            }
         }
 
         cargarDatosYArrancar();
