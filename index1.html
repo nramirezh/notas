@@ -635,8 +635,10 @@
         
         function resetDots() {
             const dots = document.querySelectorAll('.dot');
-            dots.forEach(d => d.style.background = '#444');
-            metroStep = 0;
+            dots.forEach(d => {
+                d.style.background = '#444'; // El color de fondo apagado
+            });
+            metroStep = 0; // Resetear el contador para la próxima vez
         }
 
         // --- LÓGICA DEL AFINADOR ---
