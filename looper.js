@@ -7,8 +7,52 @@ let timerInterval;
 let progressInterval;
 
 // --- Función de cuenta atrás (Global) ---
-// --- Función de cuenta atrás (Sincronizada con puntos visuales) ---
 window.startMetronome = function(callback) {
+    let counts = 0;
+    const status = document.getElementById('metronomeStatus');
+    const bpmInput = document.getElementById('bpmInput');
+    const currentBpm = bpmInput ? bpmInput.value : 100;
+    const intervalMs = 60000 / currentBpm;
+    const dots = document.querySelectorAll('.dot');
+
+    status.innerText = "Preparando... 4";
+    
+    const flashDot = (index) => {
+        const dotIdx = index % 4; // Aseguramos que siempre apunte a 0,1,2,3
+        if (dots[dotIdx]) {
+            dots.forEach(d => d.style.background = '#444');
+            dots[dotIdx].style.background = 'var(--note-root)';
+            setTimeout(() => {
+                dots[dotIdx].style.background = '#444';
+            }, 200);
+        }
+    };
+
+    // PRIMER GOLPE (El 4)
+    flashDot(0);
+    window.playClickSound(440);
+
+    const interval = setInterval(() => {
+        counts++;
+        
+        if (counts < 4) {
+            // GOLPES 3, 2, 1
+            status.innerText = `Preparando... ${4 - counts}`;
+            flashDot(counts);
+            // El golpe previo a grabar (cuando dice 1) lo hacemos más agudo para avisar
+            window.playClickSound(counts === 3 ? 880 : 440);
+        } else {
+            // ¡MOMENTO EXACTO DE ENTRADA!
+            clearInterval(interval);
+            status.innerText = "¡GRABANDO!";
+            // Ejecutamos el callback inmediatamente sin esperar otro ciclo
+            callback();
+        }
+    }, intervalMs);
+};
+
+// --- Función de cuenta atrás (Sincronizada con puntos visuales) ---
+/*window.startMetronome = function(callback) {
     let counts = 0;
     const status = document.getElementById('metronomeStatus');
     const bpmInput = document.getElementById('bpmInput');
@@ -53,7 +97,7 @@ window.startMetronome = function(callback) {
             callback();
         }
     }, intervalMs);
-};
+};*/
 /*window.startMetronome = function(callback) {
     let counts = 0;
     const status = document.getElementById('metronomeStatus');
