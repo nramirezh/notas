@@ -141,12 +141,16 @@ window.stopRecording = function() {
     clearInterval(progressInterval);
     timerInterval = null;
     progressInterval = null;
+
+    // --- LA CORRECCIÓN: Apagar las luces ---
+    if (typeof resetDots === "function") {
+        resetDots(); 
+    }
     
     if (mediaRecorder && mediaRecorder.state !== "inactive"){
         mediaRecorder.stop();
     }
 };
-
 // --- Iniciar/Parar Grabación ---
 window.toggleRecord = async function() {
     if (!isRecording) {
