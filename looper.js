@@ -6,7 +6,7 @@ let startTime;
 let timerInterval;
 let progressInterval;
 
-// --- Función de cuenta atrás (Global) ---
+// --- Función de cuenta atrás (Sincronizada con puntos visuales) ---
 window.startMetronome = function(callback) {
     let counts = 0;
     const status = document.getElementById('metronomeStatus');
@@ -18,17 +18,17 @@ window.startMetronome = function(callback) {
     status.innerText = "Preparando... 4";
     
     const flashDot = (index) => {
-        const dotIdx = index % 4; // Aseguramos que siempre apunte a 0,1,2,3
+        const dotIdx = index % 4; // Aseguramos que siempre apunte a 0, 1, 2, 3
         if (dots[dotIdx]) {
-            dots.forEach(d => d.style.background = '#444');
-            dots[dotIdx].style.background = 'var(--note-root)';
+            dots.forEach(d => d.style.background = '#444'); // Apagar todos
+            dots[dotIdx].style.background = 'var(--note-root)'; // Iluminar actual
             setTimeout(() => {
                 dots[dotIdx].style.background = '#444';
-            }, 200);
+            }, 150); // Destello rápido para mayor precisión visual
         }
     };
 
-    // PRIMER GOLPE (El 4)
+    // PRIMER GOLPE (El número 4)
     flashDot(0);
     window.playClickSound(440);
 
@@ -39,86 +39,17 @@ window.startMetronome = function(callback) {
             // GOLPES 3, 2, 1
             status.innerText = `Preparando... ${4 - counts}`;
             flashDot(counts);
-            // El golpe previo a grabar (cuando dice 1) lo hacemos más agudo para avisar
+            // El golpe previo a grabar (cuando dice 1) es más agudo
             window.playClickSound(counts === 3 ? 880 : 440);
         } else {
             // ¡MOMENTO EXACTO DE ENTRADA!
             clearInterval(interval);
             status.innerText = "¡GRABANDO!";
-            // Ejecutamos el callback inmediatamente sin esperar otro ciclo
+            // Ejecutamos el inicio de grabación sin esperar un ciclo extra
             callback();
         }
     }, intervalMs);
 };
-
-// --- Función de cuenta atrás (Sincronizada con puntos visuales) ---
-/*window.startMetronome = function(callback) {
-    let counts = 0;
-    const status = document.getElementById('metronomeStatus');
-    const bpmInput = document.getElementById('bpmInput');
-    const currentBpm = bpmInput ? bpmInput.value : 100;
-    const intervalMs = 60000 / currentBpm;
-
-    // Obtenemos los puntos para iluminarlos
-    const dots = document.querySelectorAll('.dot');
-
-    status.innerText = "Preparando... 4";
-    
-    // Función para iluminar el punto correspondiente al conteo
-    const flashDot = (index) => {
-        if (dots[index]) {
-            dots.forEach(d => d.style.background = '#444'); // Apagar todos
-            dots[index].style.background = 'var(--note-root)'; // Iluminar actual
-            setTimeout(() => {
-                dots[index].style.background = '#444'; // Apagar tras un breve instante
-            }, 200);
-        }
-    };
-
-    // Iluminar el primer punto inmediatamente
-    flashDot(0);
-    window.playClickSound(440);
-
-    const interval = setInterval(() => {
-        counts++;
-        status.innerText = `Preparando... ${4 - counts}`;
-        
-        // Iluminamos el punto (0, 1, 2, 3)
-        flashDot(counts); 
-
-        // Sonido (el último golpe es más agudo)
-        window.playClickSound(counts === 3 ? 880 : 440); 
-        
-        if (counts === 4) {
-            clearInterval(interval);
-            status.innerText = "¡GRABANDO!";
-            // Resetear puntos antes de empezar la grabación real
-            dots.forEach(d => d.style.background = '#444');
-            callback();
-        }
-    }, intervalMs);
-};*/
-/*window.startMetronome = function(callback) {
-    let counts = 0;
-    const status = document.getElementById('metronomeStatus');
-    const bpmInput = document.getElementById('bpmInput');
-    const currentBpm = bpmInput ? bpmInput.value : 100;
-    const intervalMs = 60000 / currentBpm;
-
-    status.innerText = "Preparando... 4";
-    
-    const interval = setInterval(() => {
-        counts++;
-        status.innerText = `Preparando... ${4 - counts}`;
-        window.playClickSound(counts === 4 ? 880 : 440); 
-        
-        if (counts === 4) {
-            clearInterval(interval);
-            status.innerText = "¡GRABANDO!";
-            callback();
-        }
-    }, intervalMs);
-};*/
 
 // --- Función para formatear el tiempo (00:00) ---
 function formatTime(ms) {
@@ -134,7 +65,6 @@ window.stopRecording = function() {
     document.getElementById('recDot').classList.remove('active');
     document.getElementById('metronomeStatus').innerText = "";
     
-    // Ocultar barra y resetear color
     const container = document.getElementById('progressContainer');
     const bar = document.getElementById('progressBar');
     if(container) container.style.display = 'none';
@@ -160,20 +90,21 @@ window.toggleRecord = async function() {
 
             window.startMetronome(() => {
                 isRecording = true;
-                if (!window.isMetroRunning) window.toggleMetronome();
                 audioChunks = [];
+                
+                // Iniciar el metrónomo visual de la aplicación principal
+                if (!window.isMetroRunning) window.toggleMetronome();
+                
                 document.getElementById('recDot').classList.add('active');
                 
                 const bpm = parseInt(document.getElementById('bpmInput').value) || 100;
                 const bars = parseInt(document.getElementById('loopBars').value);
                 const msPerBeat = 60000 / bpm;
-                const msPerBar = msPerBeat * 4;
-                const totalMs = msPerBar * bars;
+                const totalMs = msPerBeat * 4 * bars;
 
                 startTime = Date.now();
                 document.getElementById('loopTimer').innerText = "00:00";
                 
-                // Configuración de Barra de Progreso
                 if (bars > 0) {
                     const bar = document.getElementById('progressBar');
                     document.getElementById('progressContainer').style.display = 'block';
@@ -184,13 +115,12 @@ window.toggleRecord = async function() {
                         const percent = (elapsed / totalMs) * 100;
                         bar.style.width = Math.min(percent, 100) + "%";
 
-                        // ALERTA VISUAL: Si queda menos de 1 compás, se pone roja
-                        if (totalMs - elapsed < msPerBar) {
-                            bar.style.backgroundColor = "#e74c3c"; // Rojo alerta
+                        // Alerta visual: último compás en rojo
+                        if (totalMs - elapsed < (msPerBeat * 4)) {
+                            bar.style.backgroundColor = "#e74c3c";
                         }
                     }, 50);
 
-                    // Auto-stop matemático
                     setTimeout(() => {
                         if (isRecording) window.stopRecording();
                     }, totalMs);
@@ -201,8 +131,7 @@ window.toggleRecord = async function() {
                     document.getElementById('loopTimer').innerText = formatTime(elapsed);
                 }, 1000);
 
-                if (!window.isMetroRunning) window.toggleMetronome();
-
+                // Configurar y arrancar MediaRecorder
                 mediaRecorder = new MediaRecorder(stream);
                 mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                 mediaRecorder.onstop = () => {
