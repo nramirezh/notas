@@ -328,7 +328,7 @@
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.1.1</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.1.3</span></h2>
 
     <div class="controls">
         <div class="controls-row config-row">
@@ -435,6 +435,13 @@
         const pianoLayout = [0,1,0,1,0,0,1,0,1,0,1,0];
         let libreriaManual = null;
         window.audioCtx = null; // Al poner window. lo hacemos visible para todos los archivos .js
+      
+        //VARIABLES METRONOMO
+        window.metroInterval = null;
+        let metroStep = 0;
+        window.isMetroRunning = false;
+        window.currentBeat = 0;
+        window.bpm = 100;        
 
         const tuningPresets = {
             "standard": [4, 11, 7, 2, 9, 4],
@@ -546,10 +553,8 @@
         }
 
         // --- LÓGICA DEL METRÓNOMO (Configuración Global Unificada) ---
-        window.isMetroRunning = false;
-        window.metroInterval = null;
-        window.currentBeat = 0;
-        window.bpm = 100; // Valor inicial coherente con el HTML
+        
+        
         
         window.toggleMetronome = function() {
             const btn = document.getElementById('metroPlayBtn');
@@ -591,15 +596,22 @@
                 startMetro();
             }
         }
-        
         function startMetro() {
-            const ms = 60000 / bpm;
-            metroInterval = setInterval(() => {
-                playMetroSound();
-                updateDots();
-            }, ms);
-        }
+            if (window.metroInterval) clearInterval(window.metroInterval);
+            
+            const bpm = document.getElementById('bpmInput').value || 100;
+            const intervalMs = 60000 / bpm;
         
+            // Empezamos en el paso 0
+            metroStep = 0;
+            updateDots(); 
+        
+            window.metroInterval = setInterval(() => {
+                metroStep = (metroStep + 1) % 4;
+                updateDots();
+            }, intervalMs);
+        }
+           
         function playMetroSound() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = audioCtx.createOscillator();
@@ -620,13 +632,23 @@
         }
         
         function updateDots() {
-            resetDots();
-            document.getElementById(`dot-${window.currentBeat}`).classList.add('active');
-            window.currentBeat = (window.currentBeat + 1) % 4;
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, i) => {
+                // Solo se ilumina el punto que coincide con metroStep
+                dot.style.backgroundColor = (i === metroStep) ? 'var(--note-root)' : '#444';
+            });
         }
         
         function resetDots() {
-            document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+            if (window.metroInterval) {
+                clearInterval(window.metroInterval);
+                window.metroInterval = null;
+            }
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach(dot => {
+                dot.style.backgroundColor = '#444';
+            });
+            metroStep = 0;
         }
 
         // --- LÓGICA DEL AFINADOR ---
@@ -779,7 +801,7 @@
             });
         }
 
-        function init() {
+        /*function init() {
             const rootSel = document.getElementById('rootSelect');
             const scaleSel = document.getElementById('scaleSelect');
             
@@ -828,9 +850,9 @@
                     update(); 
                 };
             }
-        }
+        }*/
 
-        /*function init() {
+        function init() {
             const rootSel = document.getElementById('rootSelect');
             const scaleSel = document.getElementById('scaleSelect');
             
@@ -870,7 +892,7 @@
                 document.querySelectorAll('.svg-card').forEach(c => c.classList.remove('expanded'));
                 document.getElementById('overlay').style.display = 'none';
             };
-        }*/
+        }
 
         function createPiano() {
             const p = document.getElementById('piano'); p.innerHTML = "";
