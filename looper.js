@@ -160,6 +160,7 @@ window.toggleRecord = async function() {
 
             window.startMetronome(() => {
                 isRecording = true;
+                if (!window.isMetroRunning) window.toggleMetronome();
                 audioChunks = [];
                 document.getElementById('recDot').classList.add('active');
                 
