@@ -142,9 +142,12 @@ window.stopRecording = function() {
     timerInterval = null;
     progressInterval = null;
 
-    // --- LA CORRECCIÓN: Apagar las luces ---
-    if (typeof resetDots === "function") {
-        resetDots(); 
+    // --- Apagar las luces ---
+    if (window.isMetroRunning) {
+        window.toggleMetronome(); // Esto llamará a clearInterval y resetDots
+    } else {
+        // Por si acaso, llamamos a resetDots directamente si existe
+        if (typeof resetDots === 'function') resetDots();
     }
     
     if (mediaRecorder && mediaRecorder.state !== "inactive"){
