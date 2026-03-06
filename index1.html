@@ -328,7 +328,7 @@
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.1</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.1.1</span></h2>
 
     <div class="controls">
         <div class="controls-row config-row">
@@ -779,6 +779,57 @@
             });
         }
 
+        /*function init() {
+            const rootSel = document.getElementById('rootSelect');
+            const scaleSel = document.getElementById('scaleSelect');
+            
+            if (!rootSel || !scaleSel) return;
+        
+            // 1. Llenar notas (CORREGIDO: Usamos el nombre 'n' para que el mástil lo entienda)
+            rootSel.innerHTML = ""; 
+            notes.forEach((n) => { 
+                rootSel.innerHTML += `<option value="${n}">${n}</option>`; 
+            });
+        
+            // 2. Llenar escalas
+            scaleSel.innerHTML = "";
+            Object.keys(scales).forEach(s => {
+                scaleSel.innerHTML += `<option value="${s}">${s}</option>`;
+            });
+            
+            // 3. Inicializar componentes y filtrar por nivel
+            createPiano(); 
+            createFretboard(); 
+            if (typeof updateScaleSelector === "function") {
+                updateScaleSelector(); 
+            }
+            update();
+        
+            // 4. Configurar Eventos
+            rootSel.onchange = () => { selectedChordIdx = null; update(); };
+            scaleSel.onchange = () => { selectedChordIdx = null; update(); };
+            
+            // Botón Intervalos (Aseguramos que el ID coincida con el HTML)
+            const toggleBtn = document.getElementById('toggleBtn');
+            if (toggleBtn) {
+                toggleBtn.onclick = () => {
+                    showIntervals = !showIntervals;
+                    toggleBtn.innerText = showIntervals ? "Intervalos: ON" : "Intervalos: OFF";
+                    update();
+                };
+            }
+        
+            // El resto de tus eventos (tuningSelect, overlay, etc.)
+            const tuningSel = document.getElementById('tuningSelect');
+            if (tuningSel) {
+                tuningSel.onchange = (e) => { 
+                    currentTuning = tuningPresets[e.target.value]; 
+                    createFretboard(); 
+                    update(); 
+                };
+            }
+        }*/
+
         function init() {
             const rootSel = document.getElementById('rootSelect');
             const scaleSel = document.getElementById('scaleSelect');
@@ -820,44 +871,6 @@
                 document.getElementById('overlay').style.display = 'none';
             };
         }
-       
-       /*function init() {
-            const rootSel = document.getElementById('rootSelect');
-            const scaleSel = document.getElementById('scaleSelect');
-            
-            // Llenar selects
-            rootSel.innerHTML = ""; // Limpiar antes de llenar
-            scaleSel.innerHTML = "";
-            notes.forEach((n, i) => rootSel.innerHTML += `<option value="${i}">${n}</option>`;);
-            Object.keys(scales).forEach(s => scaleSel.innerHTML += `<option value="${s}">${s}</option>`);
-            
-            createPiano(); 
-            createFretboard(); 
-            update();
-
-            // Eventos
-            rootSel.onchange = () => { selectedChordIdx = null; update(); };
-            scaleSel.onchange = () => { selectedChordIdx = null; update(); };
-            
-            document.getElementById('tuningSelect').onchange = (e) => { 
-                currentTuning = tuningPresets[e.target.value]; 
-                createFretboard(); 
-                update(); 
-                // Si decides mantener los botones de notas de referencia, 
-                // asegúrate de que el ID 'tunerButtons' exista.
-            };
-
-            document.getElementById('toggleBtn').onclick = (e) => {
-                showIntervals = !showIntervals;
-                e.target.innerText = showIntervals ? "Intervalos: ON" : "Intervalos: OFF";
-                update();
-            };
-
-            document.getElementById('overlay').onclick = () => {
-                document.querySelectorAll('.svg-card').forEach(c => c.classList.remove('expanded'));
-                document.getElementById('overlay').style.display = 'none';
-            };
-        }*/
 
         function createPiano() {
             const p = document.getElementById('piano'); p.innerHTML = "";
