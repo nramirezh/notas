@@ -592,12 +592,20 @@
             }
         }
         
+        let metroStep = 0; 
+
         function startMetro() {
-            const ms = 60000 / bpm;
+            const bpm = document.getElementById('bpmInput').value || 100;
+            const intervalMs = 60000 / bpm;
+        
+            // --- LA SOLUCIÓN ---
+            metroStep = 0; // Forzamos que empiece en el primer punto SIEMPRE
+            updateDots();  // Iluminamos el primer punto inmediatamente antes del primer "tick"
+            
             metroInterval = setInterval(() => {
-                playMetroSound();
+                metroStep = (metroStep + 1) % 4; // Avanzamos al siguiente
                 updateDots();
-            }, ms);
+            }, intervalMs);
         }
         
         function playMetroSound() {
@@ -626,7 +634,9 @@
         }
         
         function resetDots() {
-            document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach(d => d.style.background = '#444');
+            metroStep = 0;
         }
 
         // --- LÓGICA DEL AFINADOR ---
