@@ -598,19 +598,24 @@
         }
         function startMetro() {
             if (window.metroInterval) clearInterval(window.metroInterval);
-            
+    
             const bpm = document.getElementById('bpmInput').value || 100;
             const intervalMs = 60000 / bpm;
-        
-            // Empezamos en el paso 0
+
             metroStep = 0;
             updateDots(); 
-        
+            // Suena el primer click de la grabación
+            if (typeof window.playClickSound === 'function') window.playClickSound(440);
+
             window.metroInterval = setInterval(() => {
                 metroStep = (metroStep + 1) % 4;
                 updateDots();
+                // Suena en cada pulso
+                // Si quieres que el primer tiempo sea más agudo: (metroStep === 0 ? 880 : 440)
+                if (typeof window.playClickSound === 'function') window.playClickSound(440);
             }, intervalMs);
         }
+
            
         function playMetroSound() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
