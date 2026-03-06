@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>PUMUCHORDS v3</title>
+    <title>PUMUCHORDS v3.1</title>
     <style>
         :root {
             --bg-color: #2c3e50; --fretboard-wood: #3d2b1f; --string-color: #bdc3c7;
@@ -274,7 +274,6 @@
         /*BOTÓN RANDON*/
         #randomBtn {background: #2980b9; transition: 0.3s;}
         #randomBtn:hover {background: #000000; transform: translateY(-2px); }
-
         #chordsList {
             display: flex;
             flex-wrap: wrap;
@@ -329,7 +328,7 @@
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.6.2</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.1</span></h2>
 
     <div class="controls">
         <div class="controls-row config-row">
@@ -393,15 +392,14 @@
             </div>
             <button id="micBtn" onclick="toggleLiveTuner()">🎤 ACTIVAR</button>
         </div>
-
         <div class="looper-container">
             <div class="looper-status">
             <span id="loopTimer">00:00</span>
             <div id="recDot" class="red-dot"></div>
             
         </div>
-
-                <div class="control-group-loop">
+        
+        <div class="control-group-loop">
             <label>Duración (Compases)</label>
             <select id="loopBars">
                 <option value="0">Manual (Libre)</option>
@@ -422,8 +420,6 @@
         </div>
         <div id="metronomeStatus" style="font-size: 0.8rem; opacity: 0.7;"></div>
         </div>
-        
-
         <div id="piano" class="piano-container"></div>
 
     </div>
@@ -478,24 +474,24 @@
             [0, 3, 6, 10], // vidim
             [0, 4, 7, 11]  // VIIMaj7
             ]},
-            "Hirajoshi": {steps: [0, 2, 3, 7, 8], /*Escala pentatónica japonesa*/ triads: ["m", "dim", "Maj", "Maj", "m"], tetrads: ["m7", "m7b5", "Maj7", "6", "m7"],chordNotes: [ [0,3,7], [0,3,6], [0,4,7], [0,4,7], [0,3,7] ] /* 5 elementos*/}
-            
+            "Hirajoshi": {steps: [0, 2, 3, 7, 8], /*Escala pentatónica japonesa*/ triads: ["m", "dim", "Maj", "Maj", "m"], tetrads: ["m7", "m7b5", "Maj7", "6", "m7"],chordNotes: [ [0,3,7], [0,3,6], [0,4,7], [0,4,7], [0,3,7] ] /* 5 elementos*/}            
         };
 
         const scaleDescriptions = {
-            "Mayor": "Es el punto de referencia para todo. Si entiendes la escala mayor, entiendes el resto, porque las demás se definen por cómo cambian respecto a esta.",
-            "Eólico (Menor)": "Es la 'hermana triste' de la mayor. Se construye empezando desde el sexto grado de una escala mayor.",
-            "Dórico": "Menor pero con 6ª mayor. Sonido Funk/Jazz",
-            "Frigio": "Menor con 2ª menor. Sonido español/metalero",
-            "Lidio": "Mayor con 4ª aumentada. Sonido místico/espacial", 
-            "Mixolidio": "Mayor con 7ª menor. El rey del Blues y el Rock n' Roll",
-            "Locrio": "Suena inestable y 'disonante'. Muy usado en el Metal extremo",
-            "Menor Armónica": "Tiene un sonido 'arábigo' o neoclásico",
-            "Menor Melódica": "Es la favorita del Jazz por su sonido sofisticado",
-            "Hijaz (Frigia Dominante)": "El alma del flamenco y el misticismo árabe. Su intervalo de segunda aumentada crea una tensión exótica irresistible.",
-            "Nakriz (Misolidia #4)": "Famosa en la música de Europa del Este y Oriente Medio. Tiene un aire cinematográfico, como un desierto al atardecer.",
-            "Hirajoshi": "Escala pentatónica japonesa inspirada en el Koto. Evoca paz, naturaleza y la elegancia del Japón tradicional."
-        };
+        "Mayor": "Es el punto de referencia para todo. Si entiendes la escala mayor, entiendes el resto, porque las demás se definen por cómo cambian respecto a esta.",
+        "Eólico (Menor)": "Es la 'hermana triste' de la mayor. Se construye empezando desde el sexto grado de una escala mayor.",
+        "Dórico": "Menor pero con 6ª mayor. Sonido Funk/Jazz",
+        "Frigio": "Menor con 2ª menor. Sonido español/metalero",
+        "Lidio": "Mayor con 4ª aumentada. Sonido místico/espacial", 
+        "Mixolidio": "Mayor con 7ª menor. El rey del Blues y el Rock n' Roll",
+        "Locrio": "Suena inestable y 'disonante'. Muy usado en el Metal extremo",
+        "Menor Armónica": "Tiene un sonido 'arábigo' o neoclásico",
+        "Menor Melódica": "Es la favorita del Jazz por su sonido sofisticado",
+        "Hijaz (Frigia Dominante)": "El alma del flamenco y el misticismo árabe. Su intervalo de segunda aumentada crea una tensión exótica irresistible.",
+        "Nakriz (Misolidia #4)": "Famosa en la música de Europa del Este y Oriente Medio. Tiene un aire cinematográfico, como un desierto al atardecer.",
+        "Hirajoshi": "Escala pentatónica japonesa inspirada en el Koto. Evoca paz, naturaleza y la elegancia del Japón tradicional."
+    };
+
         //FILTRADO POR NIVEL DE DIFICULTAD
         const escalasPorNivel = {
             'Principiante': ["Mayor (Jónico)", "Eólico (Menor)"],
@@ -573,7 +569,7 @@
                 startMetro();
             }
         };
-
+        
         function toggleMetronome() {
             const btn = document.getElementById('metroPlayBtn');
             if (isMetroRunning) {
@@ -790,7 +786,8 @@
             // Llenar selects
             rootSel.innerHTML = ""; // Limpiar antes de llenar
             scaleSel.innerHTML = "";
-            notes.forEach((n,i) => { rootSel.innerHTML += `<option value="${n}">${n}</option>`; });
+            notes.forEach((n) => { rootSel.innerHTML += `<option value="${n}">${n}</option>`; });
+            //notes.forEach((n, i) => rootSel.innerHTML += `<option value="${i}">${n}</option>`);
             Object.keys(scales).forEach(s => scaleSel.innerHTML += `<option value="${s}">${s}</option>`);
             
             createPiano(); 
@@ -823,6 +820,44 @@
                 document.getElementById('overlay').style.display = 'none';
             };
         }
+       
+       /*function init() {
+            const rootSel = document.getElementById('rootSelect');
+            const scaleSel = document.getElementById('scaleSelect');
+            
+            // Llenar selects
+            rootSel.innerHTML = ""; // Limpiar antes de llenar
+            scaleSel.innerHTML = "";
+            notes.forEach((n, i) => rootSel.innerHTML += `<option value="${i}">${n}</option>`;);
+            Object.keys(scales).forEach(s => scaleSel.innerHTML += `<option value="${s}">${s}</option>`);
+            
+            createPiano(); 
+            createFretboard(); 
+            update();
+
+            // Eventos
+            rootSel.onchange = () => { selectedChordIdx = null; update(); };
+            scaleSel.onchange = () => { selectedChordIdx = null; update(); };
+            
+            document.getElementById('tuningSelect').onchange = (e) => { 
+                currentTuning = tuningPresets[e.target.value]; 
+                createFretboard(); 
+                update(); 
+                // Si decides mantener los botones de notas de referencia, 
+                // asegúrate de que el ID 'tunerButtons' exista.
+            };
+
+            document.getElementById('toggleBtn').onclick = (e) => {
+                showIntervals = !showIntervals;
+                e.target.innerText = showIntervals ? "Intervalos: ON" : "Intervalos: OFF";
+                update();
+            };
+
+            document.getElementById('overlay').onclick = () => {
+                document.querySelectorAll('.svg-card').forEach(c => c.classList.remove('expanded'));
+                document.getElementById('overlay').style.display = 'none';
+            };
+        }*/
 
         function createPiano() {
             const p = document.getElementById('piano'); p.innerHTML = "";
@@ -853,7 +888,6 @@
                 b.appendChild(sDiv);
             });
         }
-
         function updateScaleInfo() {
                 const selectedScale = document.getElementById('scaleSelect').value;
                 const infoBox = document.getElementById('scaleText');
@@ -864,6 +898,7 @@
         function update() {
             // Buscamos el índice de la nota en el array notes
             const rootName = document.getElementById('rootSelect').value
+            //const root = parseInt(document.getElementById('rootSelect').value);
             const root = notes.indexOf(rootName);
             if (root === -1) return;
             const sData = scales[document.getElementById('scaleSelect').value];
@@ -957,7 +992,7 @@
                 };
                 cList.appendChild(card);
             });
-            updateScaleInfo();
+            /*updateScaleInfo();*/
         }
 
         window.zoomAndPlay = (el, pos) => {
