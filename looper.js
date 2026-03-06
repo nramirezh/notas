@@ -142,11 +142,13 @@ window.toggleRecord = async function() {
             const stream = await navigator.mediaDevices.getUserMedia({ 
                 audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } 
             });
+            
 
             window.startMetronome(() => {
                 isRecording = true;
                 audioChunks = [];
                 document.getElementById('recDot').classList.add('active');
+                
                 
                 const bpm = parseInt(document.getElementById('bpmInput').value) || 100;
                 const bars = parseInt(document.getElementById('loopBars').value);
