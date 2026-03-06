@@ -595,6 +595,7 @@
         let metroStep = 0; 
 
         function startMetro() {
+            if (metroInterval) clearInterval(metroInterval);
             const bpm = document.getElementById('bpmInput').value || 100;
             const intervalMs = 60000 / bpm;
         
@@ -603,7 +604,7 @@
             updateDots();  // Iluminamos el primer punto inmediatamente antes del primer "tick"
             
             metroInterval = setInterval(() => {
-                metroStep = (metroStep + 1) % 4; // Avanzamos al siguiente
+                metroStep = (metroStep + 1) % 4;
                 updateDots();
             }, intervalMs);
         }
@@ -638,7 +639,6 @@
             dots.forEach(d => {
                 d.style.background = '#444'; // El color de fondo apagado
             });
-            metroStep = 0; // Resetear el contador para la próxima vez
         }
 
         // --- LÓGICA DEL AFINADOR ---
