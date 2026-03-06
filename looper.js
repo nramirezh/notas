@@ -6,14 +6,13 @@ let startTime;
 let timerInterval;
 let progressInterval;
 
-// --- Función de cuenta atrás ---
 window.startMetronome = function(callback) {
     let counts = 0;
     const status = document.getElementById('metronomeStatus');
     const bpm = document.getElementById('bpmInput').value || 100;
     const intervalMs = 60000 / bpm;
 
-    // Usamos la variable global metroStep para que updateDots sepa qué pintar
+    // 1. Iniciamos el primer tiempo de la cuenta atrás (Paso 0)
     window.metroStep = 0;
     if (typeof updateDots === 'function') updateDots();
     window.playClickSound(440);
@@ -22,20 +21,31 @@ window.startMetronome = function(callback) {
     
     const interval = setInterval(() => {
         counts++;
+        
         if (counts < 4) {
+            // 2. Tiempos 3, 2, 1 de la cuenta atrás
             status.innerText = `Preparando... ${4 - counts}`;
-            window.metroStep = counts; // Sincronizamos el paso
+            window.metroStep = counts; // Sincronizamos el paso visual
             if (typeof updateDots === 'function') updateDots();
+            
+            // El último golpe (cuando dice 1) es más agudo
             window.playClickSound(counts === 3 ? 880 : 440);
         } else {
+            // 3. MOMENTO DE ENTRADA A GRABACIÓN
             clearInterval(interval);
-            // Limpiamos antes de pasar el testigo
-            if (typeof resetDots === 'function') resetDots();
+            
+            // IMPORTANTE: No llamamos a resetDots() aquí para evitar que la luz se apague.
+            // La función callback() se encargará de arrancar startMetro() 
+            // que pintará el nuevo Tiempo 1 al instante.
+            
             status.innerText = "¡GRABANDO!";
             callback();
         }
     }, intervalMs);
 };
+
+
+
 
 // --- Iniciar/Parar Grabación ---
 window.toggleRecord = async function() {
