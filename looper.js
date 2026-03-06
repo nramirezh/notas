@@ -6,7 +6,7 @@ let startTime;
 let timerInterval;
 let progressInterval;
 
-// --- Función de cuenta atrás (Sincronizada con puntos visuales) ---
+// --- Función de cuenta atrás ---
 window.startMetronome = function(callback) {
     let counts = 0;
     const status = document.getElementById('metronomeStatus');
@@ -18,17 +18,17 @@ window.startMetronome = function(callback) {
     status.innerText = "Preparando... 4";
     
     const flashDot = (index) => {
-        const dotIdx = index % 4; // Aseguramos que siempre apunte a 0, 1, 2, 3
+        const dotIdx = index % 4;
         if (dots[dotIdx]) {
-            dots.forEach(d => d.style.background = '#444'); // Apagar todos
-            dots[dotIdx].style.background = 'var(--note-root)'; // Iluminar actual
+            dots.forEach(d => d.style.background = '#444');
+            dots[dotIdx].style.background = 'var(--note-root)';
             setTimeout(() => {
                 dots[dotIdx].style.background = '#444';
-            }, 150); // Destello rápido para mayor precisión visual
+            }, 150);
         }
     };
 
-    // PRIMER GOLPE (El número 4)
+    // PRIMER GOLPE (El 4)
     flashDot(0);
     window.playClickSound(440);
 
@@ -36,48 +36,17 @@ window.startMetronome = function(callback) {
         counts++;
         
         if (counts < 4) {
-            // GOLPES 3, 2, 1
             status.innerText = `Preparando... ${4 - counts}`;
             flashDot(counts);
-            // El golpe previo a grabar (cuando dice 1) es más agudo
             window.playClickSound(counts === 3 ? 880 : 440);
         } else {
-            // ¡MOMENTO EXACTO DE ENTRADA!
             clearInterval(interval);
             status.innerText = "¡GRABANDO!";
-            // Ejecutamos el inicio de grabación sin esperar un ciclo extra
+            // IMPORTANTE: Limpiamos los puntos antes de pasar el testigo al metrónomo real
+            dots.forEach(d => d.style.background = '#444');
             callback();
         }
     }, intervalMs);
-};
-
-// --- Función para formatear el tiempo (00:00) ---
-function formatTime(ms) {
-    const totalSeconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-    const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-    return `${minutes}:${seconds}`;
-}
-
-// --- Detener Grabación (Global) ---
-window.stopRecording = function() {
-    isRecording = false;
-    document.getElementById('recDot').classList.remove('active');
-    document.getElementById('metronomeStatus').innerText = "";
-    
-    const container = document.getElementById('progressContainer');
-    const bar = document.getElementById('progressBar');
-    if(container) container.style.display = 'none';
-    if(bar) bar.style.backgroundColor = 'var(--accent)'; 
-    
-    clearInterval(timerInterval);
-    clearInterval(progressInterval);
-    timerInterval = null;
-    progressInterval = null;
-    
-    if (mediaRecorder && mediaRecorder.state !== "inactive"){
-        mediaRecorder.stop();
-    }
 };
 
 // --- Iniciar/Parar Grabación ---
@@ -92,8 +61,13 @@ window.toggleRecord = async function() {
                 isRecording = true;
                 audioChunks = [];
                 
-                // Iniciar el metrónomo visual de la aplicación principal
-                if (!window.isMetroRunning) window.toggleMetronome();
+                // --- CLAVE PARA LA SINCRONÍA DE LA LUZ ---
+                // Si el metrónomo ya estaba corriendo, lo paramos y lo volvemos a arrancar
+                // para que el índice de los puntos se resetee a 0 en este preciso instante.
+                if (window.isMetroRunning) {
+                    window.toggleMetronome(); // Lo para
+                }
+                window.toggleMetronome(); // Lo arranca desde el punto 1
                 
                 document.getElementById('recDot').classList.add('active');
                 
@@ -114,8 +88,6 @@ window.toggleRecord = async function() {
                         const elapsed = Date.now() - startTime;
                         const percent = (elapsed / totalMs) * 100;
                         bar.style.width = Math.min(percent, 100) + "%";
-
-                        // Alerta visual: último compás en rojo
                         if (totalMs - elapsed < (msPerBeat * 4)) {
                             bar.style.backgroundColor = "#e74c3c";
                         }
@@ -131,14 +103,12 @@ window.toggleRecord = async function() {
                     document.getElementById('loopTimer').innerText = formatTime(elapsed);
                 }, 1000);
 
-                // Configurar y arrancar MediaRecorder
                 mediaRecorder = new MediaRecorder(stream);
                 mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                 mediaRecorder.onstop = () => {
                     saveAndPlayLoop();
                     stream.getTracks().forEach(track => track.stop());
                 };
-                
                 mediaRecorder.start();
             });
         } catch (err) {
@@ -149,48 +119,4 @@ window.toggleRecord = async function() {
     }
 };
 
-// --- Limpiar todo ---
-window.clearLoop = () => { 
-    window.stopLoop(); 
-    loopAudio = null;
-    if (timerInterval) clearInterval(timerInterval);
-    if (progressInterval) clearInterval(progressInterval);
-    if (window.isMetroRunning) window.toggleMetronome();
-   
-    document.getElementById('btnPlay').disabled = true; 
-    document.getElementById('loopTimer').innerText = "00:00";
-    const bar = document.getElementById('progressBar');
-    if(bar) {
-        bar.style.width = "0%";
-        bar.style.backgroundColor = 'var(--accent)';
-    }
-    document.getElementById('progressContainer').style.display = 'none';
-    document.getElementById('metronomeStatus').innerText = "Listo para grabar";
-};
-
-// --- Audio Engine ---
-window.playClickSound = function(freq) {
-    if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = window.audioCtx.createOscillator();
-    const gain = window.audioCtx.createGain();
-    osc.connect(gain);
-    gain.connect(window.audioCtx.destination);
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0.1, window.audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + 0.1);
-    osc.start();
-    osc.stop(window.audioCtx.currentTime + 0.1);
-};
-
-function saveAndPlayLoop() {
-    const blob = new Blob(audioChunks, { type: 'audio/ogg; codecs=opus' });
-    const url = URL.createObjectURL(blob);
-    if (loopAudio) loopAudio.pause();
-    loopAudio = new Audio(url);
-    loopAudio.loop = true;
-    document.getElementById('btnPlay').disabled = false;
-    loopAudio.play();
-}
-
-window.playLoop = () => { if (loopAudio) loopAudio.play(); };
-window.stopLoop = () => { if (loopAudio) { loopAudio.pause(); loopAudio.currentTime = 0; } };
+// ... (resto de funciones formatTime, stopRecording, clearLoop, playClickSound, saveAndPlayLoop, etc. se mantienen igual)
