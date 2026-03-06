@@ -7,7 +7,54 @@ let timerInterval;
 let progressInterval;
 
 // --- Función de cuenta atrás (Global) ---
+// --- Función de cuenta atrás (Sincronizada con puntos visuales) ---
 window.startMetronome = function(callback) {
+    let counts = 0;
+    const status = document.getElementById('metronomeStatus');
+    const bpmInput = document.getElementById('bpmInput');
+    const currentBpm = bpmInput ? bpmInput.value : 100;
+    const intervalMs = 60000 / currentBpm;
+
+    // Obtenemos los puntos para iluminarlos
+    const dots = document.querySelectorAll('.dot');
+
+    status.innerText = "Preparando... 4";
+    
+    // Función para iluminar el punto correspondiente al conteo
+    const flashDot = (index) => {
+        if (dots[index]) {
+            dots.forEach(d => d.style.background = '#444'); // Apagar todos
+            dots[index].style.background = 'var(--note-root)'; // Iluminar actual
+            setTimeout(() => {
+                dots[index].style.background = '#444'; // Apagar tras un breve instante
+            }, 200);
+        }
+    };
+
+    // Iluminar el primer punto inmediatamente
+    flashDot(0);
+    window.playClickSound(440);
+
+    const interval = setInterval(() => {
+        counts++;
+        status.innerText = `Preparando... ${4 - counts}`;
+        
+        // Iluminamos el punto (0, 1, 2, 3)
+        flashDot(counts); 
+
+        // Sonido (el último golpe es más agudo)
+        window.playClickSound(counts === 3 ? 880 : 440); 
+        
+        if (counts === 4) {
+            clearInterval(interval);
+            status.innerText = "¡GRABANDO!";
+            // Resetear puntos antes de empezar la grabación real
+            dots.forEach(d => d.style.background = '#444');
+            callback();
+        }
+    }, intervalMs);
+};
+/*window.startMetronome = function(callback) {
     let counts = 0;
     const status = document.getElementById('metronomeStatus');
     const bpmInput = document.getElementById('bpmInput');
@@ -27,7 +74,7 @@ window.startMetronome = function(callback) {
             callback();
         }
     }, intervalMs);
-};
+};*/
 
 // --- Función para formatear el tiempo (00:00) ---
 function formatTime(ms) {
