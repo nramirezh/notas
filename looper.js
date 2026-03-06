@@ -10,40 +10,28 @@ let progressInterval;
 window.startMetronome = function(callback) {
     let counts = 0;
     const status = document.getElementById('metronomeStatus');
-    const bpmInput = document.getElementById('bpmInput');
-    const currentBpm = bpmInput ? bpmInput.value : 100;
-    const intervalMs = 60000 / currentBpm;
-    const dots = document.querySelectorAll('.dot');
+    const bpm = document.getElementById('bpmInput').value || 100;
+    const intervalMs = 60000 / bpm;
+
+    // Usamos la variable global metroStep para que updateDots sepa qué pintar
+    window.metroStep = 0;
+    if (typeof updateDots === 'function') updateDots();
+    window.playClickSound(440);
 
     status.innerText = "Preparando... 4";
     
-    const flashDot = (index) => {
-        const dotIdx = index % 4;
-        if (dots[dotIdx]) {
-            dots.forEach(d => d.style.background = '#444');
-            dots[dotIdx].style.background = 'var(--note-root)';
-            setTimeout(() => {
-                dots[dotIdx].style.background = '#444';
-            }, 150);
-        }
-    };
-
-    // PRIMER GOLPE (El 4)
-    flashDot(0);
-    window.playClickSound(440);
-
     const interval = setInterval(() => {
         counts++;
-        
         if (counts < 4) {
             status.innerText = `Preparando... ${4 - counts}`;
-            flashDot(counts);
+            window.metroStep = counts; // Sincronizamos el paso
+            if (typeof updateDots === 'function') updateDots();
             window.playClickSound(counts === 3 ? 880 : 440);
         } else {
             clearInterval(interval);
+            // Limpiamos antes de pasar el testigo
+            if (typeof resetDots === 'function') resetDots();
             status.innerText = "¡GRABANDO!";
-            // IMPORTANTE: Limpiamos los puntos antes de pasar el testigo al metrónomo real
-            dots.forEach(d => d.style.background = '#444');
             callback();
         }
     }, intervalMs);
@@ -131,24 +119,17 @@ window.stopRecording = function() {
     document.getElementById('recDot').classList.remove('active');
     document.getElementById('metronomeStatus').innerText = "";
     
-    // Ocultar barra y resetear color
     const container = document.getElementById('progressContainer');
-    const bar = document.getElementById('progressBar');
     if(container) container.style.display = 'none';
-    if(bar) bar.style.backgroundColor = 'var(--accent)'; 
     
     clearInterval(timerInterval);
     clearInterval(progressInterval);
-    timerInterval = null;
-    progressInterval = null;
-
-    // --- Apagar las luces ---
-    if (window.isMetroRunning) {
-        window.toggleMetronome(); // Esto llamará a clearInterval y resetDots
-    } else {
-        // Por si acaso, llamamos a resetDots directamente si existe
-        if (typeof resetDots === 'function') resetDots();
-    }
+    
+    // IMPORTANTE: Detener el metrónomo y apagar luces
+    window.isMetroRunning = false;
+    const btn = document.getElementById('metroPlayBtn');
+    if (btn) btn.innerText = "▶";
+    if (typeof resetDots === 'function') resetDots();
     
     if (mediaRecorder && mediaRecorder.state !== "inactive"){
         mediaRecorder.stop();
