@@ -437,9 +437,9 @@
         window.audioCtx = null; // Al poner window. lo hacemos visible para todos los archivos .js
       
         //VARIABLES METRONOMO
-        window.isMetroRunning = false;
-        let metroStep = 0;
         window.metroInterval = null;
+        let metroStep = 0;
+        window.isMetroRunning = false;
         window.currentBeat = 0;
         window.bpm = 100;        
 
@@ -596,24 +596,22 @@
                 startMetro();
             }
         }
-        
-        
-
         function startMetro() {
-            if (metroInterval) clearInterval(metroInterval);
+            if (window.metroInterval) clearInterval(window.metroInterval);
+            
             const bpm = document.getElementById('bpmInput').value || 100;
             const intervalMs = 60000 / bpm;
         
-            // --- LA SOLUCIÓN ---
-            metroStep = 0; // Forzamos que empiece en el primer punto SIEMPRE
-            updateDots();  // Iluminamos el primer punto inmediatamente antes del primer "tick"
-            
-            metroInterval = setInterval(() => {
+            // Empezamos en el paso 0
+            metroStep = 0;
+            updateDots(); 
+        
+            window.metroInterval = setInterval(() => {
                 metroStep = (metroStep + 1) % 4;
                 updateDots();
             }, intervalMs);
         }
-        
+           
         function playMetroSound() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = audioCtx.createOscillator();
@@ -634,16 +632,23 @@
         }
         
         function updateDots() {
-            resetDots();
-            document.getElementById(`dot-${window.currentBeat}`).classList.add('active');
-            window.currentBeat = (window.currentBeat + 1) % 4;
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, i) => {
+                // Solo se ilumina el punto que coincide con metroStep
+                dot.style.backgroundColor = (i === metroStep) ? 'var(--note-root)' : '#444';
+            });
         }
         
         function resetDots() {
+            if (window.metroInterval) {
+                clearInterval(window.metroInterval);
+                window.metroInterval = null;
+            }
             const dots = document.querySelectorAll('.dot');
-            dots.forEach(d => {
-                d.style.background = '#444'; // El color de fondo apagado
+            dots.forEach(dot => {
+                dot.style.backgroundColor = '#444';
             });
+            metroStep = 0;
         }
 
         // --- LÓGICA DEL AFINADOR ---
