@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>PUMUCHORDS v3</title>
+    <title>PUMUCHORDS v3.1</title>
     <style>
         :root {
             --bg-color: #2c3e50; --fretboard-wood: #3d2b1f; --string-color: #bdc3c7;
@@ -57,7 +57,7 @@
         
         .control-group { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
         label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.7; letter-spacing: 1px; }
-
+        .control-group-loop { padding: 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
 
 
 
@@ -175,10 +175,13 @@
         /* Contenedor principal para alinear elementos */
         .main-interface {
             display: flex;
+            flex-direction:row;
             justify-content: center;
-            align-items: flex-start;
+            align-items:center;
             gap: 20px;
-            margin-bottom: 25px;
+            margin: 0 auto 25px auto;
+            width: 100%;
+            max-width: 1200px;
             flex-wrap: wrap; /* Para que en móviles se ponga uno debajo de otro */
         }
         
@@ -271,6 +274,53 @@
         /*BOTÓN RANDON*/
         #randomBtn {background: #2980b9; transition: 0.3s;}
         #randomBtn:hover {background: #000000; transform: translateY(-2px); }
+        #chordsList {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* Centra las tarjetas si son 5 */
+            gap: 15px;
+        }
+        /*INFORMACIÓN SOBRE LA ESCALA*/
+        .scale-info-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            margin: 20px auto;
+            max-width: 800px;
+            border-radius: 0 8px 8px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            text-align: left;
+            backdrop-filter: blur(5px);
+        }
+
+        .info-icon { font-size: 1.5rem; }
+        #scaleText { margin: 0; font-size: 0.95rem; line-height: 1.4; opacity: 0.9; }
+
+        /* Para que sea sutil en el piano o guitarra */
+        @media print { .scale-info-box { display: none; } }
+
+        /*LOOPER*/
+        .looper-container {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px; 
+            border: 1px solid #444;
+            width: 200px;
+            height: 110px;
+            display:table;
+            margin: 1px auto;
+            max-width: 400px;}
+        .looper-status { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 10px; }
+        .red-dot { width: 12px; height: 12px; background: red; border-radius: 50%; display: none; }
+        .red-dot.active { display: block; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .looper-controls button { padding: 8px 15px; cursor: pointer; border-radius: 5px; border: none; background: #333; color: white; }
+        .looper-controls button:disabled { opacity: 0.3; cursor: not-allowed; }
+        .looper-controls {display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;}
+        #loopTimer {font-family: 'Courier New', monospace; font-weight: bold;font-size: 1.2rem;color: var(--accent);}
+
 
     </style>
 </head>
@@ -278,7 +328,7 @@
 
     <div id="overlay"></div>
 
-    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.6.2</span></h2>
+    <h2>PUMUCHORDS <span style="font-weight: 100;">v3.1</span></h2>
 
     <div class="controls">
         <div class="controls-row config-row">
@@ -342,7 +392,34 @@
             </div>
             <button id="micBtn" onclick="toggleLiveTuner()">🎤 ACTIVAR</button>
         </div>
-
+        <div class="looper-container">
+            <div class="looper-status">
+            <span id="loopTimer">00:00</span>
+            <div id="recDot" class="red-dot"></div>
+            
+        </div>
+        
+        <div class="control-group-loop">
+            <label>Duración (Compases)</label>
+            <select id="loopBars">
+                <option value="0">Manual (Libre)</option>
+                <option value="2">2 Compases</option>
+                <option value="4" selected>4 Compases</option>
+                <option value="8">8 Compases</option>
+                <option value="16">16 Compases</option>
+            </select>
+        </div>
+        <div id="progressContainer" style="width: 180px; height: 5px; background: #000000; margin: 10px auto; border-radius: 5px; overflow: hidden; display: none;">
+            <div id="progressBar" style="width: 0%; height: 100%; background: var(--accent); transition: width 0.1s linear;"></div>
+        </div>
+        <div class="looper-controls">
+              <button id="btnRec" onclick="toggleRecord()">🔴 Rec</button>
+              <button id="btnClear" onclick="clearLoop()">🗑️ Clear</button>
+              <button id="btnPlay" onclick="playLoop()" disabled>▶️ Play</button>
+              <button id="btnStop" onclick="stopLoop()">⏹️ Stop</button>
+        </div>
+        <div id="metronomeStatus" style="font-size: 0.8rem; opacity: 0.7;"></div>
+        </div>
         <div id="piano" class="piano-container"></div>
 
     </div>
@@ -357,7 +434,7 @@
         const stringBaseFreqs = [82.41, 110.00, 146.83, 196.00, 246.94, 329.63];
         const pianoLayout = [0,1,0,1,0,0,1,0,1,0,1,0];
         let libreriaManual = null;
-        let audioCtx = null;
+        window.audioCtx = null; // Al poner window. lo hacemos visible para todos los archivos .js
 
         const tuningPresets = {
             "standard": [4, 11, 7, 2, 9, 4],
@@ -375,8 +452,8 @@
             "Mixolidio": { steps: [0, 2, 4, 5, 7, 9, 10], triads: ["", "m", "dim", "", "m", "m", ""], tetrads: ["7", "m7", "m7b5", "Maj7", "m7", "m7", "Maj7"], chordNotes: [[0,4,7,10], [0,3,7,10], [0,3,6,10], [0,4,7,11], [0,3,7,10], [0,3,7,10], [0,4,7,11]] },
             "Eólico (Menor)": { steps: [0, 2, 3, 5, 7, 8, 10], triads: ["m", "dim", "", "m", "m", "", ""], tetrads: ["m7", "m7b5", "Maj7", "m7", "m7", "Maj7", "7"], chordNotes: [[0,3,7,10], [0,3,6,10], [0,4,7,11], [0,3,7,10], [0,3,7,10], [0,4,7,11], [0,4,7,10]] },
             "Locrio": { steps: [0, 1, 3, 5, 6, 8, 10], triads: ["dim", "", "m", "m", "", "", "m"], tetrads: ["m7b5", "Maj7", "m7", "m7", "Maj7", "7", "m7"], chordNotes: [[0,3,6,10], [0,4,7,11], [0,3,7,10], [0,3,7,10], [0,4,7,11], [0,4,7,10], [0,3,7,10]] },
-            "Menor Armónica": { steps: [0, 2, 3, 5, 7, 8, 11], triads: ["m", "dim", "aug", "m", "", "", "dim"], tetrads: ["m(Maj7)", "m7b5", "Maj7#5", "m7", "7", "Maj7", "dim7"], chordNotes: [[0,3,7,11], [0,3,6,10], [0,4,8,11], [0,3,7,10], [0,4,7,10], [0,4,7,11], [0,3,6,9]] },
-            "Menor Melódica": { steps: [0, 2, 3, 5, 7, 9, 11], triads: ["m", "m", "aug", "", "", "dim", "dim"], tetrads: ["m(Maj7)", "m7", "Maj7#5", "7", "7", "m7b5", "m7b5"], chordNotes: [[0,3,7,11], [0,3,7,10], [0,4,8,11], [0,4,7,10], [0,4,7,10], [0,3,6,10], [0,3,6,10]] },
+            "Menor Armónica": { steps: [0, 2, 3, 5, 7, 8, 11], triads: ["m", "dim", "+", "m", "", "", "dim"], tetrads: ["m(Maj7)", "m7b5", "Maj7#5", "m7", "7", "Maj7", "dim7"], chordNotes: [[0,3,7,11], [0,3,6,10], [0,4,8,11], [0,3,7,10], [0,4,7,10], [0,4,7,11], [0,3,6,9]] },
+            "Menor Melódica": { steps: [0, 2, 3, 5, 7, 9, 11], triads: ["m", "m", "+", "", "", "dim", "dim"], tetrads: ["m(Maj7)", "m7", "Maj7#5", "7", "7", "m7b5", "m7b5"], chordNotes: [[0,3,7,11], [0,3,7,10], [0,4,8,11], [0,4,7,10], [0,4,7,10], [0,3,6,10], [0,3,6,10]] },
             "Pentatónica Mayor": { steps: [0, 2, 4, 7, 9], triads: ["", "sus2", "m", "", "sus4"], tetrads: ["add9", "7sus2", "m7", "6", "7sus4"], chordNotes: [[0,4,7], [0,2,7], [0,3,7], [0,4,7], [0,5,7]] },
             "Pentatónica Menor": { steps: [0, 3, 5, 7, 10], triads: ["m", "", "sus4", "m", ""], tetrads: ["m7", "7sus4", "7sus4", "m7", "7"], chordNotes: [[0,3,7], [0,5,7], [0,5,7], [0,3,7], [0,4,7]] },
             "Hijaz (Frigia Dominante)": {steps: [0, 1, 4, 5, 7, 8, 10], triads: ["", "dim", "+", "m", "dim", "Maj", "m"], tetrads: ["7", "Maj7b5", "+7", "m7", "m7b5", "Maj7", "m7"], chordNotes: [
@@ -397,9 +474,24 @@
             [0, 3, 6, 10], // vidim
             [0, 4, 7, 11]  // VIIMaj7
             ]},
-            "Hirajoshi": {steps: [0, 2, 3, 7, 8], /*Escala pentatónica japonesa*/ triads: ["m", "dim", "Maj", "Maj", "m"], tetrads: ["m7", "m7b5", "Maj7", "6", "m7"],chordNotes: [ [0,3,7], [0,3,6], [0,4,7], [0,4,7], [0,3,7] ] /* 5 elementos*/}
-            
+            "Hirajoshi": {steps: [0, 2, 3, 7, 8], /*Escala pentatónica japonesa*/ triads: ["m", "dim", "Maj", "Maj", "m"], tetrads: ["m7", "m7b5", "Maj7", "6", "m7"],chordNotes: [ [0,3,7], [0,3,6], [0,4,7], [0,4,7], [0,3,7] ] /* 5 elementos*/}            
         };
+
+        const scaleDescriptions = {
+        "Mayor": "Es el punto de referencia para todo. Si entiendes la escala mayor, entiendes el resto, porque las demás se definen por cómo cambian respecto a esta.",
+        "Eólico (Menor)": "Es la 'hermana triste' de la mayor. Se construye empezando desde el sexto grado de una escala mayor.",
+        "Dórico": "Menor pero con 6ª mayor. Sonido Funk/Jazz",
+        "Frigio": "Menor con 2ª menor. Sonido español/metalero",
+        "Lidio": "Mayor con 4ª aumentada. Sonido místico/espacial", 
+        "Mixolidio": "Mayor con 7ª menor. El rey del Blues y el Rock n' Roll",
+        "Locrio": "Suena inestable y 'disonante'. Muy usado en el Metal extremo",
+        "Menor Armónica": "Tiene un sonido 'arábigo' o neoclásico",
+        "Menor Melódica": "Es la favorita del Jazz por su sonido sofisticado",
+        "Hijaz (Frigia Dominante)": "El alma del flamenco y el misticismo árabe. Su intervalo de segunda aumentada crea una tensión exótica irresistible.",
+        "Nakriz (Misolidia #4)": "Famosa en la música de Europa del Este y Oriente Medio. Tiene un aire cinematográfico, como un desierto al atardecer.",
+        "Hirajoshi": "Escala pentatónica japonesa inspirada en el Koto. Evoca paz, naturaleza y la elegancia del Japón tradicional."
+    };
+
         //FILTRADO POR NIVEL DE DIFICULTAD
         const escalasPorNivel = {
             'Principiante': ["Mayor (Jónico)", "Eólico (Menor)"],
@@ -453,11 +545,30 @@
             init();
         }
 
-        // --- LÓGICA DEL METRÓNOMO ---
-        let isMetroRunning = false;
-        let metroInterval = null;
-        let currentBeat = 0;
-        let bpm = 80;
+        // --- LÓGICA DEL METRÓNOMO (Configuración Global Unificada) ---
+        window.isMetroRunning = false;
+        window.metroInterval = null;
+        window.currentBeat = 0;
+        window.bpm = 100; // Valor inicial coherente con el HTML
+        
+        window.toggleMetronome = function() {
+            const btn = document.getElementById('metroPlayBtn');
+            
+            if (window.isMetroRunning) {
+                clearInterval(window.metroInterval);
+                window.isMetroRunning = false;
+                btn.innerText = "▶";
+                resetDots();
+            } else {
+                // Inicializar AudioContext si no existe (vital para navegadores modernos)
+                if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                window.isMetroRunning = true;
+                btn.innerText = "⏹";
+                window.currentBeat = 0; // Es mejor que siempre empiece en el beat 1 al dar Play
+                startMetro();
+            }
+        };
         
         function toggleMetronome() {
             const btn = document.getElementById('metroPlayBtn');
@@ -510,8 +621,8 @@
         
         function updateDots() {
             resetDots();
-            document.getElementById(`dot-${currentBeat}`).classList.add('active');
-            currentBeat = (currentBeat + 1) % 4;
+            document.getElementById(`dot-${window.currentBeat}`).classList.add('active');
+            window.currentBeat = (window.currentBeat + 1) % 4;
         }
         
         function resetDots() {
@@ -646,20 +757,25 @@
 
         // --- AUDIO ENGINE ---
         function playChord(fretStr) {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            // Aseguramos que audioCtx sea global
+            if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
             const frets = fretStr.split('-');
-            const now = audioCtx.currentTime;
+            const now = window.audioCtx.currentTime; // Usar window.
+            
             frets.forEach((fret, i) => {
                 if (fret.toLowerCase() === 'x') return;
                 const freq = stringBaseFreqs[i] * Math.pow(2, parseInt(fret) / 12);
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
+                const osc = window.audioCtx.createOscillator(); // Usar window.
+                const gain = window.audioCtx.createGain(); // Usar window.
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(freq, now);
                 gain.gain.setValueAtTime(0.3, now + (i * 0.05));
                 gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                osc.start(now + (i * 0.05)); osc.stop(now + 1.2);
+                osc.connect(gain); 
+                gain.connect(window.audioCtx.destination); // Usar window.
+                osc.start(now + (i * 0.05)); 
+                osc.stop(now + 1.2);
             });
         }
 
@@ -704,6 +820,44 @@
                 document.getElementById('overlay').style.display = 'none';
             };
         }
+       
+       /*function init() {
+            const rootSel = document.getElementById('rootSelect');
+            const scaleSel = document.getElementById('scaleSelect');
+            
+            // Llenar selects
+            rootSel.innerHTML = ""; // Limpiar antes de llenar
+            scaleSel.innerHTML = "";
+            notes.forEach((n, i) => rootSel.innerHTML += `<option value="${i}">${n}</option>`;);
+            Object.keys(scales).forEach(s => scaleSel.innerHTML += `<option value="${s}">${s}</option>`);
+            
+            createPiano(); 
+            createFretboard(); 
+            update();
+
+            // Eventos
+            rootSel.onchange = () => { selectedChordIdx = null; update(); };
+            scaleSel.onchange = () => { selectedChordIdx = null; update(); };
+            
+            document.getElementById('tuningSelect').onchange = (e) => { 
+                currentTuning = tuningPresets[e.target.value]; 
+                createFretboard(); 
+                update(); 
+                // Si decides mantener los botones de notas de referencia, 
+                // asegúrate de que el ID 'tunerButtons' exista.
+            };
+
+            document.getElementById('toggleBtn').onclick = (e) => {
+                showIntervals = !showIntervals;
+                e.target.innerText = showIntervals ? "Intervalos: ON" : "Intervalos: OFF";
+                update();
+            };
+
+            document.getElementById('overlay').onclick = () => {
+                document.querySelectorAll('.svg-card').forEach(c => c.classList.remove('expanded'));
+                document.getElementById('overlay').style.display = 'none';
+            };
+        }*/
 
         function createPiano() {
             const p = document.getElementById('piano'); p.innerHTML = "";
@@ -734,10 +888,17 @@
                 b.appendChild(sDiv);
             });
         }
+        function updateScaleInfo() {
+                const selectedScale = document.getElementById('scaleSelect').value;
+                const infoBox = document.getElementById('scaleText');
+                // Si tenemos descripción la ponemos, si no, un texto genérico
+                infoBox.innerText = scaleDescriptions[selectedScale] || "Una sonoridad única para explorar nuevas fronteras musicales.";
+            }
 
         function update() {
             // Buscamos el índice de la nota en el array notes
             const rootName = document.getElementById('rootSelect').value
+            //const root = parseInt(document.getElementById('rootSelect').value);
             const root = notes.indexOf(rootName);
             if (root === -1) return;
             const sData = scales[document.getElementById('scaleSelect').value];
@@ -831,6 +992,7 @@
                 };
                 cList.appendChild(card);
             });
+            /*updateScaleInfo();*/
         }
 
         window.zoomAndPlay = (el, pos) => {
@@ -896,5 +1058,6 @@
 
         cargarDatosYArrancar();
     </script>
+    <script src="looper.js"></script>
 </body>
 </html>
