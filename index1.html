@@ -435,6 +435,13 @@
         const pianoLayout = [0,1,0,1,0,0,1,0,1,0,1,0];
         let libreriaManual = null;
         window.audioCtx = null; // Al poner window. lo hacemos visible para todos los archivos .js
+      
+        //VARIABLES METRONOMO
+        window.isMetroRunning = false;
+        let metroStep = 0;
+        window.metroInterval = null;
+        window.currentBeat = 0;
+        window.bpm = 100;        
 
         const tuningPresets = {
             "standard": [4, 11, 7, 2, 9, 4],
@@ -546,10 +553,8 @@
         }
 
         // --- LÓGICA DEL METRÓNOMO (Configuración Global Unificada) ---
-        window.isMetroRunning = false;
-        window.metroInterval = null;
-        window.currentBeat = 0;
-        window.bpm = 100; // Valor inicial coherente con el HTML
+        
+        
         
         window.toggleMetronome = function() {
             const btn = document.getElementById('metroPlayBtn');
@@ -592,7 +597,7 @@
             }
         }
         
-        let metroStep = 0; 
+        
 
         function startMetro() {
             if (metroInterval) clearInterval(metroInterval);
